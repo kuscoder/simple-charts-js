@@ -58,8 +58,8 @@ const u = class u {
       secondaryColor: s.style.secondaryColor
     }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_BOUNDARIES = this.getBoundariesY(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (o - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = n && Math.round(n / this.X_AXIS_DATA_COUNT), this.mouseEnterHandler = this.mouseEnterHandler.bind(this), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawGraph = this.drawGraph.bind(this), this.mouse = new Proxy(this.mouse, {
       set: (...a) => {
-        const x = Reflect.set(...a);
-        return this.rafID = window.requestAnimationFrame(this.drawGraph), x;
+        const c = Reflect.set(...a);
+        return this.rafID = window.requestAnimationFrame(this.drawGraph), c;
       }
     }), this.container = t, this.canvas = document.createElement("canvas"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, this.ctx = this.canvas.getContext("2d"), s.immediate && this.initialize();
   }
@@ -73,7 +73,7 @@ const u = class u {
   }
   /** */
   drawGraph() {
-    console.log(this.mouse.isOver), this.clearAll(), this.drawAxisX(), this.drawAxisY(), this.drawLines();
+    this.clearAll(), this.drawAxisX(), this.drawAxisY(), this.drawLines();
   }
   /** */
   clearAll() {
@@ -160,7 +160,7 @@ const u = class u {
       padding: n,
       rowsCount: o,
       i18n: { months: r } = {},
-      data: { xAxis: a, yAxis: x } = {},
+      data: { xAxis: a, yAxis: c } = {},
       style: { textFont: A, textColor: y, secondaryColor: p } = {},
       immediate: m
     } = t;
@@ -207,24 +207,24 @@ const u = class u {
         throw new h('data.xAxis.type should be "date"');
       if (!Array.isArray(a.values))
         throw new h("data.xAxis.values should be an array");
-      a.type === "date" && a.values.forEach((d, c) => {
+      a.type === "date" && a.values.forEach((d, x) => {
         if (typeof d != "number")
-          throw new h(`data.xAxis.values[${c}] should be a number`);
+          throw new h(`data.xAxis.values[${x}] should be a number`);
       });
     }
-    if (x) {
-      if (!Array.isArray(x))
+    if (c) {
+      if (!Array.isArray(c))
         throw new h("data.columns should be an array");
-      x.forEach((d, c) => {
+      c.forEach((d, x) => {
         if (typeof d.name != "string")
-          throw new h(`data.yAxis[${c}].name should be a string`);
+          throw new h(`data.yAxis[${x}].name should be a string`);
         if (typeof d.color != "string")
-          throw new h(`data.yAxis[${c}].color should be a string`);
+          throw new h(`data.yAxis[${x}].color should be a string`);
         if (!Array.isArray(d.values))
-          throw new h(`data.yAxis[${c}].values should be an array`);
+          throw new h(`data.yAxis[${x}].values should be an array`);
         d.values.forEach((T, f) => {
           if (typeof T != "number")
-            throw new h(`data.yAxis[${c}].values[${f}] should be a number`);
+            throw new h(`data.yAxis[${x}].values[${f}] should be a number`);
         });
       });
     }

@@ -1,5 +1,5 @@
 export interface IDataAxisX {
-   type: 'date' // TODO: Other types
+   type: 'date'
    values: number[]
 }
 
