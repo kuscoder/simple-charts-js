@@ -1,15 +1,15 @@
-export interface ISimpleGraphsJSAxisX {
+export interface IDataAxisX {
    type: 'date' // TODO: Other types
    values: number[]
 }
 
-export interface ISimpleGraphsJSAxisY {
+export interface IDataAxisY {
    name: string
    color: string
    values: number[]
 }
 
-export interface ISimpleGraphsJSOptions {
+export interface IGraphOptions {
    width: number
    height: number
    padding: number
@@ -18,8 +18,8 @@ export interface ISimpleGraphsJSOptions {
       months: string[]
    }
    data: {
-      xAxis: ISimpleGraphsJSAxisX | null
-      yAxis: ISimpleGraphsJSAxisY[]
+      xAxis: IDataAxisX | null
+      yAxis: IDataAxisY[]
    }
    style: {
       textFont: string

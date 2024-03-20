@@ -9,14 +9,14 @@ export default defineConfig(({ mode }) => ({
       outDir: resolve(__dirname, 'dist'),
       rollupOptions: {
          input: {
-            main: resolve(__dirname, 'src/simple-graphs-js.ts')
+            main: resolve(__dirname, 'src/index.ts')
          },
          external: []
       },
       lib: {
-         entry: resolve(__dirname, 'src/simple-graphs-js.ts'),
+         entry: resolve(__dirname, 'src/index.ts'),
          name: 'SimpleGraphsJS',
-         fileName: 'simple-graphs-js'
+         fileName: 'index'
       }
    },
    plugins: [

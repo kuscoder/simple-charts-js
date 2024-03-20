@@ -1,5 +1,5 @@
 ;(function () {
-   new SimpleGraphsJS(document.body, {
+   new SimpleGraphsJS.Graph(document.body, {
       width: 600,
       height: 250,
       padding: 40,

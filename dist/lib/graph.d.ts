@@ -1,14 +1,14 @@
-import type { ISimpleGraphsJSOptions } from './simple-graphs-js.types';
-declare class SimpleGraphsJS {
+import type { IGraphOptions } from './types';
+export declare class Graph {
     private static presetOptions;
     private static validateOptions;
     private static getOptions;
     /**
      * Updates the preset options with the provided options.
      *
-     * @param {Partial<ISimpleGraphsJSOptions>} options - The options to update the preset options with. Default is an empty object.
+     * @param {Partial<IGraphOptions>} options - The options to update the preset options with. Default is an empty object.
      */
-    static changePresetOptions(options?: Partial<ISimpleGraphsJSOptions>): void;
+    static changePresetOptions(options?: Partial<IGraphOptions>): void;
     private readonly WIDTH;
     private readonly HEIGHT;
     private readonly PADDING;
@@ -31,7 +31,7 @@ declare class SimpleGraphsJS {
     private readonly container;
     private readonly canvas;
     private readonly ctx;
-    constructor(container: HTMLElement, options?: Partial<ISimpleGraphsJSOptions>);
+    constructor(container: HTMLElement, options?: Partial<IGraphOptions>);
     initialize(): void;
     destroy(): void;
     private draw;
@@ -43,4 +43,3 @@ declare class SimpleGraphsJS {
     private getX;
     private getY;
 }
-export default SimpleGraphsJS;

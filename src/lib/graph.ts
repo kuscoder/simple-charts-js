@@ -1,7 +1,7 @@
-import type { ISimpleGraphsJSAxisX, ISimpleGraphsJSAxisY, ISimpleGraphsJSOptions } from './simple-graphs-js.types'
+import type { IDataAxisX, IDataAxisY, IGraphOptions } from './types'
 
-class SimpleGraphsJS {
-   private static presetOptions: ISimpleGraphsJSOptions = {
+export class Graph {
+   private static presetOptions: IGraphOptions = {
       width: 600,
       height: 250,
       padding: 40,
@@ -22,51 +22,62 @@ class SimpleGraphsJS {
    }
 
    // prettier-ignore
-   private static validateOptions(options: Partial<ISimpleGraphsJSOptions> = {}): void {
-      if (options.width) {
-         if (typeof options.width !== 'number') throw new Error('options.width should be a number')
-         if (options.width <= 0) throw new Error('options.width should be greater than 0')
-         if (options.width % 2 !== 0) throw new Error('options.width should be an even number')
+   private static validateOptions(options: Partial<IGraphOptions> = {}): void {
+      const {
+         width,
+         height,
+         padding,
+         rowsCount,
+         i18n: { months } = {},
+         data: { xAxis, yAxis } = {},
+         style: { textFont, textColor, secondaryColor } = {},
+         immediate
+      } = options
+
+      if (width) {
+         if (typeof width !== 'number') throw new Error('options.width should be a number')
+         if (width <= 0) throw new Error('options.width should be greater than 0')
+         if (width % 2 !== 0) throw new Error('options.width should be an even number')
       }
 
-      if (options.height) {
-         if (typeof options.height !== 'number') throw new Error('options.height should be a number')
-         if (options.height <= 0) throw new Error('options.height should be greater than 0')
-         if (options.height % 2 !== 0) throw new Error('options.height should be an even number')
+      if (height) {
+         if (typeof height !== 'number') throw new Error('options.height should be a number')
+         if (height <= 0) throw new Error('options.height should be greater than 0')
+         if (height % 2 !== 0) throw new Error('options.height should be an even number')
       }
 
-      if (options.padding) {
-         if (typeof options.padding !== 'number') throw new Error('options.padding should be a number')
-         if (options.padding < 0) throw new Error('options.padding should be greater or equal to 0')
+      if (padding) {
+         if (typeof padding !== 'number') throw new Error('options.padding should be a number')
+         if (padding < 0) throw new Error('options.padding should be greater or equal to 0')
       }
 
-      if (options.rowsCount) {
-         if (typeof options.rowsCount !== 'number') throw new Error('options.rowsCount should be a number')
-         if (options.rowsCount <= 0) throw new Error('options.rowsCount should be greater than 0')
+      if (rowsCount) {
+         if (typeof rowsCount !== 'number') throw new Error('options.rowsCount should be a number')
+         if (rowsCount <= 0) throw new Error('options.rowsCount should be greater than 0')
       }
 
-      if (options.i18n?.months) {
-         if (!Array.isArray(options.i18n.months)) throw new Error('options.i18n.months should be an array')
-         if (options.i18n.months.length !== 12) throw new Error('options.i18n.months should have 12 elements')
+      if (months) {
+         if (!Array.isArray(months)) throw new Error('options.i18n.months should be an array')
+         if (months.length !== 12) throw new Error('options.i18n.months should have 12 elements')
       }
 
-      if (options.data?.xAxis) {
-         if (typeof options.data.xAxis !== 'object') throw new Error('options.data.xAxis should be an object')
-         if (typeof options.data.xAxis.type !== 'string') throw new Error('options.data.xAxis.type should be a string')
-         if (!['date'].includes(options.data.xAxis.type)) throw new Error('options.data.xAxis.type should be "date"')
-         if (!Array.isArray(options.data.xAxis.values)) throw new Error('options.data.xAxis.values should be an array')
+      if (xAxis) {
+         if (typeof xAxis !== 'object') throw new Error('options.data.xAxis should be an object')
+         if (typeof xAxis.type !== 'string') throw new Error('options.data.xAxis.type should be a string')
+         if (!['date'].includes(xAxis.type)) throw new Error('options.data.xAxis.type should be "date"')
+         if (!Array.isArray(xAxis.values)) throw new Error('options.data.xAxis.values should be an array')
 
-         if (options.data.xAxis.type === 'date') {
-            options.data.xAxis.values.forEach((value, i) => {
+         if (xAxis.type === 'date') {
+            xAxis.values.forEach((value, i) => {
                if (typeof value !== 'number') throw new Error(`options.data.xAxis.values[${i}] should be a number`)
             })
          }
       }
 
-      if (options.data?.yAxis) {
-         if (!Array.isArray(options.data.yAxis)) throw new Error('options.data.columns should be an array')
+      if (yAxis) {
+         if (!Array.isArray(yAxis)) throw new Error('options.data.columns should be an array')
 
-         options.data.yAxis.forEach((col, i) => {
+         yAxis.forEach((col, i) => {
             if (typeof col.name !== 'string') throw new Error(`options.data.yAxis[${i}].name should be a string`)
             if (typeof col.color !== 'string') throw new Error(`options.data.yAxis[${i}].color should be a string`)
             if (!Array.isArray(col.values)) throw new Error(`options.data.yAxis[${i}].values should be an array`)
@@ -77,24 +88,24 @@ class SimpleGraphsJS {
          })
       }
 
-      if (options.style?.textFont) {
-         if (typeof options.style.textFont !== 'string') throw new Error('options.style.textFont should be a string')
+      if (textFont) {
+         if (typeof textFont !== 'string') throw new Error('options.style.textFont should be a string')
       }
 
-      if (options.style?.textColor) {
-         if (typeof options.style.textColor !== 'string') throw new Error('options.style.textColor should be a string')
+      if (textColor) {
+         if (typeof textColor !== 'string') throw new Error('options.style.textColor should be a string')
       }
 
-      if (options.style?.secondaryColor) {
-         if (typeof options.style.secondaryColor !== 'string') throw new Error('options.style.secondaryColor should be a string')
+      if (secondaryColor) {
+         if (typeof secondaryColor !== 'string') throw new Error('options.style.secondaryColor should be a string')
       }
 
-      if (options.immediate) {
-         if (typeof options.immediate !== 'boolean') throw new Error('options.immediate should be a boolean')
+      if (immediate) {
+         if (typeof immediate !== 'boolean') throw new Error('options.immediate should be a boolean')
       }
    }
 
-   private static getOptions(options: Partial<ISimpleGraphsJSOptions> = {}): ISimpleGraphsJSOptions {
+   private static getOptions(options: Partial<IGraphOptions> = {}): IGraphOptions {
       this.validateOptions(options)
 
       return {
@@ -121,9 +132,9 @@ class SimpleGraphsJS {
    /**
     * Updates the preset options with the provided options.
     *
-    * @param {Partial<ISimpleGraphsJSOptions>} options - The options to update the preset options with. Default is an empty object.
+    * @param {Partial<IGraphOptions>} options - The options to update the preset options with. Default is an empty object.
     */
-   public static changePresetOptions(options: Partial<ISimpleGraphsJSOptions> = {}) {
+   public static changePresetOptions(options: Partial<IGraphOptions> = {}) {
       this.validateOptions(options)
       this.presetOptions.width = options.width || this.presetOptions.width
       this.presetOptions.height = options.height || this.presetOptions.height
@@ -144,8 +155,8 @@ class SimpleGraphsJS {
    private readonly PADDING: number
    private readonly ROWS_COUNT: number
    private readonly MONTHS_NAMES: string[]
-   private readonly X_AXIS_DATA: ISimpleGraphsJSAxisX | null
-   private readonly Y_AXIS_DATA: ISimpleGraphsJSAxisY[]
+   private readonly X_AXIS_DATA: IDataAxisX | null
+   private readonly Y_AXIS_DATA: IDataAxisY[]
 
    /* Styles */
    private readonly STYLES: {
@@ -172,8 +183,8 @@ class SimpleGraphsJS {
    private readonly canvas: HTMLCanvasElement
    private readonly ctx: CanvasRenderingContext2D
 
-   constructor(container: HTMLElement, options: Partial<ISimpleGraphsJSOptions> = {}) {
-      const formattedOptions = SimpleGraphsJS.getOptions(options)
+   constructor(container: HTMLElement, options: Partial<IGraphOptions> = {}) {
+      const formattedOptions = Graph.getOptions(options)
 
       const xLength = formattedOptions.data.xAxis?.values.length || 0
       const yLength = formattedOptions.data.yAxis[0].values.length
@@ -294,7 +305,7 @@ class SimpleGraphsJS {
       }
    }
 
-   private getBoundariesY(columns: ISimpleGraphsJSAxisY[]) {
+   private getBoundariesY(columns: IDataAxisY[]) {
       let yMin: number | null = null
       let yMax: number | null = null
 
@@ -325,5 +336,3 @@ class SimpleGraphsJS {
       return Math.floor(this.DPI_HEIGHT - this.PADDING - y * this.Y_RATIO)
    }
 }
-
-export default SimpleGraphsJS
