@@ -25,105 +25,60 @@ class SimpleGraphsJS {
       immediate: true
    }
 
+   // prettier-ignore
    private static validateOptions(options: Partial<ISimpleGraphsJSOptions> = {}): void {
       if (options.width) {
-         if (typeof options.width !== 'number') {
-            throw new Error('options.width should be a number')
-         }
-
-         if (options.width <= 0) {
-            throw new Error('options.width should be greater than 0')
-         }
-
-         if (options.width % 2 !== 0) {
-            throw new Error('options.width should be an even number')
-         }
+         if (typeof options.width !== 'number') throw new Error('options.width should be a number')
+         if (options.width <= 0) throw new Error('options.width should be greater than 0')
+         if (options.width % 2 !== 0) throw new Error('options.width should be an even number')
       }
 
       if (options.height) {
-         if (typeof options.height !== 'number') {
-            throw new Error('options.height should be a number')
-         }
-
-         if (options.height <= 0) {
-            throw new Error('options.height should be greater than 0')
-         }
-
-         if (options.height % 2 !== 0) {
-            throw new Error('options.height should be an even number')
-         }
+         if (typeof options.height !== 'number') throw new Error('options.height should be a number')
+         if (options.height <= 0) throw new Error('options.height should be greater than 0')
+         if (options.height % 2 !== 0) throw new Error('options.height should be an even number')
       }
 
       if (options.padding) {
-         if (typeof options.padding !== 'number') {
-            throw new Error('options.padding should be a number')
-         }
-
-         if (options.padding < 0) {
-            throw new Error('options.padding should be greater or equal to 0')
-         }
+         if (typeof options.padding !== 'number') throw new Error('options.padding should be a number')
+         if (options.padding < 0) throw new Error('options.padding should be greater or equal to 0')
       }
 
       if (options.rowsCount) {
-         if (typeof options.rowsCount !== 'number') {
-            throw new Error('options.rowsCount should be a number')
-         }
-
-         if (options.rowsCount <= 0) {
-            throw new Error('options.rowsCount should be greater than 0')
-         }
+         if (typeof options.rowsCount !== 'number') throw new Error('options.rowsCount should be a number')
+         if (options.rowsCount <= 0) throw new Error('options.rowsCount should be greater than 0')
       }
 
       if (options.i18n?.months) {
-         if (!Array.isArray(options.i18n.months)) {
-            throw new Error('options.i18n.months should be an array')
-         }
-
-         if (options.i18n.months.length !== 12) {
-            throw new Error('options.i18n.months should have 12 elements')
-         }
+         if (!Array.isArray(options.i18n.months)) throw new Error('options.i18n.months should be an array')
+         if (options.i18n.months.length !== 12) throw new Error('options.i18n.months should have 12 elements')
       }
 
       if (options.data?.dates) {
-         if (!Array.isArray(options.data.dates)) {
-            throw new Error('options.data.dates should be an array')
-         }
+         if (!Array.isArray(options.data.dates)) throw new Error('options.data.dates should be an array')
+         if (options.data.dates.some((date) => typeof date !== 'number')) throw new Error('options.data.dates should be an array of numbers')
 
-         if (options.data.dates.some((date) => typeof date !== 'number')) {
-            throw new Error('options.data.dates should be an array of numbers')
-         }
       }
 
       if (options.data?.columns) {
-         if (!Array.isArray(options.data.columns)) {
-            throw new Error('options.data.columns should be an array')
-         }
-
-         // TODO
+         if (!Array.isArray(options.data.columns)) throw new Error('options.data.columns should be an array')
+         // TODO: other checks
       }
 
       if (options.style?.textFont) {
-         if (typeof options.style.textFont !== 'string') {
-            throw new Error('options.style.textFont should be a string')
-         }
+         if (typeof options.style.textFont !== 'string') throw new Error('options.style.textFont should be a string')
       }
 
       if (options.style?.textColor) {
-         if (typeof options.style.textColor !== 'string') {
-            throw new Error('options.style.textColor should be a string')
-         }
+         if (typeof options.style.textColor !== 'string') throw new Error('options.style.textColor should be a string')
       }
 
       if (options.style?.secondaryColor) {
-         if (typeof options.style.secondaryColor !== 'string') {
-            throw new Error('options.style.secondaryColor should be a string')
-         }
+         if (typeof options.style.secondaryColor !== 'string') throw new Error('options.style.secondaryColor should be a string')
       }
 
       if (options.immediate) {
-         if (typeof options.immediate !== 'boolean') {
-            throw new Error('options.immediate should be a boolean')
-         }
+         if (typeof options.immediate !== 'boolean') throw new Error('options.immediate should be a boolean')
       }
    }
 
