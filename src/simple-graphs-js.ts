@@ -1,8 +1,4 @@
-import type {
-   ISimpleGraphsJSColumn,
-   ISimpleGraphsJSOptionsColumn,
-   ISimpleGraphsJSOptions
-} from './simple-graphs-js.types'
+import type { ISimpleGraphsJSAxisX, ISimpleGraphsJSAxisY, ISimpleGraphsJSOptions } from './simple-graphs-js.types'
 
 class SimpleGraphsJS {
    private static presetOptions: ISimpleGraphsJSOptions = {
@@ -14,8 +10,8 @@ class SimpleGraphsJS {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
       data: {
-         columns: [],
-         dates: []
+         xAxis: null,
+         yAxis: []
       },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
@@ -54,22 +50,30 @@ class SimpleGraphsJS {
          if (options.i18n.months.length !== 12) throw new Error('options.i18n.months should have 12 elements')
       }
 
-      if (options.data?.dates) {
-         if (!Array.isArray(options.data.dates)) throw new Error('options.data.dates should be an array')
-         if (options.data.dates.some((date) => typeof date !== 'number')) throw new Error('options.data.dates should be an array of numbers')
+      if (options.data?.xAxis) {
+         if (typeof options.data.xAxis !== 'object') throw new Error('options.data.xAxis should be an object')
+         if (typeof options.data.xAxis.type !== 'string') throw new Error('options.data.xAxis.type should be a string')
+         if (!['date'].includes(options.data.xAxis.type)) throw new Error('options.data.xAxis.type should be "date"')
+         if (!Array.isArray(options.data.xAxis.values)) throw new Error('options.data.xAxis.values should be an array')
 
+         if (options.data.xAxis.type === 'date') {
+            options.data.xAxis.values.forEach((value, i) => {
+               if (typeof value !== 'number') throw new Error(`options.data.xAxis.values[${i}] should be a number`)
+            })
+         }
       }
 
-      if (options.data?.columns) {
-         if (!Array.isArray(options.data.columns)) throw new Error('options.data.columns should be an array')
+      if (options.data?.yAxis) {
+         if (!Array.isArray(options.data.yAxis)) throw new Error('options.data.columns should be an array')
 
-         options.data.columns.forEach((column, i) => {
-            if (typeof column.type !== 'string') throw new Error(`options.data.columns[${i}].type should be a string`)
-            if (!['x', 'y'].includes(column.type)) throw new Error(`options.data.columns[${i}].type should be 'x' or 'y'`)
-            if (typeof column.name !== 'string') throw new Error(`options.data.columns[${i}].name should be a string`)
-            if (typeof column.color !== 'string') throw new Error(`options.data.columns[${i}].color should be a string`)
-            if (!Array.isArray(column.values)) throw new Error(`options.data.columns[${i}].values should be an array`)
-            if (column.values.some((value) => typeof value !== 'number')) throw new Error(`options.data.columns[${i}].values should be an array of numbers`)
+         options.data.yAxis.forEach((col, i) => {
+            if (typeof col.name !== 'string') throw new Error(`options.data.yAxis[${i}].name should be a string`)
+            if (typeof col.color !== 'string') throw new Error(`options.data.yAxis[${i}].color should be a string`)
+            if (!Array.isArray(col.values)) throw new Error(`options.data.yAxis[${i}].values should be an array`)
+
+            col.values.forEach((value, j) => {
+               if (typeof value !== 'number') throw new Error(`options.data.yAxis[${i}].values[${j}] should be a number`)
+            })
          })
       }
 
@@ -107,8 +111,8 @@ class SimpleGraphsJS {
             secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor
          },
          data: {
-            dates: options.data?.dates || this.presetOptions.data.dates,
-            columns: options.data?.columns || this.presetOptions.data.columns
+            xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
+            yAxis: options.data?.yAxis || this.presetOptions.data.yAxis
          },
          immediate: options.immediate ?? this.presetOptions.immediate
       }
@@ -129,8 +133,8 @@ class SimpleGraphsJS {
       this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
       this.presetOptions.style.textColor = options.style?.textColor || this.presetOptions.style.textColor
       this.presetOptions.style.secondaryColor = options.style?.secondaryColor || this.presetOptions.style.secondaryColor
-      this.presetOptions.data.columns = options.data?.columns || this.presetOptions.data.columns
-      this.presetOptions.data.dates = options.data?.dates || this.presetOptions.data.dates
+      this.presetOptions.data.xAxis = options.data?.xAxis || this.presetOptions.data.xAxis
+      this.presetOptions.data.yAxis = options.data?.yAxis || this.presetOptions.data.yAxis
       this.presetOptions.immediate = options.immediate || this.presetOptions.immediate
    }
 
@@ -140,8 +144,8 @@ class SimpleGraphsJS {
    private readonly PADDING: number
    private readonly ROWS_COUNT: number
    private readonly MONTHS_NAMES: string[]
-   private readonly DATES: number[]
-   private readonly COLUMNS: ISimpleGraphsJSColumn[]
+   private readonly X_AXIS_DATA: ISimpleGraphsJSAxisX | null
+   private readonly Y_AXIS_DATA: ISimpleGraphsJSAxisY[]
 
    /* Styles */
    private readonly STYLES: {
@@ -155,13 +159,13 @@ class SimpleGraphsJS {
    private readonly DPI_HEIGHT: number
    private readonly VIEW_WIDTH: number
    private readonly VIEW_HEIGHT: number
-   private readonly BOUNDARIES: [number, number]
+   private readonly Y_BOUNDARIES: [number, number]
    private readonly X_RATIO: number
    private readonly Y_RATIO: number
    private readonly ROWS_STEP: number
    private readonly TEXT_STEP: number
-   private readonly DATE_COUNT: number
-   private readonly DATE_STEP: number
+   private readonly X_AXIS_DATA_COUNT: number
+   private readonly X_AXIS_DATA_STEP: number
 
    /* DOM */
    private readonly container: HTMLElement
@@ -171,13 +175,17 @@ class SimpleGraphsJS {
    constructor(container: HTMLElement, options: Partial<ISimpleGraphsJSOptions> = {}) {
       const formattedOptions = SimpleGraphsJS.getOptions(options)
 
+      const xLength = formattedOptions.data.xAxis?.values.length || 0
+      const yLength = formattedOptions.data.yAxis[0].values.length
+
       /* Options */
       this.WIDTH = formattedOptions.width
       this.HEIGHT = formattedOptions.height
       this.PADDING = formattedOptions.padding
       this.ROWS_COUNT = formattedOptions.rowsCount
       this.MONTHS_NAMES = formattedOptions.i18n.months
-      this.DATES = formattedOptions.data.dates
+      this.X_AXIS_DATA = formattedOptions.data.xAxis
+      this.Y_AXIS_DATA = formattedOptions.data.yAxis
 
       /* Styles */
       this.STYLES = {
@@ -192,15 +200,15 @@ class SimpleGraphsJS {
       this.VIEW_WIDTH = this.DPI_WIDTH
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
 
-      this.BOUNDARIES = this.getBoundaries(formattedOptions.data.columns)
-      this.X_RATIO = this.VIEW_WIDTH / (formattedOptions.data.columns[0].values.length - 1)
-      this.Y_RATIO = this.VIEW_HEIGHT / (this.BOUNDARIES[1] - this.BOUNDARIES[0])
-      this.COLUMNS = this.getColumns(formattedOptions.data.columns)
+      this.Y_BOUNDARIES = this.getBoundariesY(this.Y_AXIS_DATA)
+      this.X_RATIO = this.VIEW_WIDTH / (yLength - 1)
+      this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0])
 
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
-      this.TEXT_STEP = (this.BOUNDARIES[1] - this.BOUNDARIES[0]) / this.ROWS_COUNT
-      this.DATE_COUNT = 6
-      this.DATE_STEP = Math.round(this.DATES.length / this.DATE_COUNT)
+      this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT
+
+      this.X_AXIS_DATA_COUNT = 6
+      this.X_AXIS_DATA_STEP = xLength && Math.round(xLength / this.X_AXIS_DATA_COUNT)
 
       /* DOM */
       this.container = container
@@ -234,12 +242,15 @@ class SimpleGraphsJS {
    }
 
    private drawAxisX() {
+      if (!this.X_AXIS_DATA) return
+
       this.ctx.fillStyle = this.STYLES.textColor
       this.ctx.font = this.STYLES.textFont
       this.ctx.beginPath()
 
-      for (let i = 1; i <= this.DATES.length; i += this.DATE_STEP) {
-         const text = this.getDate(this.DATES[i - 1])
+      // TODO: Other X_AXIS_DATA types
+      for (let i = 1; i <= this.X_AXIS_DATA.values.length; i += this.X_AXIS_DATA_STEP) {
+         const text = this.getDate(this.X_AXIS_DATA.values[i - 1])
          this.ctx.fillText(text, this.getX(i), this.DPI_HEIGHT - 10)
       }
 
@@ -254,7 +265,7 @@ class SimpleGraphsJS {
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
-         const text = String(Math.round(this.BOUNDARIES[1] - this.TEXT_STEP * i))
+         const text = String(Math.round(this.Y_BOUNDARIES[1] - this.TEXT_STEP * i))
          const posY = i * this.ROWS_STEP + this.PADDING
          this.ctx.fillText(text, 5, posY - 10)
          this.ctx.moveTo(0, posY)
@@ -268,11 +279,13 @@ class SimpleGraphsJS {
    private drawLines() {
       this.ctx.lineWidth = 4
 
-      for (const col of this.COLUMNS) {
+      for (const col of this.Y_AXIS_DATA) {
          this.ctx.strokeStyle = col.color
          this.ctx.beginPath()
 
-         for (const [x, y] of col.values) {
+         for (let i = 0; i < col.values.length; i++) {
+            const x = this.getX(i)
+            const y = this.getY(col.values[i])
             this.ctx.lineTo(x, y)
          }
 
@@ -281,19 +294,7 @@ class SimpleGraphsJS {
       }
    }
 
-   private getColumns(columns: ISimpleGraphsJSOptionsColumn[]): ISimpleGraphsJSColumn[] {
-      const copiedColumns = JSON.parse(JSON.stringify(columns)) as ISimpleGraphsJSColumn[]
-
-      for (const col of copiedColumns) {
-         col.values = col.values.map((y, x) => {
-            return [this.getX(x), this.getY(y as unknown as number)]
-         })
-      }
-
-      return copiedColumns
-   }
-
-   private getBoundaries(columns: ISimpleGraphsJSOptionsColumn[]) {
+   private getBoundariesY(columns: ISimpleGraphsJSAxisY[]) {
       let yMin: number | null = null
       let yMax: number | null = null
 

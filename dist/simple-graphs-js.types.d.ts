@@ -1,10 +1,10 @@
-export interface ISimpleGraphsJSColumn {
-    type: string;
+export interface ISimpleGraphsJSAxisX {
+    type: 'date';
+    values: number[];
+}
+export interface ISimpleGraphsJSAxisY {
     name: string;
     color: string;
-    values: [number, number][];
-}
-export interface ISimpleGraphsJSOptionsColumn extends Omit<ISimpleGraphsJSColumn, 'values'> {
     values: number[];
 }
 export interface ISimpleGraphsJSOptions {
@@ -16,8 +16,8 @@ export interface ISimpleGraphsJSOptions {
         months: string[];
     };
     data: {
-        dates: number[];
-        columns: ISimpleGraphsJSOptionsColumn[];
+        xAxis: ISimpleGraphsJSAxisX | null;
+        yAxis: ISimpleGraphsJSAxisY[];
     };
     style: {
         textFont: string;
