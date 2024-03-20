@@ -1,6 +1,6 @@
 ;(function () {
    new SimpleGraphsJS.Graph(document.body, {
-      width: 600,
+      width: '600',
       height: 250,
       padding: 40,
       rowsCount: 5,

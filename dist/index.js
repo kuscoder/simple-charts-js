@@ -1,41 +1,51 @@
-var _ = Object.defineProperty;
-var I = (a, t, e) => t in a ? _(a, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : a[t] = e;
-var i = (a, t, e) => (I(a, typeof t != "symbol" ? t + "" : t, e), e);
-const p = class p {
+var f = Object.defineProperty;
+var O = (l, t, e) => t in l ? f(l, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : l[t] = e;
+var h = (l, t, e) => (O(l, typeof t != "symbol" ? t + "" : t, e), e);
+class g extends Error {
+  constructor(t) {
+    super(t), this.name = "GraphError";
+  }
+}
+class i extends g {
+  constructor(t) {
+    super(t), this.name = "GraphOptionsError";
+  }
+}
+const A = class A {
   constructor(t, e = {}) {
     /* Options */
-    i(this, "WIDTH");
-    i(this, "HEIGHT");
-    i(this, "PADDING");
-    i(this, "ROWS_COUNT");
-    i(this, "MONTHS_NAMES");
-    i(this, "X_AXIS_DATA");
-    i(this, "Y_AXIS_DATA");
+    h(this, "WIDTH");
+    h(this, "HEIGHT");
+    h(this, "PADDING");
+    h(this, "ROWS_COUNT");
+    h(this, "MONTHS_NAMES");
+    h(this, "X_AXIS_DATA");
+    h(this, "Y_AXIS_DATA");
     /* Styles */
-    i(this, "STYLES");
+    h(this, "STYLES");
     /* Calculated */
-    i(this, "DPI_WIDTH");
-    i(this, "DPI_HEIGHT");
-    i(this, "VIEW_WIDTH");
-    i(this, "VIEW_HEIGHT");
-    i(this, "Y_BOUNDARIES");
-    i(this, "X_RATIO");
-    i(this, "Y_RATIO");
-    i(this, "ROWS_STEP");
-    i(this, "TEXT_STEP");
-    i(this, "X_AXIS_DATA_COUNT");
-    i(this, "X_AXIS_DATA_STEP");
+    h(this, "DPI_WIDTH");
+    h(this, "DPI_HEIGHT");
+    h(this, "VIEW_WIDTH");
+    h(this, "VIEW_HEIGHT");
+    h(this, "Y_BOUNDARIES");
+    h(this, "X_RATIO");
+    h(this, "Y_RATIO");
+    h(this, "ROWS_STEP");
+    h(this, "TEXT_STEP");
+    h(this, "X_AXIS_DATA_COUNT");
+    h(this, "X_AXIS_DATA_STEP");
     /* DOM */
-    i(this, "container");
-    i(this, "canvas");
-    i(this, "ctx");
-    var n;
-    const s = p.getOptions(e), o = ((n = s.data.xAxis) == null ? void 0 : n.values.length) || 0, r = s.data.yAxis[0].values.length;
+    h(this, "container");
+    h(this, "canvas");
+    h(this, "ctx");
+    var a;
+    const s = A.getOptions(e), o = ((a = s.data.xAxis) == null ? void 0 : a.values.length) || 0, n = s.data.yAxis[0].values.length;
     this.WIDTH = s.width, this.HEIGHT = s.height, this.PADDING = s.padding, this.ROWS_COUNT = s.rowsCount, this.MONTHS_NAMES = s.i18n.months, this.X_AXIS_DATA = s.data.xAxis, this.Y_AXIS_DATA = s.data.yAxis, this.STYLES = {
       textFont: s.style.textFont,
       textColor: s.style.textColor,
       secondaryColor: s.style.secondaryColor
-    }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_BOUNDARIES = this.getBoundariesY(this.Y_AXIS_DATA), this.X_RATIO = this.VIEW_WIDTH / (r - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = o && Math.round(o / this.X_AXIS_DATA_COUNT), this.container = t, this.canvas = document.createElement("canvas"), this.ctx = this.canvas.getContext("2d"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, s.immediate && this.initialize();
+    }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_BOUNDARIES = this.getBoundariesY(this.Y_AXIS_DATA), this.X_RATIO = this.VIEW_WIDTH / (n - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = o && Math.round(o / this.X_AXIS_DATA_COUNT), this.container = t, this.canvas = document.createElement("canvas"), this.ctx = this.canvas.getContext("2d"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, s.immediate && this.initialize();
   }
   // prettier-ignore
   static validateOptions(t = {}) {
@@ -43,87 +53,87 @@ const p = class p {
       width: e,
       height: s,
       padding: o,
-      rowsCount: r,
-      i18n: { months: n } = {},
-      data: { xAxis: h, yAxis: x } = {},
-      style: { textFont: A, textColor: y, secondaryColor: c } = {},
-      immediate: u
+      rowsCount: n,
+      i18n: { months: a } = {},
+      data: { xAxis: r, yAxis: p } = {},
+      style: { textFont: c, textColor: y, secondaryColor: u } = {},
+      immediate: w
     } = t;
     if (e) {
       if (typeof e != "number")
-        throw new Error("options.width should be a number");
+        throw new i("width should be a number");
       if (e <= 0)
-        throw new Error("options.width should be greater than 0");
+        throw new i("width should be greater than 0");
       if (e % 2 !== 0)
-        throw new Error("options.width should be an even number");
+        throw new i("width should be an even number");
     }
     if (s) {
       if (typeof s != "number")
-        throw new Error("options.height should be a number");
+        throw new i("height should be a number");
       if (s <= 0)
-        throw new Error("options.height should be greater than 0");
+        throw new i("height should be greater than 0");
       if (s % 2 !== 0)
-        throw new Error("options.height should be an even number");
+        throw new i("height should be an even number");
     }
     if (o) {
       if (typeof o != "number")
-        throw new Error("options.padding should be a number");
+        throw new i("padding should be a number");
       if (o < 0)
-        throw new Error("options.padding should be greater or equal to 0");
-    }
-    if (r) {
-      if (typeof r != "number")
-        throw new Error("options.rowsCount should be a number");
-      if (r <= 0)
-        throw new Error("options.rowsCount should be greater than 0");
+        throw new i("padding should be greater or equal to 0");
     }
     if (n) {
-      if (!Array.isArray(n))
-        throw new Error("options.i18n.months should be an array");
-      if (n.length !== 12)
-        throw new Error("options.i18n.months should have 12 elements");
+      if (typeof n != "number")
+        throw new i("rowsCount should be a number");
+      if (n <= 0)
+        throw new i("rowsCount should be greater than 0");
     }
-    if (h) {
-      if (typeof h != "object")
-        throw new Error("options.data.xAxis should be an object");
-      if (typeof h.type != "string")
-        throw new Error("options.data.xAxis.type should be a string");
-      if (!["date"].includes(h.type))
-        throw new Error('options.data.xAxis.type should be "date"');
-      if (!Array.isArray(h.values))
-        throw new Error("options.data.xAxis.values should be an array");
-      h.type === "date" && h.values.forEach((l, d) => {
-        if (typeof l != "number")
-          throw new Error(`options.data.xAxis.values[${d}] should be a number`);
+    if (a) {
+      if (!Array.isArray(a))
+        throw new i("i18n.months should be an array");
+      if (a.length !== 12)
+        throw new i("i18n.months should have 12 elements");
+    }
+    if (r) {
+      if (typeof r != "object")
+        throw new i("data.xAxis should be an object");
+      if (typeof r.type != "string")
+        throw new i("data.xAxis.type should be a string");
+      if (!["date"].includes(r.type))
+        throw new i('data.xAxis.type should be "date"');
+      if (!Array.isArray(r.values))
+        throw new i("data.xAxis.values should be an array");
+      r.type === "date" && r.values.forEach((d, x) => {
+        if (typeof d != "number")
+          throw new i(`data.xAxis.values[${x}] should be a number`);
       });
     }
-    if (x) {
-      if (!Array.isArray(x))
-        throw new Error("options.data.columns should be an array");
-      x.forEach((l, d) => {
-        if (typeof l.name != "string")
-          throw new Error(`options.data.yAxis[${d}].name should be a string`);
-        if (typeof l.color != "string")
-          throw new Error(`options.data.yAxis[${d}].color should be a string`);
-        if (!Array.isArray(l.values))
-          throw new Error(`options.data.yAxis[${d}].values should be an array`);
-        l.values.forEach((T, E) => {
-          if (typeof T != "number")
-            throw new Error(`options.data.yAxis[${d}].values[${E}] should be a number`);
+    if (p) {
+      if (!Array.isArray(p))
+        throw new i("data.columns should be an array");
+      p.forEach((d, x) => {
+        if (typeof d.name != "string")
+          throw new i(`data.yAxis[${x}].name should be a string`);
+        if (typeof d.color != "string")
+          throw new i(`data.yAxis[${x}].color should be a string`);
+        if (!Array.isArray(d.values))
+          throw new i(`data.yAxis[${x}].values should be an array`);
+        d.values.forEach((_, I) => {
+          if (typeof _ != "number")
+            throw new i(`data.yAxis[${x}].values[${I}] should be a number`);
         });
       });
     }
-    if (A && typeof A != "string")
-      throw new Error("options.style.textFont should be a string");
-    if (y && typeof y != "string")
-      throw new Error("options.style.textColor should be a string");
     if (c && typeof c != "string")
-      throw new Error("options.style.secondaryColor should be a string");
-    if (u && typeof u != "boolean")
-      throw new Error("options.immediate should be a boolean");
+      throw new i("style.textFont should be a string");
+    if (y && typeof y != "string")
+      throw new i("style.textColor should be a string");
+    if (u && typeof u != "string")
+      throw new i("style.secondaryColor should be a string");
+    if (w && typeof w != "boolean")
+      throw new i("immediate should be a boolean");
   }
   static getOptions(t = {}) {
-    var e, s, o, r, n, h;
+    var e, s, o, n, a, r;
     return this.validateOptions(t), {
       width: t.width || this.presetOptions.width,
       height: t.height || this.presetOptions.height,
@@ -135,11 +145,11 @@ const p = class p {
       style: {
         textFont: ((s = t.style) == null ? void 0 : s.textFont) || this.presetOptions.style.textFont,
         textColor: ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor,
-        secondaryColor: ((r = t.style) == null ? void 0 : r.secondaryColor) || this.presetOptions.style.secondaryColor
+        secondaryColor: ((n = t.style) == null ? void 0 : n.secondaryColor) || this.presetOptions.style.secondaryColor
       },
       data: {
-        xAxis: ((n = t.data) == null ? void 0 : n.xAxis) || this.presetOptions.data.xAxis,
-        yAxis: ((h = t.data) == null ? void 0 : h.yAxis) || this.presetOptions.data.yAxis
+        xAxis: ((a = t.data) == null ? void 0 : a.xAxis) || this.presetOptions.data.xAxis,
+        yAxis: ((r = t.data) == null ? void 0 : r.yAxis) || this.presetOptions.data.yAxis
       },
       immediate: t.immediate ?? this.presetOptions.immediate
     };
@@ -150,8 +160,8 @@ const p = class p {
    * @param {Partial<IGraphOptions>} options - The options to update the preset options with. Default is an empty object.
    */
   static changePresetOptions(t = {}) {
-    var e, s, o, r, n, h;
-    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding || this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.i18n.months = ((e = t.i18n) == null ? void 0 : e.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((s = t.style) == null ? void 0 : s.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((r = t.style) == null ? void 0 : r.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.data.xAxis = ((n = t.data) == null ? void 0 : n.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((h = t.data) == null ? void 0 : h.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.immediate = t.immediate || this.presetOptions.immediate;
+    var e, s, o, n, a, r;
+    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding || this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.i18n.months = ((e = t.i18n) == null ? void 0 : e.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((s = t.style) == null ? void 0 : s.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((n = t.style) == null ? void 0 : n.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.data.xAxis = ((a = t.data) == null ? void 0 : a.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((r = t.data) == null ? void 0 : r.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.immediate = t.immediate || this.presetOptions.immediate;
   }
   /* Initializes the component by appending the canvas to the container element and drawing the graph */
   initialize() {
@@ -196,13 +206,13 @@ const p = class p {
   getBoundariesY(t) {
     let e = null, s = null;
     for (const o of t)
-      for (const r of o.values)
-        e = e === null || r < e ? r : e, s = s === null || r > s ? r : s;
+      for (const n of o.values)
+        e = e === null || n < e ? n : e, s = s === null || n > s ? n : s;
     return [e, s];
   }
   getDate(t) {
-    const e = new Date(t), s = e.getDate(), o = e.getMonth(), r = this.MONTHS_NAMES;
-    return `${s} ${r[o]}`;
+    const e = new Date(t), s = e.getDate(), o = e.getMonth(), n = this.MONTHS_NAMES;
+    return `${s} ${n[o]}`;
   }
   getX(t) {
     return Math.floor(t * this.X_RATIO);
@@ -211,7 +221,7 @@ const p = class p {
     return Math.floor(this.DPI_HEIGHT - this.PADDING - t * this.Y_RATIO);
   }
 };
-i(p, "presetOptions", {
+h(A, "presetOptions", {
   width: 600,
   height: 250,
   padding: 40,
@@ -230,10 +240,9 @@ i(p, "presetOptions", {
   },
   immediate: !0
 });
-let w = p;
-class O extends Error {
-}
+let T = A;
 export {
-  w as Graph,
-  O as GraphsError
+  T as Graph,
+  g as GraphError,
+  i as GraphOptionsError
 };
