@@ -9,7 +9,7 @@ export interface IDataAxisY {
    values: number[]
 }
 
-export interface IGraphOptions {
+export interface IChartOptions {
    width: number
    height: number
    padding: number

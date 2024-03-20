@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
       },
       lib: {
          entry: resolve(__dirname, 'src/index.ts'),
-         name: 'SimpleGraphsJS',
+         name: 'SimpleChartsJS',
          fileName: 'index'
       }
    },

@@ -1,22 +1,23 @@
 {
-   "name": "simple-graphs-js",
-   "description": "simple-graphs-js - a library for drawing graphs.",
+   "name": "simple-charts-js",
+   "description": "simple-charts-js - a library for drawing charts.",
    "author": "Nikita Kus <kuscoder@yandex.ru>",
    "version": "0.0.1",
    "license": "ISC",
    "keywords": [
-      "graph",
+      "chart",
+      "gharp",
       "diagram",
       "canvas",
       "typescript"
    ],
-   "homepage": "https://github.com/kuscoder/simple-graphs-js#readme",
+   "homepage": "https://github.com/kuscoder/simple-charts-js#readme",
    "repository": {
       "type": "git",
-      "url": "git+https://github.com/kuscoder/simple-graphs-js.git"
+      "url": "git+https://github.com/kuscoder/simple-charts-js.git"
    },
    "bugs": {
-      "url": "https://github.com/kuscoder/simple-graphs-js/issues"
+      "url": "https://github.com/kuscoder/simple-charts-js/issues"
    },
    "files": [
       "dist"

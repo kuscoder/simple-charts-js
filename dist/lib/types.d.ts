@@ -7,7 +7,7 @@ export interface IDataAxisY {
     color: string;
     values: number[];
 }
-export interface IGraphOptions {
+export interface IChartOptions {
     width: number;
     height: number;
     padding: number;

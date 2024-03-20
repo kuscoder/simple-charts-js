@@ -1,9 +1,9 @@
-import { GraphOptionsError } from './graph-error'
-import type { IDataAxisX, IDataAxisY, IGraphOptions } from './types'
+import { ChartOptionsError } from './chart-error'
+import type { IDataAxisX, IDataAxisY, IChartOptions } from './types'
 
-export class Graph {
+export class Chart {
    // Static options preset
-   private static presetOptions: IGraphOptions = {
+   private static presetOptions: IChartOptions = {
       width: 600,
       height: 250,
       padding: 40,
@@ -71,8 +71,8 @@ export class Graph {
    private canvasRect: DOMRect | null
 
    /** */
-   constructor(container: HTMLElement, options: Partial<IGraphOptions> = {}) {
-      const formattedOptions = Graph.getOptions(options)
+   constructor(container: HTMLElement, options: Partial<IChartOptions> = {}) {
+      const formattedOptions = Chart.getOptions(options)
       const xLength = formattedOptions.data.xAxis?.values.length || 0
       const yLength = formattedOptions.data.yAxis[0].values.length
 
@@ -140,7 +140,7 @@ export class Graph {
       }
    }
 
-   /** Initializes the component by appending the canvas to the container element and drawing the graph */
+   /** Initializes the component by appending the canvas to the container element and drawing the chart */
    public initialize() {
       if (this.isInitialized) return
       this.isInitialized = true
@@ -319,7 +319,7 @@ export class Graph {
    }
 
    /** */
-   private static validateOptions(options: Partial<IGraphOptions> = {}): void {
+   private static validateOptions(options: Partial<IChartOptions> = {}): void {
       const {
          width,
          height,
@@ -332,79 +332,79 @@ export class Graph {
       } = options
 
       if (width) {
-         if (typeof width !== 'number') throw new GraphOptionsError('width should be a number')
-         if (width <= 0) throw new GraphOptionsError('width should be greater than 0')
-         if (width % 2 !== 0) throw new GraphOptionsError('width should be an even number')
+         if (typeof width !== 'number') throw new ChartOptionsError('width should be a number')
+         if (width <= 0) throw new ChartOptionsError('width should be greater than 0')
+         if (width % 2 !== 0) throw new ChartOptionsError('width should be an even number')
       }
 
       if (height) {
-         if (typeof height !== 'number') throw new GraphOptionsError('height should be a number')
-         if (height <= 0) throw new GraphOptionsError('height should be greater than 0')
-         if (height % 2 !== 0) throw new GraphOptionsError('height should be an even number')
+         if (typeof height !== 'number') throw new ChartOptionsError('height should be a number')
+         if (height <= 0) throw new ChartOptionsError('height should be greater than 0')
+         if (height % 2 !== 0) throw new ChartOptionsError('height should be an even number')
       }
 
       if (padding) {
-         if (typeof padding !== 'number') throw new GraphOptionsError('padding should be a number')
-         if (padding < 0) throw new GraphOptionsError('padding should be greater or equal to 0')
+         if (typeof padding !== 'number') throw new ChartOptionsError('padding should be a number')
+         if (padding < 0) throw new ChartOptionsError('padding should be greater or equal to 0')
       }
 
       if (rowsCount) {
-         if (typeof rowsCount !== 'number') throw new GraphOptionsError('rowsCount should be a number')
-         if (rowsCount <= 0) throw new GraphOptionsError('rowsCount should be greater than 0')
+         if (typeof rowsCount !== 'number') throw new ChartOptionsError('rowsCount should be a number')
+         if (rowsCount <= 0) throw new ChartOptionsError('rowsCount should be greater than 0')
       }
 
       if (months) {
-         if (!Array.isArray(months)) throw new GraphOptionsError('i18n.months should be an array')
-         if (months.length !== 12) throw new GraphOptionsError('i18n.months should have 12 elements')
+         if (!Array.isArray(months)) throw new ChartOptionsError('i18n.months should be an array')
+         if (months.length !== 12) throw new ChartOptionsError('i18n.months should have 12 elements')
       }
 
       if (xAxis) {
-         if (typeof xAxis !== 'object') throw new GraphOptionsError('data.xAxis should be an object')
-         if (typeof xAxis.type !== 'string') throw new GraphOptionsError('data.xAxis.type should be a string')
-         if (!['date'].includes(xAxis.type)) throw new GraphOptionsError('data.xAxis.type should be "date"')
-         if (!Array.isArray(xAxis.values)) throw new GraphOptionsError('data.xAxis.values should be an array')
+         if (typeof xAxis !== 'object') throw new ChartOptionsError('data.xAxis should be an object')
+         if (typeof xAxis.type !== 'string') throw new ChartOptionsError('data.xAxis.type should be a string')
+         if (!['date'].includes(xAxis.type)) throw new ChartOptionsError('data.xAxis.type should be "date"')
+         if (!Array.isArray(xAxis.values)) throw new ChartOptionsError('data.xAxis.values should be an array')
 
          if (xAxis.type === 'date') {
             xAxis.values.forEach((value, i) => {
-               if (typeof value !== 'number') throw new GraphOptionsError(`data.xAxis.values[${i}] should be a number`)
+               if (typeof value !== 'number') throw new ChartOptionsError(`data.xAxis.values[${i}] should be a number`)
             })
          }
       }
 
       if (yAxis) {
-         if (!Array.isArray(yAxis)) throw new GraphOptionsError('data.columns should be an array')
+         if (!Array.isArray(yAxis)) throw new ChartOptionsError('data.columns should be an array')
 
          yAxis.forEach((col, i) => {
-            if (typeof col.name !== 'string') throw new GraphOptionsError(`data.yAxis[${i}].name should be a string`)
-            if (typeof col.color !== 'string') throw new GraphOptionsError(`data.yAxis[${i}].color should be a string`)
-            if (!Array.isArray(col.values)) throw new GraphOptionsError(`data.yAxis[${i}].values should be an array`)
+            if (typeof col.name !== 'string') throw new ChartOptionsError(`data.yAxis[${i}].name should be a string`)
+            if (typeof col.color !== 'string') throw new ChartOptionsError(`data.yAxis[${i}].color should be a string`)
+            if (!Array.isArray(col.values)) throw new ChartOptionsError(`data.yAxis[${i}].values should be an array`)
 
             col.values.forEach((value, j) => {
                if (typeof value !== 'number')
-                  throw new GraphOptionsError(`data.yAxis[${i}].values[${j}] should be a number`)
+                  throw new ChartOptionsError(`data.yAxis[${i}].values[${j}] should be a number`)
             })
          })
       }
 
       if (textFont) {
-         if (typeof textFont !== 'string') throw new GraphOptionsError('style.textFont should be a string')
+         if (typeof textFont !== 'string') throw new ChartOptionsError('style.textFont should be a string')
       }
 
       if (textColor) {
-         if (typeof textColor !== 'string') throw new GraphOptionsError('style.textColor should be a string')
+         if (typeof textColor !== 'string') throw new ChartOptionsError('style.textColor should be a string')
       }
 
       if (secondaryColor) {
-         if (typeof secondaryColor !== 'string') throw new GraphOptionsError('style.secondaryColor should be a string')
+         if (typeof secondaryColor !== 'string') throw new ChartOptionsError('style.secondaryColor should be a string')
       }
 
       if (immediate) {
-         if (typeof immediate !== 'boolean') throw new GraphOptionsError('immediate should be a boolean')
+         if (typeof immediate !== 'boolean') throw new ChartOptionsError('immediate should be a boolean')
       }
    }
 
    /** */
-   private static getOptions(options: Partial<IGraphOptions> = {}): IGraphOptions {
+   private static getOptions(options: Partial<IChartOptions> = {}): IChartOptions {
       this.validateOptions(options)
 
       return {
@@ -431,9 +431,9 @@ export class Graph {
    /**
     * Updates the preset options with the provided options.
     *
-    * @param {Partial<IGraphOptions>} options - The options to update the preset options with. Default is an empty object.
+    * @param {Partial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
     */
-   public static changePresetOptions(options: Partial<IGraphOptions> = {}) {
+   public static changePresetOptions(options: Partial<IChartOptions> = {}) {
       this.validateOptions(options)
       this.presetOptions.width = options.width || this.presetOptions.width
       this.presetOptions.height = options.height || this.presetOptions.height

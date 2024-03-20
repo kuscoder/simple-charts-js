@@ -1,5 +1,5 @@
-import type { IGraphOptions } from './types';
-export declare class Graph {
+import type { IChartOptions } from './types';
+export declare class Chart {
     private static presetOptions;
     private readonly WIDTH;
     private readonly HEIGHT;
@@ -27,8 +27,8 @@ export declare class Graph {
     private readonly ctx;
     private canvasRect;
     /** */
-    constructor(container: HTMLElement, options?: Partial<IGraphOptions>);
-    /** Initializes the component by appending the canvas to the container element and drawing the graph */
+    constructor(container: HTMLElement, options?: Partial<IChartOptions>);
+    /** Initializes the component by appending the canvas to the container element and drawing the chart */
     initialize(): void;
     /** Destroys the component from the DOM */
     destroy(): void;
@@ -64,7 +64,7 @@ export declare class Graph {
     /**
      * Updates the preset options with the provided options.
      *
-     * @param {Partial<IGraphOptions>} options - The options to update the preset options with. Default is an empty object.
+     * @param {Partial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
      */
-    static changePresetOptions(options?: Partial<IGraphOptions>): void;
+    static changePresetOptions(options?: Partial<IChartOptions>): void;
 }

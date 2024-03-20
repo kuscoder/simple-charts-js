@@ -1,5 +1,5 @@
 ;(function () {
-   const graph = new SimpleGraphsJS.Graph(document.body, {
+   const chart = new SimpleChartsJS.Chart(document.body, {
       width: 600,
       height: 250,
       padding: 40,
@@ -66,9 +66,9 @@
       immediate: false
    })
 
-   graph.initialize()
+   chart.initialize()
 
    window.addEventListener('keyup', (e) => {
-      if (e.code === 'Delete') graph.destroy()
+      if (e.code === 'Delete') chart.destroy()
    })
 })()

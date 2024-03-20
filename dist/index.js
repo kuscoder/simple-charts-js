@@ -3,12 +3,12 @@ var O = (l, t, e) => t in l ? I(l, t, { enumerable: !0, configurable: !0, writab
 var i = (l, t, e) => (O(l, typeof t != "symbol" ? t + "" : t, e), e);
 class v extends Error {
   constructor(t) {
-    super(t), this.name = "GraphError";
+    super(t), this.name = "ChartError";
   }
 }
 class h extends v {
   constructor(t) {
-    super(t), this.name = "GraphOptionsError";
+    super(t), this.name = "ChartOptionsError";
   }
 }
 const u = class u {
@@ -63,7 +63,7 @@ const u = class u {
       }
     }), this.container = t, this.canvas = document.createElement("canvas"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, this.ctx = this.canvas.getContext("2d"), s.immediate && this.initialize();
   }
-  /** Initializes the component by appending the canvas to the container element and drawing the graph */
+  /** Initializes the component by appending the canvas to the container element and drawing the chart */
   initialize() {
     this.isInitialized || (this.isInitialized = !0, this.container.appendChild(this.canvas), this.canvas.addEventListener("mouseenter", this.mouseEnterHandler), this.canvas.addEventListener("mousemove", this.mouseMoveHandler), this.canvas.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawGraph());
   }
@@ -161,8 +161,8 @@ const u = class u {
       rowsCount: o,
       i18n: { months: r } = {},
       data: { xAxis: a, yAxis: c } = {},
-      style: { textFont: A, textColor: y, secondaryColor: p } = {},
-      immediate: m
+      style: { textFont: A, textColor: y, secondaryColor: m } = {},
+      immediate: p
     } = t;
     if (e) {
       if (typeof e != "number")
@@ -232,9 +232,9 @@ const u = class u {
       throw new h("style.textFont should be a string");
     if (y && typeof y != "string")
       throw new h("style.textColor should be a string");
-    if (p && typeof p != "string")
+    if (m && typeof m != "string")
       throw new h("style.secondaryColor should be a string");
-    if (m && typeof m != "boolean")
+    if (p && typeof p != "boolean")
       throw new h("immediate should be a boolean");
   }
   /** */
@@ -263,7 +263,7 @@ const u = class u {
   /**
    * Updates the preset options with the provided options.
    *
-   * @param {Partial<IGraphOptions>} options - The options to update the preset options with. Default is an empty object.
+   * @param {Partial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
    */
   static changePresetOptions(t = {}) {
     var e, s, n, o, r, a;
@@ -292,7 +292,7 @@ i(u, "presetOptions", {
 });
 let w = u;
 export {
-  w as Graph,
-  v as GraphError,
-  h as GraphOptionsError
+  w as Chart,
+  v as ChartError,
+  h as ChartOptionsError
 };
