@@ -151,6 +151,11 @@ class SimpleGraphsJS {
       }
    }
 
+   /**
+    * Updates the preset options with the provided options.
+    *
+    * @param {Partial<ISimpleGraphsJSOptions>} options - The options to update the preset options with. Default is an empty object.
+    */
    public static changePresetOptions(options: Partial<ISimpleGraphsJSOptions> = {}) {
       this.validateOptions(options)
       this.presetOptions.width = options.width || this.presetOptions.width
