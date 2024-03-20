@@ -24,43 +24,6 @@ class SimpleGraphsJS {
       immediate: true
    }
 
-   public static changePresetOptions(options: Partial<ISimpleGraphsJSOptions> = {}) {
-      this.validateOptions(options)
-      this.presetOptions.width = options.width || this.presetOptions.width
-      this.presetOptions.height = options.height || this.presetOptions.height
-      this.presetOptions.padding = options.padding || this.presetOptions.padding
-      this.presetOptions.rowsCount = options.rowsCount || this.presetOptions.rowsCount
-      this.presetOptions.i18n.months = options.i18n?.months || this.presetOptions.i18n.months
-      this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
-      this.presetOptions.style.textColor = options.style?.textColor || this.presetOptions.style.textColor
-      this.presetOptions.data.columns = options.data?.columns || this.presetOptions.data.columns
-      this.presetOptions.data.dates = options.data?.dates || this.presetOptions.data.dates
-      this.presetOptions.immediate = options.immediate || this.presetOptions.immediate
-   }
-
-   private static getOptions(options: Partial<ISimpleGraphsJSOptions> = {}): ISimpleGraphsJSOptions {
-      this.validateOptions(options)
-
-      return {
-         width: options.width || this.presetOptions.width,
-         height: options.height || this.presetOptions.height,
-         padding: options.padding || this.presetOptions.padding,
-         rowsCount: options.rowsCount || this.presetOptions.rowsCount,
-         i18n: {
-            months: options.i18n?.months || this.presetOptions.i18n.months
-         },
-         style: {
-            textFont: options.style?.textFont || this.presetOptions.style.textFont,
-            textColor: options.style?.textColor || this.presetOptions.style.textColor
-         },
-         data: {
-            dates: options.data?.dates || this.presetOptions.data.dates,
-            columns: options.data?.columns || this.presetOptions.data.columns
-         },
-         immediate: options.immediate || this.presetOptions.immediate
-      }
-   }
-
    private static validateOptions(options: Partial<ISimpleGraphsJSOptions> = {}): void {
       if (options.width) {
          if (typeof options.width !== 'number') {
@@ -157,6 +120,43 @@ class SimpleGraphsJS {
       }
    }
 
+   private static getOptions(options: Partial<ISimpleGraphsJSOptions> = {}): ISimpleGraphsJSOptions {
+      this.validateOptions(options)
+
+      return {
+         width: options.width || this.presetOptions.width,
+         height: options.height || this.presetOptions.height,
+         padding: options.padding || this.presetOptions.padding,
+         rowsCount: options.rowsCount || this.presetOptions.rowsCount,
+         i18n: {
+            months: options.i18n?.months || this.presetOptions.i18n.months
+         },
+         style: {
+            textFont: options.style?.textFont || this.presetOptions.style.textFont,
+            textColor: options.style?.textColor || this.presetOptions.style.textColor
+         },
+         data: {
+            dates: options.data?.dates || this.presetOptions.data.dates,
+            columns: options.data?.columns || this.presetOptions.data.columns
+         },
+         immediate: options.immediate || this.presetOptions.immediate
+      }
+   }
+
+   public static changePresetOptions(options: Partial<ISimpleGraphsJSOptions> = {}) {
+      this.validateOptions(options)
+      this.presetOptions.width = options.width || this.presetOptions.width
+      this.presetOptions.height = options.height || this.presetOptions.height
+      this.presetOptions.padding = options.padding || this.presetOptions.padding
+      this.presetOptions.rowsCount = options.rowsCount || this.presetOptions.rowsCount
+      this.presetOptions.i18n.months = options.i18n?.months || this.presetOptions.i18n.months
+      this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
+      this.presetOptions.style.textColor = options.style?.textColor || this.presetOptions.style.textColor
+      this.presetOptions.data.columns = options.data?.columns || this.presetOptions.data.columns
+      this.presetOptions.data.dates = options.data?.dates || this.presetOptions.data.dates
+      this.presetOptions.immediate = options.immediate || this.presetOptions.immediate
+   }
+
    /* Options */
    private readonly WIDTH: number
    private readonly HEIGHT: number
@@ -189,6 +189,7 @@ class SimpleGraphsJS {
    constructor(container: HTMLElement, options: Partial<ISimpleGraphsJSOptions> = {}) {
       const formattedOptions = SimpleGraphsJS.getOptions(options)
 
+      /* Options */
       this.WIDTH = formattedOptions.width
       this.HEIGHT = formattedOptions.height
       this.PADDING = formattedOptions.padding
@@ -198,6 +199,7 @@ class SimpleGraphsJS {
       this.TEXT_COLOR = formattedOptions.style.textColor
       this.DATES = formattedOptions.data.dates
 
+      /* Calculated */
       this.DPI_WIDTH = this.WIDTH * 2
       this.DPI_HEIGHT = this.HEIGHT * 2
       this.VIEW_WIDTH = this.DPI_WIDTH
@@ -213,6 +215,7 @@ class SimpleGraphsJS {
       this.DATE_COUNT = 6
       this.DATE_STEP = Math.round(this.DATES.length / this.DATE_COUNT)
 
+      /* DOM */
       this.container = container
       this.canvas = document.createElement('canvas')
       this.ctx = this.canvas.getContext('2d')!
@@ -226,11 +229,13 @@ class SimpleGraphsJS {
       }
    }
 
+   /* Initializes the component by appending the canvas to the container element and drawing the graph */
    public initialize() {
       this.container.appendChild(this.canvas)
       this.draw()
    }
 
+   /* Destroys the component from the DOM */
    public destroy() {
       this.container.removeChild(this.canvas)
    }
