@@ -1,15 +1,19 @@
-export interface ISimpleGraphsJSColumn<F extends boolean = false> {
+export interface ISimpleGraphsJSColumn {
    type: string
    name: string
    color: string
-   values: F extends true ? [number, number][] : number[]
+   values: [number, number][]
+}
+
+export interface ISimpleGraphsJSOptionsColumn extends Omit<ISimpleGraphsJSColumn, 'values'> {
+   values: number[]
 }
 
 export interface ISimpleGraphsJSOptions {
    width: number
    height: number
    padding: number
-   rows: number
+   rowsCount: number
    i18n: {
       months: string[]
    }
@@ -18,7 +22,8 @@ export interface ISimpleGraphsJSOptions {
       textColor: string
    }
    data: {
-      columns: ISimpleGraphsJSColumn<false>[]
       dates: number[]
+      columns: ISimpleGraphsJSOptionsColumn[]
    }
+   immediate: boolean
 }

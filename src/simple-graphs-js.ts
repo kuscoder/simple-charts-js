@@ -1,39 +1,163 @@
-import type { ISimpleGraphsJSColumn, ISimpleGraphsJSOptions } from './simple-graphs-js.types'
+import type {
+   ISimpleGraphsJSColumn,
+   ISimpleGraphsJSOptionsColumn,
+   ISimpleGraphsJSOptions
+} from './simple-graphs-js.types'
 
 class SimpleGraphsJS {
-   private static DEFAULT_OPTIONS: ISimpleGraphsJSOptions = {
+   private static presetOptions: ISimpleGraphsJSOptions = {
       width: 600,
       height: 250,
       padding: 40,
-      rows: 5,
-
+      rowsCount: 5,
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
-
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa'
       },
-
       data: {
          columns: [],
          dates: []
+      },
+      immediate: true
+   }
+
+   public static changePresetOptions(options: Partial<ISimpleGraphsJSOptions> = {}) {
+      this.validateOptions(options)
+      this.presetOptions.width = options.width || this.presetOptions.width
+      this.presetOptions.height = options.height || this.presetOptions.height
+      this.presetOptions.padding = options.padding || this.presetOptions.padding
+      this.presetOptions.rowsCount = options.rowsCount || this.presetOptions.rowsCount
+      this.presetOptions.i18n.months = options.i18n?.months || this.presetOptions.i18n.months
+      this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
+      this.presetOptions.style.textColor = options.style?.textColor || this.presetOptions.style.textColor
+      this.presetOptions.data.columns = options.data?.columns || this.presetOptions.data.columns
+      this.presetOptions.data.dates = options.data?.dates || this.presetOptions.data.dates
+      this.presetOptions.immediate = options.immediate || this.presetOptions.immediate
+   }
+
+   private static getOptions(options: Partial<ISimpleGraphsJSOptions> = {}): ISimpleGraphsJSOptions {
+      this.validateOptions(options)
+
+      return {
+         width: options.width || this.presetOptions.width,
+         height: options.height || this.presetOptions.height,
+         padding: options.padding || this.presetOptions.padding,
+         rowsCount: options.rowsCount || this.presetOptions.rowsCount,
+         i18n: {
+            months: options.i18n?.months || this.presetOptions.i18n.months
+         },
+         style: {
+            textFont: options.style?.textFont || this.presetOptions.style.textFont,
+            textColor: options.style?.textColor || this.presetOptions.style.textColor
+         },
+         data: {
+            dates: options.data?.dates || this.presetOptions.data.dates,
+            columns: options.data?.columns || this.presetOptions.data.columns
+         },
+         immediate: options.immediate || this.presetOptions.immediate
       }
    }
 
-   public static setDefaultOptions(options: Partial<ISimpleGraphsJSOptions> = {}) {
-      this.DEFAULT_OPTIONS.width = options.width || this.DEFAULT_OPTIONS.width
-      this.DEFAULT_OPTIONS.height = options.height || this.DEFAULT_OPTIONS.height
-      this.DEFAULT_OPTIONS.padding = options.padding || this.DEFAULT_OPTIONS.padding
-      this.DEFAULT_OPTIONS.rows = options.rows || this.DEFAULT_OPTIONS.rows
-      this.DEFAULT_OPTIONS.i18n.months = options.i18n?.months || this.DEFAULT_OPTIONS.i18n.months
-      this.DEFAULT_OPTIONS.style.textFont = options.style?.textFont || this.DEFAULT_OPTIONS.style.textFont
-      this.DEFAULT_OPTIONS.style.textColor = options.style?.textColor || this.DEFAULT_OPTIONS.style.textColor
-      this.DEFAULT_OPTIONS.data.columns = options.data?.columns || this.DEFAULT_OPTIONS.data.columns
-      this.DEFAULT_OPTIONS.data.dates = options.data?.dates || this.DEFAULT_OPTIONS.data.dates
+   private static validateOptions(options: Partial<ISimpleGraphsJSOptions> = {}): void {
+      if (options.width) {
+         if (typeof options.width !== 'number') {
+            throw new Error('options.width should be a number')
+         }
+
+         if (options.width <= 0) {
+            throw new Error('options.width should be greater than 0')
+         }
+
+         if (options.width % 2 !== 0) {
+            throw new Error('options.width should be an even number')
+         }
+      }
+
+      if (options.height) {
+         if (typeof options.height !== 'number') {
+            throw new Error('options.height should be a number')
+         }
+
+         if (options.height <= 0) {
+            throw new Error('options.height should be greater than 0')
+         }
+
+         if (options.height % 2 !== 0) {
+            throw new Error('options.height should be an even number')
+         }
+      }
+
+      if (options.padding) {
+         if (typeof options.padding !== 'number') {
+            throw new Error('options.padding should be a number')
+         }
+
+         if (options.padding < 0) {
+            throw new Error('options.padding should be greater or equal to 0')
+         }
+      }
+
+      if (options.rowsCount) {
+         if (typeof options.rowsCount !== 'number') {
+            throw new Error('options.rowsCount should be a number')
+         }
+
+         if (options.rowsCount <= 0) {
+            throw new Error('options.rowsCount should be greater than 0')
+         }
+      }
+
+      if (options.i18n?.months) {
+         if (!Array.isArray(options.i18n.months)) {
+            throw new Error('options.i18n.months should be an array')
+         }
+
+         if (options.i18n.months.length !== 12) {
+            throw new Error('options.i18n.months should have 12 elements')
+         }
+      }
+
+      if (options.style?.textFont) {
+         if (typeof options.style.textFont !== 'string') {
+            throw new Error('options.style.textFont should be a string')
+         }
+      }
+
+      if (options.style?.textColor) {
+         if (typeof options.style.textColor !== 'string') {
+            throw new Error('options.style.textColor should be a string')
+         }
+      }
+
+      if (options.data?.dates) {
+         if (!Array.isArray(options.data.dates)) {
+            throw new Error('options.data.dates should be an array')
+         }
+
+         if (options.data.dates.some((date) => typeof date !== 'number')) {
+            throw new Error('options.data.dates should be an array of numbers')
+         }
+      }
+
+      if (options.data?.columns) {
+         if (!Array.isArray(options.data.columns)) {
+            throw new Error('options.data.columns should be an array')
+         }
+
+         // TODO
+      }
+
+      if (options.immediate) {
+         if (typeof options.immediate !== 'boolean') {
+            throw new Error('options.immediate should be a boolean')
+         }
+      }
    }
 
+   /* Options */
    private readonly WIDTH: number
    private readonly HEIGHT: number
    private readonly PADDING: number
@@ -41,9 +165,10 @@ class SimpleGraphsJS {
    private readonly MONTHS_NAMES: string[]
    private readonly TEXT_FONT: string
    private readonly TEXT_COLOR: string
-   private readonly COLUMNS: ISimpleGraphsJSColumn<true | false>[]
    private readonly DATES: number[]
+   private readonly COLUMNS: ISimpleGraphsJSColumn[]
 
+   /* Calculated */
    private readonly DPI_WIDTH: number
    private readonly DPI_HEIGHT: number
    private readonly VIEW_WIDTH: number
@@ -56,41 +181,58 @@ class SimpleGraphsJS {
    private readonly DATE_COUNT: number
    private readonly DATE_STEP: number
 
+   /* DOM */
+   private readonly container: HTMLElement
    private readonly canvas: HTMLCanvasElement
    private readonly ctx: CanvasRenderingContext2D
 
-   constructor(canvas: HTMLCanvasElement, options: Partial<ISimpleGraphsJSOptions> = {}) {
-      this.WIDTH = options.width || SimpleGraphsJS.DEFAULT_OPTIONS.width
-      this.HEIGHT = options.height || SimpleGraphsJS.DEFAULT_OPTIONS.height
-      this.PADDING = options.padding || SimpleGraphsJS.DEFAULT_OPTIONS.padding
-      this.ROWS_COUNT = options.rows || SimpleGraphsJS.DEFAULT_OPTIONS.rows
-      this.MONTHS_NAMES = options.i18n?.months || SimpleGraphsJS.DEFAULT_OPTIONS.i18n.months
-      this.TEXT_FONT = options.style?.textFont || SimpleGraphsJS.DEFAULT_OPTIONS.style.textFont
-      this.TEXT_COLOR = options.style?.textColor || SimpleGraphsJS.DEFAULT_OPTIONS.style.textColor
-      this.COLUMNS = options.data?.columns || SimpleGraphsJS.DEFAULT_OPTIONS.data.columns
-      this.DATES = options.data?.dates || SimpleGraphsJS.DEFAULT_OPTIONS.data.dates
+   constructor(container: HTMLElement, options: Partial<ISimpleGraphsJSOptions> = {}) {
+      const formattedOptions = SimpleGraphsJS.getOptions(options)
+
+      this.WIDTH = formattedOptions.width
+      this.HEIGHT = formattedOptions.height
+      this.PADDING = formattedOptions.padding
+      this.ROWS_COUNT = formattedOptions.rowsCount
+      this.MONTHS_NAMES = formattedOptions.i18n.months
+      this.TEXT_FONT = formattedOptions.style.textFont
+      this.TEXT_COLOR = formattedOptions.style.textColor
+      this.DATES = formattedOptions.data.dates
 
       this.DPI_WIDTH = this.WIDTH * 2
       this.DPI_HEIGHT = this.HEIGHT * 2
       this.VIEW_WIDTH = this.DPI_WIDTH
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
-      this.BOUNDARIES = this.getBoundaries()
-      this.X_RATIO = this.VIEW_WIDTH / (this.COLUMNS[0].values.length - 1)
+
+      this.BOUNDARIES = this.getBoundaries(formattedOptions.data.columns)
+      this.X_RATIO = this.VIEW_WIDTH / (formattedOptions.data.columns[0].values.length - 1)
       this.Y_RATIO = this.VIEW_HEIGHT / (this.BOUNDARIES[1] - this.BOUNDARIES[0])
-      this.COLUMNS = this.prepareColumns()
+      this.COLUMNS = this.getColumns(formattedOptions.data.columns)
+
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
       this.TEXT_STEP = (this.BOUNDARIES[1] - this.BOUNDARIES[0]) / this.ROWS_COUNT
       this.DATE_COUNT = 6
       this.DATE_STEP = Math.round(this.DATES.length / this.DATE_COUNT)
 
-      this.canvas = canvas
+      this.container = container
+      this.canvas = document.createElement('canvas')
       this.ctx = this.canvas.getContext('2d')!
       this.canvas.style.width = this.WIDTH + 'px'
       this.canvas.style.height = this.HEIGHT + 'px'
       this.canvas.width = this.DPI_WIDTH
       this.canvas.height = this.DPI_HEIGHT
 
+      if (formattedOptions.immediate) {
+         this.initialize()
+      }
+   }
+
+   public initialize() {
+      this.container.appendChild(this.canvas)
       this.draw()
+   }
+
+   public destroy() {
+      this.container.removeChild(this.canvas)
    }
 
    private draw() {
@@ -105,7 +247,7 @@ class SimpleGraphsJS {
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.DATES.length; i += this.DATE_STEP) {
-         let text = this.getDate(this.DATES[i - 1])
+         const text = this.getDate(this.DATES[i - 1])
          this.ctx.fillText(text, this.getX(i), this.DPI_HEIGHT - 10)
       }
 
@@ -120,8 +262,8 @@ class SimpleGraphsJS {
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
-         let text = String(Math.round(this.BOUNDARIES[1] - this.TEXT_STEP * i))
-         let posY = i * this.ROWS_STEP + this.PADDING
+         const text = String(Math.round(this.BOUNDARIES[1] - this.TEXT_STEP * i))
+         const posY = i * this.ROWS_STEP + this.PADDING
          this.ctx.fillText(text, 5, posY - 10)
          this.ctx.moveTo(0, posY)
          this.ctx.lineTo(this.DPI_WIDTH, posY)
@@ -134,11 +276,11 @@ class SimpleGraphsJS {
    private drawLines() {
       this.ctx.lineWidth = 4
 
-      for (let col of this.COLUMNS as ISimpleGraphsJSColumn<true>[]) {
+      for (const col of this.COLUMNS) {
          this.ctx.strokeStyle = col.color
          this.ctx.beginPath()
 
-         for (let [x, y] of col.values) {
+         for (const [x, y] of col.values) {
             this.ctx.lineTo(x, y)
          }
 
@@ -147,29 +289,30 @@ class SimpleGraphsJS {
       }
    }
 
-   private getBoundaries() {
+   private getColumns(columns: ISimpleGraphsJSOptionsColumn[]): ISimpleGraphsJSColumn[] {
+      const copiedColumns = JSON.parse(JSON.stringify(columns)) as ISimpleGraphsJSColumn[]
+
+      for (const col of copiedColumns) {
+         col.values = col.values.map((y, x) => {
+            return [this.getX(x), this.getY(y as unknown as number)]
+         })
+      }
+
+      return copiedColumns
+   }
+
+   private getBoundaries(columns: ISimpleGraphsJSOptionsColumn[]) {
       let yMin: number | null = null
       let yMax: number | null = null
 
-      for (let col of this.COLUMNS as ISimpleGraphsJSColumn<false>[]) {
-         for (let y of col.values) {
+      for (const col of columns) {
+         for (const y of col.values) {
             yMin = yMin === null || y < yMin ? y : yMin
             yMax = yMax === null || y > yMax ? y : yMax
          }
       }
 
       return [yMin, yMax] as [number, number]
-   }
-
-   private prepareColumns() {
-      const coords = []
-
-      for (let col of this.COLUMNS as ISimpleGraphsJSColumn<false>[]) {
-         col.values = col.values.map((y, x) => [this.getX(x), this.getY(y)]) as unknown as [number, number]
-         coords.push(col)
-      }
-
-      return coords
    }
 
    private getDate(timestamp: number) {

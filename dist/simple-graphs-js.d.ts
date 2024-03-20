@@ -1,7 +1,9 @@
 import type { ISimpleGraphsJSOptions } from './simple-graphs-js.types';
 declare class SimpleGraphsJS {
-    private static DEFAULT_OPTIONS;
-    static setDefaultOptions(options?: Partial<ISimpleGraphsJSOptions>): void;
+    private static presetOptions;
+    static changePresetOptions(options?: Partial<ISimpleGraphsJSOptions>): void;
+    private static getOptions;
+    private static validateOptions;
     private readonly WIDTH;
     private readonly HEIGHT;
     private readonly PADDING;
@@ -9,8 +11,8 @@ declare class SimpleGraphsJS {
     private readonly MONTHS_NAMES;
     private readonly TEXT_FONT;
     private readonly TEXT_COLOR;
-    private readonly COLUMNS;
     private readonly DATES;
+    private readonly COLUMNS;
     private readonly DPI_WIDTH;
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;
@@ -22,15 +24,18 @@ declare class SimpleGraphsJS {
     private readonly TEXT_STEP;
     private readonly DATE_COUNT;
     private readonly DATE_STEP;
+    private readonly container;
     private readonly canvas;
     private readonly ctx;
-    constructor(canvas: HTMLCanvasElement, options?: Partial<ISimpleGraphsJSOptions>);
+    constructor(container: HTMLElement, options?: Partial<ISimpleGraphsJSOptions>);
+    initialize(): void;
+    destroy(): void;
     private draw;
     private drawAxisX;
     private drawAxisY;
     private drawLines;
+    private getColumns;
     private getBoundaries;
-    private prepareColumns;
     private getDate;
     private getX;
     private getY;

@@ -1,13 +1,9 @@
 ;(function () {
-   const container = document.body
-   const canvas = document.createElement('canvas')
-   container.appendChild(canvas)
-
-   new SimpleGraphsJS(canvas, {
+   new SimpleGraphsJS(document.body, {
       width: 600,
       height: 250,
       padding: 40,
-      rows: 5,
+      rowsCount: 5,
 
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
