@@ -1,6 +1,6 @@
 ;(function () {
-   new SimpleGraphsJS.Graph(document.body, {
-      width: '600',
+   const graph = new SimpleGraphsJS.Graph(document.body, {
+      width: 600,
       height: 250,
       padding: 40,
       rowsCount: 5,
@@ -63,6 +63,12 @@
          secondaryColor: '#bbbbbb'
       },
 
-      immediate: true
+      immediate: false
+   })
+
+   graph.initialize()
+
+   window.addEventListener('keyup', (e) => {
+      if (e.code === 'Delete') graph.destroy()
    })
 })()
