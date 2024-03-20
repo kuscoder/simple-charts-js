@@ -9,11 +9,6 @@
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
 
-      style: {
-         textFont: 'normal 20px Helvetica,sans-serif',
-         textColor: '#96a2aa'
-      },
-
       data: {
          columns: [
             {
@@ -59,6 +54,14 @@
             1550880000000, 1550966400000, 1551052800000, 1551139200000, 1551225600000, 1551312000000, 1551398400000,
             1551484800000, 1551571200000, 1551657600000, 1551744000000, 1551830400000, 1551916800000, 1552003200000
          ]
-      }
+      },
+
+      style: {
+         textFont: 'normal 20px Helvetica,sans-serif',
+         textColor: '#96a2aa',
+         secondaryColor: '#bbbbbb'
+      },
+
+      immediate: true
    })
 })()

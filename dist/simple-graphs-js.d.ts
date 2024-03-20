@@ -1,18 +1,17 @@
 import type { ISimpleGraphsJSOptions } from './simple-graphs-js.types';
 declare class SimpleGraphsJS {
     private static presetOptions;
-    static changePresetOptions(options?: Partial<ISimpleGraphsJSOptions>): void;
-    private static getOptions;
     private static validateOptions;
+    private static getOptions;
+    static changePresetOptions(options?: Partial<ISimpleGraphsJSOptions>): void;
     private readonly WIDTH;
     private readonly HEIGHT;
     private readonly PADDING;
     private readonly ROWS_COUNT;
     private readonly MONTHS_NAMES;
-    private readonly TEXT_FONT;
-    private readonly TEXT_COLOR;
     private readonly DATES;
     private readonly COLUMNS;
+    private readonly STYLES;
     private readonly DPI_WIDTH;
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;

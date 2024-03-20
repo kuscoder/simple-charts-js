@@ -15,13 +15,14 @@ export interface ISimpleGraphsJSOptions {
     i18n: {
         months: string[];
     };
-    style: {
-        textFont: string;
-        textColor: string;
-    };
     data: {
         dates: number[];
         columns: ISimpleGraphsJSOptionsColumn[];
+    };
+    style: {
+        textFont: string;
+        textColor: string;
+        secondaryColor: string;
     };
     immediate: boolean;
 }

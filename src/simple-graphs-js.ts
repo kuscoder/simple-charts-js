@@ -13,13 +13,14 @@ class SimpleGraphsJS {
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
-      style: {
-         textFont: 'normal 20px Helvetica,sans-serif',
-         textColor: '#96a2aa'
-      },
       data: {
          columns: [],
          dates: []
+      },
+      style: {
+         textFont: 'normal 20px Helvetica,sans-serif',
+         textColor: '#96a2aa',
+         secondaryColor: '#bbbbbb'
       },
       immediate: true
    }
@@ -83,18 +84,6 @@ class SimpleGraphsJS {
          }
       }
 
-      if (options.style?.textFont) {
-         if (typeof options.style.textFont !== 'string') {
-            throw new Error('options.style.textFont should be a string')
-         }
-      }
-
-      if (options.style?.textColor) {
-         if (typeof options.style.textColor !== 'string') {
-            throw new Error('options.style.textColor should be a string')
-         }
-      }
-
       if (options.data?.dates) {
          if (!Array.isArray(options.data.dates)) {
             throw new Error('options.data.dates should be an array')
@@ -111,6 +100,24 @@ class SimpleGraphsJS {
          }
 
          // TODO
+      }
+
+      if (options.style?.textFont) {
+         if (typeof options.style.textFont !== 'string') {
+            throw new Error('options.style.textFont should be a string')
+         }
+      }
+
+      if (options.style?.textColor) {
+         if (typeof options.style.textColor !== 'string') {
+            throw new Error('options.style.textColor should be a string')
+         }
+      }
+
+      if (options.style?.secondaryColor) {
+         if (typeof options.style.secondaryColor !== 'string') {
+            throw new Error('options.style.secondaryColor should be a string')
+         }
       }
 
       if (options.immediate) {
@@ -133,13 +140,14 @@ class SimpleGraphsJS {
          },
          style: {
             textFont: options.style?.textFont || this.presetOptions.style.textFont,
-            textColor: options.style?.textColor || this.presetOptions.style.textColor
+            textColor: options.style?.textColor || this.presetOptions.style.textColor,
+            secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor
          },
          data: {
             dates: options.data?.dates || this.presetOptions.data.dates,
             columns: options.data?.columns || this.presetOptions.data.columns
          },
-         immediate: options.immediate || this.presetOptions.immediate
+         immediate: options.immediate ?? this.presetOptions.immediate
       }
    }
 
@@ -152,6 +160,7 @@ class SimpleGraphsJS {
       this.presetOptions.i18n.months = options.i18n?.months || this.presetOptions.i18n.months
       this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
       this.presetOptions.style.textColor = options.style?.textColor || this.presetOptions.style.textColor
+      this.presetOptions.style.secondaryColor = options.style?.secondaryColor || this.presetOptions.style.secondaryColor
       this.presetOptions.data.columns = options.data?.columns || this.presetOptions.data.columns
       this.presetOptions.data.dates = options.data?.dates || this.presetOptions.data.dates
       this.presetOptions.immediate = options.immediate || this.presetOptions.immediate
@@ -163,10 +172,15 @@ class SimpleGraphsJS {
    private readonly PADDING: number
    private readonly ROWS_COUNT: number
    private readonly MONTHS_NAMES: string[]
-   private readonly TEXT_FONT: string
-   private readonly TEXT_COLOR: string
    private readonly DATES: number[]
    private readonly COLUMNS: ISimpleGraphsJSColumn[]
+
+   /* Styles */
+   private readonly STYLES: {
+      textFont: string
+      textColor: string
+      secondaryColor: string
+   }
 
    /* Calculated */
    private readonly DPI_WIDTH: number
@@ -195,9 +209,14 @@ class SimpleGraphsJS {
       this.PADDING = formattedOptions.padding
       this.ROWS_COUNT = formattedOptions.rowsCount
       this.MONTHS_NAMES = formattedOptions.i18n.months
-      this.TEXT_FONT = formattedOptions.style.textFont
-      this.TEXT_COLOR = formattedOptions.style.textColor
       this.DATES = formattedOptions.data.dates
+
+      /* Styles */
+      this.STYLES = {
+         textFont: formattedOptions.style.textFont,
+         textColor: formattedOptions.style.textColor,
+         secondaryColor: formattedOptions.style.secondaryColor
+      }
 
       /* Calculated */
       this.DPI_WIDTH = this.WIDTH * 2
@@ -247,8 +266,8 @@ class SimpleGraphsJS {
    }
 
    private drawAxisX() {
-      this.ctx.fillStyle = this.TEXT_COLOR
-      this.ctx.font = this.TEXT_FONT
+      this.ctx.fillStyle = this.STYLES.textColor
+      this.ctx.font = this.STYLES.textFont
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.DATES.length; i += this.DATE_STEP) {
@@ -261,9 +280,9 @@ class SimpleGraphsJS {
 
    private drawAxisY() {
       this.ctx.lineWidth = 1
-      this.ctx.strokeStyle = '#bbbbbb'
-      this.ctx.fillStyle = this.TEXT_COLOR
-      this.ctx.font = this.TEXT_FONT
+      this.ctx.strokeStyle = this.STYLES.secondaryColor
+      this.ctx.fillStyle = this.STYLES.textColor
+      this.ctx.font = this.STYLES.textFont
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
