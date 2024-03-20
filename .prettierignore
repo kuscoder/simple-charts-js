@@ -1,0 +1,9 @@
+.git
+.husky
+dist
+node_modules
+bun.lockb
+LICENCE
+package-lock.json
+*.html
+*.md
