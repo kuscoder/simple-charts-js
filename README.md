@@ -7,6 +7,7 @@
 
 ## Example
 ![example.png](./example/example.png)
+Live demo - https://kuscoder.github.io/simple-charts-js/
 
 ## Features
 - Full TypeScript support
