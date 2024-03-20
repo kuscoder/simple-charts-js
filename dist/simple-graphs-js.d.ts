@@ -3,6 +3,11 @@ declare class SimpleGraphsJS {
     private static presetOptions;
     private static validateOptions;
     private static getOptions;
+    /**
+     * Updates the preset options with the provided options.
+     *
+     * @param {Partial<ISimpleGraphsJSOptions>} options - The options to update the preset options with. Default is an empty object.
+     */
     static changePresetOptions(options?: Partial<ISimpleGraphsJSOptions>): void;
     private readonly WIDTH;
     private readonly HEIGHT;

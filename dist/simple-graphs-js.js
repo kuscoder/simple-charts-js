@@ -1,8 +1,8 @@
-var u = Object.defineProperty;
-var E = (a, t, s) => t in a ? u(a, t, { enumerable: !0, configurable: !0, writable: !0, value: s }) : a[t] = s;
-var i = (a, t, s) => (E(a, typeof t != "symbol" ? t + "" : t, s), s);
-const l = class l {
-  constructor(t, s = {}) {
+var y = Object.defineProperty;
+var E = (d, t, e) => t in d ? y(d, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : d[t] = e;
+var i = (d, t, e) => (E(d, typeof t != "symbol" ? t + "" : t, e), e);
+const c = class c {
+  constructor(t, e = {}) {
     /* Options */
     i(this, "WIDTH");
     i(this, "HEIGHT");
@@ -29,15 +29,16 @@ const l = class l {
     i(this, "container");
     i(this, "canvas");
     i(this, "ctx");
-    const e = l.getOptions(s);
-    this.WIDTH = e.width, this.HEIGHT = e.height, this.PADDING = e.padding, this.ROWS_COUNT = e.rowsCount, this.MONTHS_NAMES = e.i18n.months, this.DATES = e.data.dates, this.STYLES = {
-      textFont: e.style.textFont,
-      textColor: e.style.textColor,
-      secondaryColor: e.style.secondaryColor
-    }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.BOUNDARIES = this.getBoundaries(e.data.columns), this.X_RATIO = this.VIEW_WIDTH / (e.data.columns[0].values.length - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.BOUNDARIES[1] - this.BOUNDARIES[0]), this.COLUMNS = this.getColumns(e.data.columns), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.BOUNDARIES[1] - this.BOUNDARIES[0]) / this.ROWS_COUNT, this.DATE_COUNT = 6, this.DATE_STEP = Math.round(this.DATES.length / this.DATE_COUNT), this.container = t, this.canvas = document.createElement("canvas"), this.ctx = this.canvas.getContext("2d"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, e.immediate && this.initialize();
+    const s = c.getOptions(e);
+    this.WIDTH = s.width, this.HEIGHT = s.height, this.PADDING = s.padding, this.ROWS_COUNT = s.rowsCount, this.MONTHS_NAMES = s.i18n.months, this.DATES = s.data.dates, this.STYLES = {
+      textFont: s.style.textFont,
+      textColor: s.style.textColor,
+      secondaryColor: s.style.secondaryColor
+    }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.BOUNDARIES = this.getBoundaries(s.data.columns), this.X_RATIO = this.VIEW_WIDTH / (s.data.columns[0].values.length - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.BOUNDARIES[1] - this.BOUNDARIES[0]), this.COLUMNS = this.getColumns(s.data.columns), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.BOUNDARIES[1] - this.BOUNDARIES[0]) / this.ROWS_COUNT, this.DATE_COUNT = 6, this.DATE_STEP = Math.round(this.DATES.length / this.DATE_COUNT), this.container = t, this.canvas = document.createElement("canvas"), this.ctx = this.canvas.getContext("2d"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, s.immediate && this.initialize();
   }
+  // prettier-ignore
   static validateOptions(t = {}) {
-    var s, e, h, r, o, n;
+    var e, s, o, r, h, n;
     if (t.width) {
       if (typeof t.width != "number")
         throw new Error("options.width should be a number");
@@ -66,23 +67,39 @@ const l = class l {
       if (t.rowsCount <= 0)
         throw new Error("options.rowsCount should be greater than 0");
     }
-    if ((s = t.i18n) != null && s.months) {
+    if ((e = t.i18n) != null && e.months) {
       if (!Array.isArray(t.i18n.months))
         throw new Error("options.i18n.months should be an array");
       if (t.i18n.months.length !== 12)
         throw new Error("options.i18n.months should have 12 elements");
     }
-    if ((e = t.data) != null && e.dates) {
+    if ((s = t.data) != null && s.dates) {
       if (!Array.isArray(t.data.dates))
         throw new Error("options.data.dates should be an array");
-      if (t.data.dates.some((c) => typeof c != "number"))
+      if (t.data.dates.some((a) => typeof a != "number"))
         throw new Error("options.data.dates should be an array of numbers");
     }
-    if ((h = t.data) != null && h.columns && !Array.isArray(t.data.columns))
-      throw new Error("options.data.columns should be an array");
+    if ((o = t.data) != null && o.columns) {
+      if (!Array.isArray(t.data.columns))
+        throw new Error("options.data.columns should be an array");
+      t.data.columns.forEach((a, l) => {
+        if (typeof a.type != "string")
+          throw new Error(`options.data.columns[${l}].type should be a string`);
+        if (!["x", "y"].includes(a.type))
+          throw new Error(`options.data.columns[${l}].type should be 'x' or 'y'`);
+        if (typeof a.name != "string")
+          throw new Error(`options.data.columns[${l}].name should be a string`);
+        if (typeof a.color != "string")
+          throw new Error(`options.data.columns[${l}].color should be a string`);
+        if (!Array.isArray(a.values))
+          throw new Error(`options.data.columns[${l}].values should be an array`);
+        if (a.values.some((w) => typeof w != "number"))
+          throw new Error(`options.data.columns[${l}].values should be an array of numbers`);
+      });
+    }
     if ((r = t.style) != null && r.textFont && typeof t.style.textFont != "string")
       throw new Error("options.style.textFont should be a string");
-    if ((o = t.style) != null && o.textColor && typeof t.style.textColor != "string")
+    if ((h = t.style) != null && h.textColor && typeof t.style.textColor != "string")
       throw new Error("options.style.textColor should be a string");
     if ((n = t.style) != null && n.secondaryColor && typeof t.style.secondaryColor != "string")
       throw new Error("options.style.secondaryColor should be a string");
@@ -90,30 +107,35 @@ const l = class l {
       throw new Error("options.immediate should be a boolean");
   }
   static getOptions(t = {}) {
-    var s, e, h, r, o, n;
+    var e, s, o, r, h, n;
     return this.validateOptions(t), {
       width: t.width || this.presetOptions.width,
       height: t.height || this.presetOptions.height,
       padding: t.padding || this.presetOptions.padding,
       rowsCount: t.rowsCount || this.presetOptions.rowsCount,
       i18n: {
-        months: ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months
+        months: ((e = t.i18n) == null ? void 0 : e.months) || this.presetOptions.i18n.months
       },
       style: {
-        textFont: ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont,
-        textColor: ((h = t.style) == null ? void 0 : h.textColor) || this.presetOptions.style.textColor,
+        textFont: ((s = t.style) == null ? void 0 : s.textFont) || this.presetOptions.style.textFont,
+        textColor: ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor,
         secondaryColor: ((r = t.style) == null ? void 0 : r.secondaryColor) || this.presetOptions.style.secondaryColor
       },
       data: {
-        dates: ((o = t.data) == null ? void 0 : o.dates) || this.presetOptions.data.dates,
+        dates: ((h = t.data) == null ? void 0 : h.dates) || this.presetOptions.data.dates,
         columns: ((n = t.data) == null ? void 0 : n.columns) || this.presetOptions.data.columns
       },
       immediate: t.immediate ?? this.presetOptions.immediate
     };
   }
+  /**
+   * Updates the preset options with the provided options.
+   *
+   * @param {Partial<ISimpleGraphsJSOptions>} options - The options to update the preset options with. Default is an empty object.
+   */
   static changePresetOptions(t = {}) {
-    var s, e, h, r, o, n;
-    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding || this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.i18n.months = ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((h = t.style) == null ? void 0 : h.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((r = t.style) == null ? void 0 : r.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.data.columns = ((o = t.data) == null ? void 0 : o.columns) || this.presetOptions.data.columns, this.presetOptions.data.dates = ((n = t.data) == null ? void 0 : n.dates) || this.presetOptions.data.dates, this.presetOptions.immediate = t.immediate || this.presetOptions.immediate;
+    var e, s, o, r, h, n;
+    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding || this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.i18n.months = ((e = t.i18n) == null ? void 0 : e.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((s = t.style) == null ? void 0 : s.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((r = t.style) == null ? void 0 : r.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.data.columns = ((h = t.data) == null ? void 0 : h.columns) || this.presetOptions.data.columns, this.presetOptions.data.dates = ((n = t.data) == null ? void 0 : n.dates) || this.presetOptions.data.dates, this.presetOptions.immediate = t.immediate || this.presetOptions.immediate;
   }
   /* Initializes the component by appending the canvas to the container element and drawing the graph */
   initialize() {
@@ -129,16 +151,16 @@ const l = class l {
   drawAxisX() {
     this.ctx.fillStyle = this.STYLES.textColor, this.ctx.font = this.STYLES.textFont, this.ctx.beginPath();
     for (let t = 1; t <= this.DATES.length; t += this.DATE_STEP) {
-      const s = this.getDate(this.DATES[t - 1]);
-      this.ctx.fillText(s, this.getX(t), this.DPI_HEIGHT - 10);
+      const e = this.getDate(this.DATES[t - 1]);
+      this.ctx.fillText(e, this.getX(t), this.DPI_HEIGHT - 10);
     }
     this.ctx.closePath();
   }
   drawAxisY() {
     this.ctx.lineWidth = 1, this.ctx.strokeStyle = this.STYLES.secondaryColor, this.ctx.fillStyle = this.STYLES.textColor, this.ctx.font = this.STYLES.textFont, this.ctx.beginPath();
     for (let t = 1; t <= this.ROWS_COUNT; t++) {
-      const s = String(Math.round(this.BOUNDARIES[1] - this.TEXT_STEP * t)), e = t * this.ROWS_STEP + this.PADDING;
-      this.ctx.fillText(s, 5, e - 10), this.ctx.moveTo(0, e), this.ctx.lineTo(this.DPI_WIDTH, e);
+      const e = String(Math.round(this.BOUNDARIES[1] - this.TEXT_STEP * t)), s = t * this.ROWS_STEP + this.PADDING;
+      this.ctx.fillText(e, 5, s - 10), this.ctx.moveTo(0, s), this.ctx.lineTo(this.DPI_WIDTH, s);
     }
     this.ctx.stroke(), this.ctx.closePath();
   }
@@ -146,27 +168,27 @@ const l = class l {
     this.ctx.lineWidth = 4;
     for (const t of this.COLUMNS) {
       this.ctx.strokeStyle = t.color, this.ctx.beginPath();
-      for (const [s, e] of t.values)
-        this.ctx.lineTo(s, e);
+      for (const [e, s] of t.values)
+        this.ctx.lineTo(e, s);
       this.ctx.stroke(), this.ctx.closePath();
     }
   }
   getColumns(t) {
-    const s = JSON.parse(JSON.stringify(t));
-    for (const e of s)
-      e.values = e.values.map((h, r) => [this.getX(r), this.getY(h)]);
-    return s;
+    const e = JSON.parse(JSON.stringify(t));
+    for (const s of e)
+      s.values = s.values.map((o, r) => [this.getX(r), this.getY(o)]);
+    return e;
   }
   getBoundaries(t) {
-    let s = null, e = null;
-    for (const h of t)
-      for (const r of h.values)
-        s = s === null || r < s ? r : s, e = e === null || r > e ? r : e;
-    return [s, e];
+    let e = null, s = null;
+    for (const o of t)
+      for (const r of o.values)
+        e = e === null || r < e ? r : e, s = s === null || r > s ? r : s;
+    return [e, s];
   }
   getDate(t) {
-    const s = new Date(t), e = s.getDate(), h = s.getMonth(), r = this.MONTHS_NAMES;
-    return `${e} ${r[h]}`;
+    const e = new Date(t), s = e.getDate(), o = e.getMonth(), r = this.MONTHS_NAMES;
+    return `${s} ${r[o]}`;
   }
   getX(t) {
     return Math.floor(t * this.X_RATIO);
@@ -175,7 +197,7 @@ const l = class l {
     return Math.floor(this.DPI_HEIGHT - this.PADDING - t * this.Y_RATIO);
   }
 };
-i(l, "presetOptions", {
+i(c, "presetOptions", {
   width: 600,
   height: 250,
   padding: 40,
@@ -194,7 +216,7 @@ i(l, "presetOptions", {
   },
   immediate: !0
 });
-let d = l;
+let u = c;
 export {
-  d as default
+  u as default
 };

@@ -62,7 +62,15 @@ class SimpleGraphsJS {
 
       if (options.data?.columns) {
          if (!Array.isArray(options.data.columns)) throw new Error('options.data.columns should be an array')
-         // TODO: other checks
+
+         options.data.columns.forEach((column, i) => {
+            if (typeof column.type !== 'string') throw new Error(`options.data.columns[${i}].type should be a string`)
+            if (!['x', 'y'].includes(column.type)) throw new Error(`options.data.columns[${i}].type should be 'x' or 'y'`)
+            if (typeof column.name !== 'string') throw new Error(`options.data.columns[${i}].name should be a string`)
+            if (typeof column.color !== 'string') throw new Error(`options.data.columns[${i}].color should be a string`)
+            if (!Array.isArray(column.values)) throw new Error(`options.data.columns[${i}].values should be an array`)
+            if (column.values.some((value) => typeof value !== 'number')) throw new Error(`options.data.columns[${i}].values should be an array of numbers`)
+         })
       }
 
       if (options.style?.textFont) {
