@@ -1,30 +1,38 @@
 var O = Object.defineProperty;
-var b = (d, t, i) => t in d ? O(d, t, { enumerable: !0, configurable: !0, writable: !0, value: i }) : d[t] = i;
-var n = (d, t, i) => (b(d, typeof t != "symbol" ? t + "" : t, i), i);
-function C(d, t) {
-  let i;
-  return (...e) => {
-    clearTimeout(i), i = setTimeout(() => d(...e), t);
+var b = (a, t, e) => t in a ? O(a, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : a[t] = e;
+var n = (a, t, e) => (b(a, typeof t != "symbol" ? t + "" : t, e), e);
+function C(a, t) {
+  let e;
+  return (...i) => {
+    clearTimeout(e), e = setTimeout(() => a(...i), t);
   };
 }
-class _ extends Error {
+function _(a, t) {
+  let e;
+  return (...i) => {
+    e || (e = setTimeout(() => {
+      a(...i), e = null;
+    }, t));
+  };
+}
+class H extends Error {
   constructor(t) {
     super(t), this.name = "ChartError";
   }
 }
-class s extends _ {
+class s extends H {
   constructor(t) {
     super(t), this.name = "ChartOptionsError";
   }
 }
-const w = class w {
+const I = class I {
   /**
    * Constructor for creating a new instance of the Chart class.
    *
    * @param {HTMLElement} containerElement - the HTML element that will contain the chart
    * @param {Partial<IChartOptions>} options - optional chart options
    */
-  constructor(t, i = {}) {
+  constructor(t, e = {}) {
     // Options
     n(this, "WIDTH");
     n(this, "HEIGHT");
@@ -58,14 +66,14 @@ const w = class w {
     n(this, "tooltipElement");
     n(this, "canvasRect");
     n(this, "ctx");
-    var a;
-    const e = w.getOptions(i), h = ((a = e.data.xAxis) == null ? void 0 : a.values.length) || 0, r = this.getAxisYDataLength(e.data.yAxis);
-    this.containerElement = t, this.WIDTH = e.width, this.HEIGHT = e.height, this.PADDING = e.padding, this.ROWS_COUNT = e.rowsCount, this.DATA = e.data, this.I18N = e.i18n, this.INTERACTIVITY = e.interactivity, this.STYLE = e.style, this.TECHNICAL = e.technical, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (r - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = h && Math.round(h / this.X_AXIS_DATA_COUNT), this.resizeHandler = C(this.resizeHandler.bind(this), 100), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = this.drawChart.bind(this), this.mouse = new Proxy(
+    var o;
+    const i = I.getOptions(e), h = ((o = i.data.xAxis) == null ? void 0 : o.values.length) || 0, r = this.getAxisYDataLength(i.data.yAxis);
+    this.containerElement = t, this.WIDTH = i.width, this.HEIGHT = i.height, this.PADDING = i.padding, this.ROWS_COUNT = i.rowsCount, this.DATA = i.data, this.I18N = i.i18n, this.INTERACTIVITY = i.interactivity, this.STYLE = i.style, this.TECHNICAL = i.technical, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (r - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = h && Math.round(h / this.X_AXIS_DATA_COUNT), this.resizeHandler = C(this.resizeHandler.bind(this), 100), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = _(this.drawChart.bind(this), 1e3 / this.INTERACTIVITY.fpsLimit), this.mouse = new Proxy(
       {},
       {
-        set: (...o) => {
-          const l = Reflect.set(...o);
-          return this.rafID = window.requestAnimationFrame(this.drawChart), l;
+        set: (...l) => {
+          const d = Reflect.set(...l);
+          return this.rafID = window.requestAnimationFrame(this.drawChart), d;
         }
       }
     ), this.createDOMElements(), this.TECHNICAL.immediateInit && this.initialize();
@@ -95,12 +103,12 @@ const w = class w {
     if (this.DATA.xAxis) {
       this.ctx.fillStyle = this.STYLE.textColor, this.ctx.font = this.STYLE.textFont, this.ctx.lineWidth = 2, this.ctx.strokeStyle = this.STYLE.secondaryColor;
       for (let t = 1; t <= this.DATA.xAxis.values.length; t++) {
-        const i = this.getX(t);
+        const e = this.getX(t);
         if ((t - 1) % this.X_AXIS_DATA_STEP === 0) {
-          const e = this.getDate(this.DATA.xAxis.values[t - 1]);
-          this.ctx.fillText(e, i, this.DPI_HEIGHT - 10);
+          const i = this.getDate(this.DATA.xAxis.values[t - 1]);
+          this.ctx.fillText(i, e, this.DPI_HEIGHT - 10);
         }
-        this.drawGuideLinesIsOver(i);
+        this.drawGuideLinesIsOver(e);
       }
     }
   }
@@ -112,9 +120,9 @@ const w = class w {
    */
   drawGuideLinesIsOver(t) {
     if (this.mouse.x && this.mouse.y) {
-      const i = this.isMouseOverYAxisDataItem(t), e = this.PADDING / 2, h = this.DPI_HEIGHT - this.PADDING;
-      if (i && this.mouse.y >= e)
-        return this.INTERACTIVITY.horisontalGuide && this.mouse.y <= h && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, e), this.ctx.lineTo(t, h), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.arc(t, e, 2, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath(), !0;
+      const e = this.isMouseOverYAxisDataItem(t), i = this.PADDING / 2, h = this.DPI_HEIGHT - this.PADDING;
+      if (e && this.mouse.y >= i)
+        return this.INTERACTIVITY.horisontalGuide && this.mouse.y <= h && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, i), this.ctx.lineTo(t, h), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.arc(t, i, 2, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath(), !0;
     }
     return !1;
   }
@@ -122,8 +130,8 @@ const w = class w {
   drawAxisY() {
     this.ctx.lineWidth = 1, this.ctx.strokeStyle = this.STYLE.secondaryColor, this.ctx.fillStyle = this.STYLE.textColor, this.ctx.font = this.STYLE.textFont, this.ctx.beginPath();
     for (let t = 1; t <= this.ROWS_COUNT; t++) {
-      const i = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * t)), e = t * this.ROWS_STEP + this.PADDING;
-      this.ctx.fillText(i, 5, e - 10), this.ctx.moveTo(0, e), this.ctx.lineTo(this.DPI_WIDTH, e);
+      const e = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * t)), i = t * this.ROWS_STEP + this.PADDING;
+      this.ctx.fillText(e, 5, i - 10), this.ctx.moveTo(0, i), this.ctx.lineTo(this.DPI_WIDTH, i);
     }
     this.ctx.stroke(), this.ctx.closePath();
   }
@@ -131,13 +139,13 @@ const w = class w {
   drawLines() {
     this.ctx.lineWidth = 4, this.ctx.fillStyle = this.STYLE.backgroundColor;
     for (const t of this.DATA.yAxis) {
-      let i = null, e = null;
+      let e = null, i = null;
       this.ctx.strokeStyle = t.color, this.ctx.beginPath();
       for (let h = 0; h < t.values.length; h++) {
-        const r = this.getX(h), a = this.getY(t.values[h]);
-        this.ctx.lineTo(r, a), this.isMouseOverYAxisDataItem(r) && (i = r, e = a);
+        const r = this.getX(h), o = this.getY(t.values[h]);
+        this.ctx.lineTo(r, o), this.isMouseOverYAxisDataItem(r) && (e = r, i = o);
       }
-      this.ctx.stroke(), this.ctx.closePath(), i && e && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2 && (this.ctx.beginPath(), this.ctx.arc(i, e, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath());
+      this.ctx.stroke(), this.ctx.closePath(), e && i && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2 && (this.ctx.beginPath(), this.ctx.arc(e, i, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath());
     }
   }
   /** Event handler that updates the mouse position by canvas coordinates. */
@@ -159,11 +167,11 @@ const w = class w {
    * @return {[number, number]} an array containing the minimum and maximum y values
    */
   getYAxisDataBoundaries(t) {
-    let i = null, e = null;
+    let e = null, i = null;
     for (const h of t)
       for (const r of h.values)
-        (i === null || r < i) && (i = r), (e === null || r > e) && (e = r);
-    return [i ?? 0, e ?? 0];
+        (e === null || r < e) && (e = r), (i === null || r > i) && (i = r);
+    return [e ?? 0, i ?? 0];
   }
   /**
    * Returns a formatted date string for x-axis based on the given timestamp.
@@ -172,8 +180,8 @@ const w = class w {
    * @return {string} The formatted date string in the format "day month".
    */
   getDate(t) {
-    const i = new Date(t), e = i.getDate(), h = i.getMonth();
-    return `${e} ${this.I18N.months[h]}`;
+    const e = new Date(t), i = e.getDate(), h = e.getMonth();
+    return `${i} ${this.I18N.months[h]}`;
   }
   /**
    * Converts x coordinate from x-axis data to canvas coordinate.
@@ -201,10 +209,10 @@ const w = class w {
    */
   getAxisYDataLength(t) {
     t ?? (t = this.DATA.yAxis);
-    let i = 0;
-    for (const e of t)
-      e.values.length > i && (i = e.values.length);
-    return i;
+    let e = 0;
+    for (const i of t)
+      i.values.length > e && (e = i.values.length);
+    return e;
   }
   /**
    * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
@@ -213,8 +221,8 @@ const w = class w {
    * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
    */
   isMouseOverYAxisDataItem(t) {
-    const i = this.getAxisYDataLength() - 1;
-    return !i || !this.mouse.x ? !1 : Math.abs(t - this.mouse.x) < this.DPI_WIDTH / i / 2;
+    const e = this.getAxisYDataLength() - 1;
+    return !e || !this.mouse.x ? !1 : Math.abs(t - this.mouse.x) < this.DPI_WIDTH / e / 2;
   }
   /**
    * Validates the provided options for a chart constructor.
@@ -226,30 +234,30 @@ const w = class w {
   // prettier-ignore
   static validateOptions(t = {}) {
     const {
-      width: i,
-      height: e,
+      width: e,
+      height: i,
       padding: h,
       rowsCount: r,
-      data: { xAxis: a, yAxis: o } = {},
-      i18n: { months: l } = {},
+      data: { xAxis: o, yAxis: l } = {},
+      i18n: { months: d } = {},
       interactivity: { horisontalGuide: p, guideDotsRadius: c, fpsLimit: u } = {},
-      style: { textFont: m, textColor: x, secondaryColor: I, backgroundColor: E } = {},
-      technical: { insertMethod: A, immediateInit: g } = {}
+      style: { textFont: m, textColor: x, secondaryColor: w, backgroundColor: T } = {},
+      technical: { insertMethod: A, immediateInit: E } = {}
     } = t;
-    if (i) {
-      if (typeof i != "number")
-        throw new s("width should be a number");
-      if (i <= 0)
-        throw new s("width should be greater than 0");
-      if (i % 2 !== 0)
-        throw new s("width should be an even number");
-    }
     if (e) {
       if (typeof e != "number")
-        throw new s("height should be a number");
+        throw new s("width should be a number");
       if (e <= 0)
-        throw new s("height should be greater than 0");
+        throw new s("width should be greater than 0");
       if (e % 2 !== 0)
+        throw new s("width should be an even number");
+    }
+    if (i) {
+      if (typeof i != "number")
+        throw new s("height should be a number");
+      if (i <= 0)
+        throw new s("height should be greater than 0");
+      if (i % 2 !== 0)
         throw new s("height should be an even number");
     }
     if (h) {
@@ -278,24 +286,24 @@ const w = class w {
       if (u <= 0)
         throw new s("interactivity.fpsLimit should be greater than 0");
     }
-    if (a) {
-      if (typeof a != "object")
+    if (o) {
+      if (typeof o != "object")
         throw new s("data.xAxis should be an object");
-      if (typeof a.type != "string")
+      if (typeof o.type != "string")
         throw new s("data.xAxis.type should be a string");
-      if (!["date"].includes(a.type))
+      if (!["date"].includes(o.type))
         throw new s('data.xAxis.type should be "date"');
-      if (!Array.isArray(a.values))
+      if (!Array.isArray(o.values))
         throw new s("data.xAxis.values should be an array");
-      a.type === "date" && a.values.forEach((f, y) => {
+      o.type === "date" && o.values.forEach((f, y) => {
         if (typeof f != "number")
           throw new s(`data.xAxis.values[${y}] should be a number`);
       });
     }
-    if (o) {
-      if (!Array.isArray(o))
+    if (l) {
+      if (!Array.isArray(l))
         throw new s("data.columns should be an array");
-      o.forEach((f, y) => {
+      l.forEach((f, y) => {
         if (typeof f.name != "string")
           throw new s(`data.yAxis[${y}].name should be a string`);
         if (typeof f.color != "string")
@@ -308,19 +316,19 @@ const w = class w {
         });
       });
     }
-    if (l) {
-      if (!Array.isArray(l))
+    if (d) {
+      if (!Array.isArray(d))
         throw new s("i18n.months should be an array");
-      if (l.length !== 12)
+      if (d.length !== 12)
         throw new s("i18n.months should have 12 elements");
     }
     if (m && typeof m != "string")
       throw new s("style.textFont should be a string");
     if (x && typeof x != "string")
       throw new s("style.textColor should be a string");
-    if (I && typeof I != "string")
+    if (w && typeof w != "string")
       throw new s("style.secondaryColor should be a string");
-    if (E && typeof E != "string")
+    if (T && typeof T != "string")
       throw new s("style.backgroundColor should be a string");
     if (A) {
       if (typeof A != "string" && typeof A != "function")
@@ -328,7 +336,7 @@ const w = class w {
       if (typeof A == "string" && !["append", "prepend"].includes(A))
         throw new s('technical.insertMethod should be "append" or "prepend" or function');
     }
-    if (g && typeof g != "boolean")
+    if (E && typeof E != "boolean")
       throw new s("technical.immediateInit should be a boolean");
   }
   /**
@@ -338,26 +346,26 @@ const w = class w {
    * @return {IChartOptions} The merged options.
    */
   static getOptions(t = {}) {
-    var i, e, h, r, a, o, l, p, c, u, m, x;
+    var e, i, h, r, o, l, d, p, c, u, m, x;
     return this.validateOptions(t), {
       width: t.width || this.presetOptions.width,
       height: t.height || this.presetOptions.height,
       padding: t.padding ?? this.presetOptions.padding,
       rowsCount: t.rowsCount || this.presetOptions.rowsCount,
       data: {
-        xAxis: ((i = t.data) == null ? void 0 : i.xAxis) || this.presetOptions.data.xAxis,
-        yAxis: ((e = t.data) == null ? void 0 : e.yAxis) || this.presetOptions.data.yAxis
+        xAxis: ((e = t.data) == null ? void 0 : e.xAxis) || this.presetOptions.data.xAxis,
+        yAxis: ((i = t.data) == null ? void 0 : i.yAxis) || this.presetOptions.data.yAxis
       },
       i18n: {
         months: ((h = t.i18n) == null ? void 0 : h.months) || this.presetOptions.i18n.months
       },
       interactivity: {
         horisontalGuide: ((r = t.interactivity) == null ? void 0 : r.horisontalGuide) || this.presetOptions.interactivity.horisontalGuide,
-        guideDotsRadius: ((a = t.interactivity) == null ? void 0 : a.guideDotsRadius) || this.presetOptions.interactivity.guideDotsRadius,
-        fpsLimit: ((o = t.interactivity) == null ? void 0 : o.fpsLimit) || this.presetOptions.interactivity.fpsLimit
+        guideDotsRadius: ((o = t.interactivity) == null ? void 0 : o.guideDotsRadius) || this.presetOptions.interactivity.guideDotsRadius,
+        fpsLimit: ((l = t.interactivity) == null ? void 0 : l.fpsLimit) || this.presetOptions.interactivity.fpsLimit
       },
       style: {
-        textFont: ((l = t.style) == null ? void 0 : l.textFont) || this.presetOptions.style.textFont,
+        textFont: ((d = t.style) == null ? void 0 : d.textFont) || this.presetOptions.style.textFont,
         textColor: ((p = t.style) == null ? void 0 : p.textColor) || this.presetOptions.style.textColor,
         secondaryColor: ((c = t.style) == null ? void 0 : c.secondaryColor) || this.presetOptions.style.secondaryColor,
         backgroundColor: ((u = t.style) == null ? void 0 : u.backgroundColor) || this.presetOptions.style.backgroundColor
@@ -375,12 +383,12 @@ const w = class w {
    */
   // prettier-ignore
   static changePresetOptions(t = {}) {
-    var i, e, h, r, a, o, l, p, c, u, m, x;
-    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.data.xAxis = ((i = t.data) == null ? void 0 : i.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((e = t.data) == null ? void 0 : e.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.i18n.months = ((h = t.i18n) == null ? void 0 : h.months) || this.presetOptions.i18n.months, this.presetOptions.interactivity.horisontalGuide = ((r = t.interactivity) == null ? void 0 : r.horisontalGuide) || this.presetOptions.interactivity.horisontalGuide, this.presetOptions.interactivity.guideDotsRadius = ((a = t.interactivity) == null ? void 0 : a.guideDotsRadius) || this.presetOptions.interactivity.guideDotsRadius, this.presetOptions.interactivity.fpsLimit = ((o = t.interactivity) == null ? void 0 : o.fpsLimit) || this.presetOptions.interactivity.fpsLimit, this.presetOptions.style.textFont = ((l = t.style) == null ? void 0 : l.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((p = t.style) == null ? void 0 : p.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((c = t.style) == null ? void 0 : c.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.style.backgroundColor = ((u = t.style) == null ? void 0 : u.backgroundColor) || this.presetOptions.style.backgroundColor, this.presetOptions.technical.insertMethod = ((m = t.technical) == null ? void 0 : m.insertMethod) || this.presetOptions.technical.insertMethod, this.presetOptions.technical.immediateInit = ((x = t.technical) == null ? void 0 : x.immediateInit) || this.presetOptions.technical.immediateInit;
+    var e, i, h, r, o, l, d, p, c, u, m, x;
+    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.data.xAxis = ((e = t.data) == null ? void 0 : e.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((i = t.data) == null ? void 0 : i.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.i18n.months = ((h = t.i18n) == null ? void 0 : h.months) || this.presetOptions.i18n.months, this.presetOptions.interactivity.horisontalGuide = ((r = t.interactivity) == null ? void 0 : r.horisontalGuide) || this.presetOptions.interactivity.horisontalGuide, this.presetOptions.interactivity.guideDotsRadius = ((o = t.interactivity) == null ? void 0 : o.guideDotsRadius) || this.presetOptions.interactivity.guideDotsRadius, this.presetOptions.interactivity.fpsLimit = ((l = t.interactivity) == null ? void 0 : l.fpsLimit) || this.presetOptions.interactivity.fpsLimit, this.presetOptions.style.textFont = ((d = t.style) == null ? void 0 : d.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((p = t.style) == null ? void 0 : p.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((c = t.style) == null ? void 0 : c.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.style.backgroundColor = ((u = t.style) == null ? void 0 : u.backgroundColor) || this.presetOptions.style.backgroundColor, this.presetOptions.technical.insertMethod = ((m = t.technical) == null ? void 0 : m.insertMethod) || this.presetOptions.technical.insertMethod, this.presetOptions.technical.immediateInit = ((x = t.technical) == null ? void 0 : x.immediateInit) || this.presetOptions.technical.immediateInit;
   }
 };
 // Static options preset
-n(w, "presetOptions", {
+n(I, "presetOptions", {
   width: 600,
   height: 250,
   padding: 40,
@@ -408,9 +416,9 @@ n(w, "presetOptions", {
     immediateInit: !0
   }
 });
-let T = w;
+let g = I;
 export {
-  T as Chart,
-  _ as ChartError,
+  g as Chart,
+  H as ChartError,
   s as ChartOptionsError
 };

@@ -1,4 +1,4 @@
-import { debounce } from '@/utils'
+import { debounce, throttle } from '@/utils'
 import { ChartOptionsError } from './chart-error'
 import type { IDataAxisY, IChartOptions } from './types'
 
@@ -112,7 +112,7 @@ export class Chart {
       this.resizeHandler = debounce(this.resizeHandler.bind(this), 100)
       this.mouseMoveHandler = this.mouseMoveHandler.bind(this)
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
-      this.drawChart = this.drawChart.bind(this)
+      this.drawChart = throttle(this.drawChart.bind(this), 1000 / this.INTERACTIVITY.fpsLimit)
 
       // Interactivity
       this.mouse = new Proxy(
