@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
       emptyOutDir: true,
       outDir: resolve(__dirname, 'dist'),
       rollupOptions: {
+         output: {
+            assetFileNames: 'index.css'
+         },
          input: {
             main: resolve(__dirname, 'src/index.ts')
          },
@@ -17,6 +20,11 @@ export default defineConfig(({ mode }) => ({
          entry: resolve(__dirname, 'src/index.ts'),
          name: 'SimpleChartsJS',
          fileName: 'index'
+      }
+   },
+   resolve: {
+      alias: {
+         '@': resolve(__dirname, 'src')
       }
    },
    plugins: [

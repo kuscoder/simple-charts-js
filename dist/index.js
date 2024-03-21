@@ -341,7 +341,7 @@ h(f, "presetOptions", {
   height: 250,
   padding: 40,
   rowsCount: 5,
-  guideDotsRadius: 10,
+  guideDotsRadius: 8,
   data: {
     xAxis: null,
     yAxis: []
