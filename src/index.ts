@@ -6,3 +6,4 @@ export type * from './lib/types'
 // TODO: Debug mode
 // TODO: Controls and hints in example
 // TODO: Vector2 util
+// TODO: Resize handling

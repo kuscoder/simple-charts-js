@@ -8,6 +8,7 @@ async function main() {
       height: 250,
       padding: 40,
       rowsCount: 5,
+      guideDotsRadius: 10,
 
       data: {
          xAxis: {
@@ -64,7 +65,8 @@ async function main() {
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
-         secondaryColor: '#bbbbbb'
+         secondaryColor: '#bbbbbb',
+         backgroundColor: '#ffffff'
       },
 
       flags: {

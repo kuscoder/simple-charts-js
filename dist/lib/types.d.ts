@@ -12,6 +12,7 @@ export interface IChartOptions {
     height: number;
     padding: number;
     rowsCount: number;
+    guideDotsRadius: number;
     data: {
         xAxis: IDataAxisX | null;
         yAxis: IDataAxisY[];
@@ -23,6 +24,7 @@ export interface IChartOptions {
         textFont: string;
         textColor: string;
         secondaryColor: string;
+        backgroundColor: string;
     };
     flags: {
         horGuide: boolean;

@@ -8,6 +8,7 @@ export class Chart {
       height: 250,
       padding: 40,
       rowsCount: 5,
+      guideDotsRadius: 10,
       data: {
          xAxis: null,
          yAxis: []
@@ -18,7 +19,8 @@ export class Chart {
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
-         secondaryColor: '#bbbbbb'
+         secondaryColor: '#bbbbbb',
+         backgroundColor: '#ffffff'
       },
       flags: {
          horGuide: true,
@@ -31,6 +33,7 @@ export class Chart {
    private readonly HEIGHT: IChartOptions['height']
    private readonly PADDING: IChartOptions['padding']
    private readonly ROWS_COUNT: IChartOptions['rowsCount']
+   private readonly GUIDE_DOTS_RADIUS: IChartOptions['guideDotsRadius']
    private readonly DATA: IChartOptions['data']
    private readonly I18N: IChartOptions['i18n']
    private readonly STYLE: IChartOptions['style']
@@ -80,6 +83,7 @@ export class Chart {
       this.HEIGHT = formattedOptions.height
       this.PADDING = formattedOptions.padding
       this.ROWS_COUNT = formattedOptions.rowsCount
+      this.GUIDE_DOTS_RADIUS = formattedOptions.guideDotsRadius
       this.DATA = formattedOptions.data
       this.I18N = formattedOptions.i18n
       this.STYLE = formattedOptions.style
@@ -157,15 +161,16 @@ export class Chart {
 
    /** Main method that draws the chart by clearing the canvas. */
    private drawChart(): void {
-      this.clearAll()
+      this.drawBackground()
       this.drawAxisX()
       this.drawAxisY()
       this.drawLines()
    }
 
-   /** Сlears the entire canvas. */
-   private clearAll(): void {
-      this.ctx.clearRect(0, 0, this.DPI_WIDTH, this.DPI_HEIGHT)
+   /** Draws the background of the chart. */
+   private drawBackground(): void {
+      this.ctx.fillStyle = this.STYLE.backgroundColor
+      this.ctx.fillRect(0, 0, this.DPI_WIDTH, this.DPI_HEIGHT)
    }
 
    /** Draws the X axis of the chart and guide lines. */
@@ -190,38 +195,53 @@ export class Chart {
          }
 
          // Draw guides
-         this.drawGuideLines(x)
+         this.drawGuideLinesIsOver(x)
       }
    }
 
-   /** Draws the guide lines. */
-   private drawGuideLines(x: number): void {
-      if (!this.mouse.x || !this.mouse.y) return
+   /**
+    * Draws the guide lines if the mouse-x is over the y-axis data item.
+    *
+    * @param {number} x - The x-coordinate to check for mouse position and draw the guide lines.
+    * @return {boolean} true if the guide lines were drawn, false otherwise
+    */
+   private drawGuideLinesIsOver(x: number): boolean {
+      if (this.mouse.x && this.mouse.y) {
+         const isOver = this.isMouseOverYAxisDataItem(x)
+         const topHeight = this.PADDING / 2
+         const bottomHeight = this.DPI_HEIGHT - this.PADDING
 
-      const length = this.DATA.xAxis?.values.length || 0
-      const isOver = length && Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
-      const topHeight = this.PADDING / 2
-      const bottomHeight = this.DPI_HEIGHT - this.PADDING
+         if (isOver && this.mouse.y >= topHeight) {
+            // Dashed horizontal guide line
+            if (this.FLAGS.horGuide && this.mouse.y <= bottomHeight) {
+               this.ctx.beginPath()
+               this.ctx.setLineDash([20, 25])
+               this.ctx.moveTo(0, this.mouse.y)
+               this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y)
+               this.ctx.stroke()
+               this.ctx.closePath()
+            }
 
-      if (isOver && this.mouse.y >= topHeight) {
-         // Dashed guide line for Y axis
-         if (this.FLAGS.horGuide && this.mouse.y <= bottomHeight) {
+            // Solid vertical guide line
             this.ctx.beginPath()
-            this.ctx.setLineDash([20, 25])
-            this.ctx.moveTo(0, this.mouse.y)
-            this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y)
+            this.ctx.setLineDash([])
+            this.ctx.moveTo(x, topHeight)
+            this.ctx.lineTo(x, bottomHeight)
             this.ctx.stroke()
             this.ctx.closePath()
-         }
 
-         // Solid guide line for X axis
-         this.ctx.beginPath()
-         this.ctx.setLineDash([])
-         this.ctx.moveTo(x, topHeight)
-         this.ctx.lineTo(x, bottomHeight)
-         this.ctx.stroke()
-         this.ctx.closePath()
+            // Dot in the top of the vertical guide line
+            this.ctx.beginPath()
+            this.ctx.arc(x, topHeight, 2, 0, 2 * Math.PI)
+            this.ctx.fill()
+            this.ctx.stroke()
+            this.ctx.closePath()
+
+            return true
+         }
       }
+
+      return false
    }
 
    /** Draws the Y axis of the chart. */
@@ -234,10 +254,10 @@ export class Chart {
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
          const text = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * i))
-         const posY = i * this.ROWS_STEP + this.PADDING
-         this.ctx.fillText(text, 5, posY - 10)
-         this.ctx.moveTo(0, posY)
-         this.ctx.lineTo(this.DPI_WIDTH, posY)
+         const y = i * this.ROWS_STEP + this.PADDING
+         this.ctx.fillText(text, 5, y - 10)
+         this.ctx.moveTo(0, y)
+         this.ctx.lineTo(this.DPI_WIDTH, y)
       }
 
       this.ctx.stroke()
@@ -247,8 +267,12 @@ export class Chart {
    /** Draws the lines of the chart. */
    private drawLines(): void {
       this.ctx.lineWidth = 4
+      this.ctx.fillStyle = this.STYLE.backgroundColor
 
       for (const col of this.DATA.yAxis) {
+         let overX: number | null = null
+         let overY: number | null = null
+
          this.ctx.strokeStyle = col.color
          this.ctx.beginPath()
 
@@ -256,11 +280,38 @@ export class Chart {
             const x = this.getX(i)
             const y = this.getY(col.values[i])
             this.ctx.lineTo(x, y)
+
+            // Write x and y values if the mouse-x is over the y-axis data item
+            if (this.isMouseOverYAxisDataItem(x)) {
+               overX = x
+               overY = y
+            }
          }
 
          this.ctx.stroke()
          this.ctx.closePath()
+
+         // Draw guide dots if the mouse-x is over the y-axis data item
+         if (overX && overY && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2) {
+            this.ctx.beginPath()
+            this.ctx.arc(overX, overY, this.GUIDE_DOTS_RADIUS, 0, 2 * Math.PI)
+            this.ctx.fill()
+            this.ctx.stroke()
+            this.ctx.closePath()
+         }
       }
+   }
+
+   /**
+    * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+    *
+    * @param {number} x - The x-axis data item coordinate to check.
+    * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+    */
+   private isMouseOverYAxisDataItem(x: number): boolean {
+      const length = this.DATA.xAxis?.values.length
+      if (!length || !this.mouse.x) return false
+      return Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
    }
 
    /** Event handler that updates the mouse position by canvas coordinates. */
@@ -336,15 +387,17 @@ export class Chart {
     * @throws {ChartOptionsError} if the options are invalid
     * @return {void}
     */
+   // prettier-ignore
    private static validateOptions(options: Partial<IChartOptions> = {}): void {
       const {
          width,
          height,
          padding,
          rowsCount,
+         guideDotsRadius,
          data: { xAxis, yAxis } = {},
          i18n: { months } = {},
-         style: { textFont, textColor, secondaryColor } = {},
+         style: { textFont, textColor, secondaryColor, backgroundColor } = {},
          flags: { horGuide, immediateInit } = {}
       } = options
 
@@ -368,6 +421,11 @@ export class Chart {
       if (rowsCount) {
          if (typeof rowsCount !== 'number') throw new ChartOptionsError('rowsCount should be a number')
          if (rowsCount <= 0) throw new ChartOptionsError('rowsCount should be greater than 0')
+      }
+
+      if (guideDotsRadius) {
+         if (typeof guideDotsRadius !== 'number') throw new ChartOptionsError('guideDotsRadius should be a number')
+         if (guideDotsRadius <= 0) throw new ChartOptionsError('guideDotsRadius should be greater than 0')
       }
 
       if (xAxis) {
@@ -415,6 +473,10 @@ export class Chart {
          if (typeof secondaryColor !== 'string') throw new ChartOptionsError('style.secondaryColor should be a string')
       }
 
+      if (backgroundColor) {
+         if (typeof backgroundColor !== 'string') throw new ChartOptionsError('style.backgroundColor should be a string')
+      }
+
       if (horGuide) {
          if (typeof horGuide !== 'boolean') throw new ChartOptionsError('flags.horGuide should be a boolean')
       }
@@ -438,6 +500,7 @@ export class Chart {
          height: options.height || this.presetOptions.height,
          padding: options.padding ?? this.presetOptions.padding,
          rowsCount: options.rowsCount || this.presetOptions.rowsCount,
+         guideDotsRadius: options.guideDotsRadius || this.presetOptions.guideDotsRadius,
          data: {
             xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
             yAxis: options.data?.yAxis || this.presetOptions.data.yAxis
@@ -448,7 +511,8 @@ export class Chart {
          style: {
             textFont: options.style?.textFont || this.presetOptions.style.textFont,
             textColor: options.style?.textColor || this.presetOptions.style.textColor,
-            secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor
+            secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor,
+            backgroundColor: options.style?.backgroundColor || this.presetOptions.style.backgroundColor
          },
          flags: {
             horGuide: options.flags?.horGuide ?? this.presetOptions.flags.horGuide,
@@ -462,19 +526,22 @@ export class Chart {
     *
     * @param {Partial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
     */
+   // prettier-ignore
    public static changePresetOptions(options: Partial<IChartOptions> = {}): void {
       this.validateOptions(options)
-      this.presetOptions.width = options.width || this.presetOptions.width
-      this.presetOptions.height = options.height || this.presetOptions.height
-      this.presetOptions.padding = options.padding ?? this.presetOptions.padding
-      this.presetOptions.rowsCount = options.rowsCount || this.presetOptions.rowsCount
-      this.presetOptions.i18n.months = options.i18n?.months || this.presetOptions.i18n.months
-      this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
-      this.presetOptions.style.textColor = options.style?.textColor || this.presetOptions.style.textColor
-      this.presetOptions.style.secondaryColor = options.style?.secondaryColor || this.presetOptions.style.secondaryColor
-      this.presetOptions.data.xAxis = options.data?.xAxis || this.presetOptions.data.xAxis
-      this.presetOptions.data.yAxis = options.data?.yAxis || this.presetOptions.data.yAxis
-      this.presetOptions.flags.horGuide = options.flags?.horGuide ?? this.presetOptions.flags.horGuide
-      this.presetOptions.flags.immediateInit = options.flags?.immediateInit ?? this.presetOptions.flags.immediateInit
+      this.presetOptions.width                 = options.width                  || this.presetOptions.width
+      this.presetOptions.height                = options.height                 || this.presetOptions.height
+      this.presetOptions.padding               = options.padding                ?? this.presetOptions.padding
+      this.presetOptions.rowsCount             = options.rowsCount              || this.presetOptions.rowsCount
+      this.presetOptions.guideDotsRadius       = options.guideDotsRadius        || this.presetOptions.guideDotsRadius
+      this.presetOptions.i18n.months           = options.i18n?.months           || this.presetOptions.i18n.months
+      this.presetOptions.style.textFont        = options.style?.textFont        || this.presetOptions.style.textFont
+      this.presetOptions.style.textColor       = options.style?.textColor       || this.presetOptions.style.textColor
+      this.presetOptions.style.secondaryColor  = options.style?.secondaryColor  || this.presetOptions.style.secondaryColor
+      this.presetOptions.style.backgroundColor = options.style?.backgroundColor || this.presetOptions.style.backgroundColor
+      this.presetOptions.data.xAxis            = options.data?.xAxis            || this.presetOptions.data.xAxis
+      this.presetOptions.data.yAxis            = options.data?.yAxis            || this.presetOptions.data.yAxis
+      this.presetOptions.flags.horGuide        = options.flags?.horGuide        ?? this.presetOptions.flags.horGuide
+      this.presetOptions.flags.immediateInit   = options.flags?.immediateInit   ?? this.presetOptions.flags.immediateInit
    }
 }

@@ -5,6 +5,7 @@ export declare class Chart {
     private readonly HEIGHT;
     private readonly PADDING;
     private readonly ROWS_COUNT;
+    private readonly GUIDE_DOTS_RADIUS;
     private readonly DATA;
     private readonly I18N;
     private readonly STYLE;
@@ -40,16 +41,28 @@ export declare class Chart {
     destroy(): void;
     /** Main method that draws the chart by clearing the canvas. */
     private drawChart;
-    /** Сlears the entire canvas. */
-    private clearAll;
+    /** Draws the background of the chart. */
+    private drawBackground;
     /** Draws the X axis of the chart and guide lines. */
     private drawAxisX;
-    /** Draws the guide lines. */
-    private drawGuideLines;
+    /**
+     * Draws the guide lines if the mouse-x is over the y-axis data item.
+     *
+     * @param {number} x - The x-coordinate to check for mouse position and draw the guide lines.
+     * @return {boolean} true if the guide lines were drawn, false otherwise
+     */
+    private drawGuideLinesIsOver;
     /** Draws the Y axis of the chart. */
     private drawAxisY;
     /** Draws the lines of the chart. */
     private drawLines;
+    /**
+     * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+     *
+     * @param {number} x - The x-axis data item coordinate to check.
+     * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+     */
+    private isMouseOverYAxisDataItem;
     /** Event handler that updates the mouse position by canvas coordinates. */
     private mouseMoveHandler;
     /** Event handler that resets the mouse position when the mouse leaves the canvas. */
