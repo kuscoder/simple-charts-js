@@ -9,10 +9,6 @@ async function main() {
       padding: 40,
       rowsCount: 5,
 
-      i18n: {
-         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      },
-
       data: {
          xAxis: {
             type: 'date',
@@ -61,13 +57,20 @@ async function main() {
          ]
       },
 
+      i18n: {
+         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      },
+
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
          secondaryColor: '#bbbbbb'
       },
 
-      immediate: true
+      flags: {
+         horGuide: false,
+         immediateInit: false
+      }
    })
 
    // Manual chart initialization / destroying test

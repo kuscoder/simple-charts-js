@@ -1,5 +1,5 @@
 import { ChartOptionsError } from './chart-error'
-import type { IDataAxisX, IDataAxisY, IChartOptions } from './types'
+import type { IDataAxisY, IChartOptions } from './types'
 
 export class Chart {
    // Static options preset
@@ -8,38 +8,33 @@ export class Chart {
       height: 250,
       padding: 40,
       rowsCount: 5,
-      i18n: {
-         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      },
       data: {
          xAxis: null,
          yAxis: []
+      },
+      i18n: {
+         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
          secondaryColor: '#bbbbbb'
       },
-      immediate: true
+      flags: {
+         horGuide: true,
+         immediateInit: true
+      }
    }
 
    // Options
-   private readonly WIDTH: number
-   private readonly HEIGHT: number
-   private readonly PADDING: number
-   private readonly ROWS_COUNT: number
-   private readonly MONTHS_NAMES: string[]
-
-   private readonly DATA: {
-      xAxis: IDataAxisX | null
-      yAxis: IDataAxisY[]
-   }
-
-   private readonly STYLES: {
-      textFont: string
-      textColor: string
-      secondaryColor: string
-   }
+   private readonly WIDTH: IChartOptions['width']
+   private readonly HEIGHT: IChartOptions['height']
+   private readonly PADDING: IChartOptions['padding']
+   private readonly ROWS_COUNT: IChartOptions['rowsCount']
+   private readonly DATA: IChartOptions['data']
+   private readonly I18N: IChartOptions['i18n']
+   private readonly STYLE: IChartOptions['style']
+   private readonly FLAGS: IChartOptions['flags']
 
    // Calculated
    private readonly DPI_WIDTH: number
@@ -80,18 +75,10 @@ export class Chart {
       this.HEIGHT = formattedOptions.height
       this.PADDING = formattedOptions.padding
       this.ROWS_COUNT = formattedOptions.rowsCount
-      this.MONTHS_NAMES = formattedOptions.i18n.months
-
-      this.DATA = {
-         xAxis: formattedOptions.data.xAxis,
-         yAxis: formattedOptions.data.yAxis
-      }
-
-      this.STYLES = {
-         textFont: formattedOptions.style.textFont,
-         textColor: formattedOptions.style.textColor,
-         secondaryColor: formattedOptions.style.secondaryColor
-      }
+      this.DATA = formattedOptions.data
+      this.I18N = formattedOptions.i18n
+      this.STYLE = formattedOptions.style
+      this.FLAGS = formattedOptions.flags
 
       // Calculated
       this.DPI_WIDTH = this.WIDTH * 2
@@ -136,7 +123,7 @@ export class Chart {
       this.ctx = this.canvas.getContext('2d')!
 
       // Initialize if in immediate mode
-      if (formattedOptions.immediate) {
+      if (this.FLAGS.immediateInit) {
          this.initialize()
       }
    }
@@ -181,12 +168,12 @@ export class Chart {
       if (!this.DATA.xAxis) return
 
       // For X axis
-      this.ctx.fillStyle = this.STYLES.textColor
-      this.ctx.font = this.STYLES.textFont
+      this.ctx.fillStyle = this.STYLE.textColor
+      this.ctx.font = this.STYLE.textFont
 
       // For guides
       this.ctx.lineWidth = 2
-      this.ctx.strokeStyle = this.STYLES.secondaryColor
+      this.ctx.strokeStyle = this.STYLE.secondaryColor
 
       for (let i = 1; i <= this.DATA.xAxis.values.length; i++) {
          const x = this.getX(i)
@@ -209,15 +196,17 @@ export class Chart {
       const isOver = length && Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
 
       if (isOver) {
-         // Y dashed line
-         this.ctx.beginPath()
-         this.ctx.setLineDash([20, 25])
-         this.ctx.moveTo(0, this.mouse.y)
-         this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y)
-         this.ctx.stroke()
-         this.ctx.closePath()
+         // Dashed guide line for Y axis
+         if (this.FLAGS.horGuide) {
+            this.ctx.beginPath()
+            this.ctx.setLineDash([20, 25])
+            this.ctx.moveTo(0, this.mouse.y)
+            this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y)
+            this.ctx.stroke()
+            this.ctx.closePath()
+         }
 
-         // X solid line
+         // Solid guide line for X axis
          this.ctx.beginPath()
          this.ctx.setLineDash([])
          this.ctx.moveTo(x, 0)
@@ -230,9 +219,9 @@ export class Chart {
    /** */
    private drawAxisY() {
       this.ctx.lineWidth = 1
-      this.ctx.strokeStyle = this.STYLES.secondaryColor
-      this.ctx.fillStyle = this.STYLES.textColor
-      this.ctx.font = this.STYLES.textFont
+      this.ctx.strokeStyle = this.STYLE.secondaryColor
+      this.ctx.fillStyle = this.STYLE.textColor
+      this.ctx.font = this.STYLE.textFont
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
@@ -299,8 +288,7 @@ export class Chart {
       const date = new Date(timestamp)
       const day = date.getDate()
       const month = date.getMonth()
-      const months = this.MONTHS_NAMES
-      return `${day} ${months[month]}`
+      return `${day} ${this.I18N.months[month]}`
    }
 
    /** */
@@ -320,10 +308,10 @@ export class Chart {
          height,
          padding,
          rowsCount,
-         i18n: { months } = {},
          data: { xAxis, yAxis } = {},
+         i18n: { months } = {},
          style: { textFont, textColor, secondaryColor } = {},
-         immediate
+         flags: { horGuide, immediateInit } = {}
       } = options
 
       if (width) {
@@ -346,11 +334,6 @@ export class Chart {
       if (rowsCount) {
          if (typeof rowsCount !== 'number') throw new ChartOptionsError('rowsCount should be a number')
          if (rowsCount <= 0) throw new ChartOptionsError('rowsCount should be greater than 0')
-      }
-
-      if (months) {
-         if (!Array.isArray(months)) throw new ChartOptionsError('i18n.months should be an array')
-         if (months.length !== 12) throw new ChartOptionsError('i18n.months should have 12 elements')
       }
 
       if (xAxis) {
@@ -381,6 +364,11 @@ export class Chart {
          })
       }
 
+      if (months) {
+         if (!Array.isArray(months)) throw new ChartOptionsError('i18n.months should be an array')
+         if (months.length !== 12) throw new ChartOptionsError('i18n.months should have 12 elements')
+      }
+
       if (textFont) {
          if (typeof textFont !== 'string') throw new ChartOptionsError('style.textFont should be a string')
       }
@@ -393,8 +381,12 @@ export class Chart {
          if (typeof secondaryColor !== 'string') throw new ChartOptionsError('style.secondaryColor should be a string')
       }
 
-      if (immediate) {
-         if (typeof immediate !== 'boolean') throw new ChartOptionsError('immediate should be a boolean')
+      if (horGuide) {
+         if (typeof horGuide !== 'boolean') throw new ChartOptionsError('flags.horGuide should be a boolean')
+      }
+
+      if (immediateInit) {
+         if (typeof immediateInit !== 'boolean') throw new ChartOptionsError('flags.immediateInit should be a boolean')
       }
    }
 
@@ -407,6 +399,10 @@ export class Chart {
          height: options.height || this.presetOptions.height,
          padding: options.padding || this.presetOptions.padding,
          rowsCount: options.rowsCount || this.presetOptions.rowsCount,
+         data: {
+            xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
+            yAxis: options.data?.yAxis || this.presetOptions.data.yAxis
+         },
          i18n: {
             months: options.i18n?.months || this.presetOptions.i18n.months
          },
@@ -415,11 +411,10 @@ export class Chart {
             textColor: options.style?.textColor || this.presetOptions.style.textColor,
             secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor
          },
-         data: {
-            xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
-            yAxis: options.data?.yAxis || this.presetOptions.data.yAxis
-         },
-         immediate: options.immediate ?? this.presetOptions.immediate
+         flags: {
+            horGuide: options.flags?.horGuide ?? this.presetOptions.flags.horGuide,
+            immediateInit: options.flags?.immediateInit ?? this.presetOptions.flags.immediateInit
+         }
       }
    }
 
@@ -440,6 +435,7 @@ export class Chart {
       this.presetOptions.style.secondaryColor = options.style?.secondaryColor || this.presetOptions.style.secondaryColor
       this.presetOptions.data.xAxis = options.data?.xAxis || this.presetOptions.data.xAxis
       this.presetOptions.data.yAxis = options.data?.yAxis || this.presetOptions.data.yAxis
-      this.presetOptions.immediate = options.immediate || this.presetOptions.immediate
+      this.presetOptions.flags.horGuide = options.flags?.horGuide ?? this.presetOptions.flags.horGuide
+      this.presetOptions.flags.immediateInit = options.flags?.immediateInit ?? this.presetOptions.flags.immediateInit
    }
 }

@@ -5,9 +5,10 @@ export declare class Chart {
     private readonly HEIGHT;
     private readonly PADDING;
     private readonly ROWS_COUNT;
-    private readonly MONTHS_NAMES;
     private readonly DATA;
-    private readonly STYLES;
+    private readonly I18N;
+    private readonly STYLE;
+    private readonly FLAGS;
     private readonly DPI_WIDTH;
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;

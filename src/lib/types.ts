@@ -14,17 +14,20 @@ export interface IChartOptions {
    height: number
    padding: number
    rowsCount: number
-   i18n: {
-      months: string[]
-   }
    data: {
       xAxis: IDataAxisX | null
       yAxis: IDataAxisY[]
+   }
+   i18n: {
+      months: string[]
    }
    style: {
       textFont: string
       textColor: string
       secondaryColor: string
    }
-   immediate: boolean
+   flags: {
+      horGuide: boolean
+      immediateInit: boolean
+   }
 }
