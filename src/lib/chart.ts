@@ -9,7 +9,6 @@ export class Chart {
       height: 250,
       padding: 40,
       rowsCount: 5,
-      guideDotsRadius: 8,
       data: {
          xAxis: null,
          yAxis: []
@@ -17,17 +16,21 @@ export class Chart {
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
+      interactivity: {
+         horisontalGuide: true,
+         guideDotsRadius: 8,
+         fpsLimit: 60
+      },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
          secondaryColor: '#bbbbbb',
          backgroundColor: '#ffffff'
       },
-      flags: {
-         horGuide: true,
+      technical: {
+         insertMethod: 'append',
          immediateInit: true
-      },
-      insertMethod: 'append'
+      }
    }
 
    // Options
@@ -35,12 +38,11 @@ export class Chart {
    private readonly HEIGHT: IChartOptions['height']
    private readonly PADDING: IChartOptions['padding']
    private readonly ROWS_COUNT: IChartOptions['rowsCount']
-   private readonly GUIDE_DOTS_RADIUS: IChartOptions['guideDotsRadius']
    private readonly DATA: IChartOptions['data']
    private readonly I18N: IChartOptions['i18n']
+   private readonly INTERACTIVITY: IChartOptions['interactivity']
    private readonly STYLE: IChartOptions['style']
-   private readonly FLAGS: IChartOptions['flags']
-   private readonly INSERT_METHOD: IChartOptions['insertMethod']
+   private readonly TECHNICAL: IChartOptions['technical']
 
    // Calculated
    private readonly DPI_WIDTH: number
@@ -87,12 +89,11 @@ export class Chart {
       this.HEIGHT = formattedOptions.height
       this.PADDING = formattedOptions.padding
       this.ROWS_COUNT = formattedOptions.rowsCount
-      this.GUIDE_DOTS_RADIUS = formattedOptions.guideDotsRadius
       this.DATA = formattedOptions.data
       this.I18N = formattedOptions.i18n
+      this.INTERACTIVITY = formattedOptions.interactivity
       this.STYLE = formattedOptions.style
-      this.FLAGS = formattedOptions.flags
-      this.INSERT_METHOD = formattedOptions.insertMethod
+      this.TECHNICAL = formattedOptions.technical
 
       // Calculated
       this.DPI_WIDTH = this.WIDTH * 2
@@ -129,7 +130,7 @@ export class Chart {
       this.createDOMElements()
 
       // Initialize if in immediate mode
-      if (this.FLAGS.immediateInit) {
+      if (this.TECHNICAL.immediateInit) {
          this.initialize()
       }
    }
@@ -160,12 +161,12 @@ export class Chart {
       this.isInitialized = true
 
       // Insert into DOM
-      if (this.INSERT_METHOD === 'append') {
+      if (this.TECHNICAL.insertMethod === 'append') {
          this.containerElement.appendChild(this.wrapperElement)
-      } else if (this.INSERT_METHOD === 'prepend') {
+      } else if (this.TECHNICAL.insertMethod === 'prepend') {
          this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild)
       } else {
-         this.INSERT_METHOD(this.containerElement, this.wrapperElement)
+         this.TECHNICAL.insertMethod(this.containerElement, this.wrapperElement)
       }
       this.wrapperElement.appendChild(this.canvasElement)
       this.wrapperElement.appendChild(this.tooltipElement)
@@ -251,7 +252,7 @@ export class Chart {
 
          if (isOver && this.mouse.y >= topHeight) {
             // Dashed horizontal guide line
-            if (this.FLAGS.horGuide && this.mouse.y <= bottomHeight) {
+            if (this.INTERACTIVITY.horisontalGuide && this.mouse.y <= bottomHeight) {
                this.ctx.beginPath()
                this.ctx.setLineDash([20, 25])
                this.ctx.moveTo(0, this.mouse.y)
@@ -332,7 +333,7 @@ export class Chart {
          // Draw guide dots if the mouse-x is over the y-axis data item
          if (overX && overY && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2) {
             this.ctx.beginPath()
-            this.ctx.arc(overX, overY, this.GUIDE_DOTS_RADIUS, 0, 2 * Math.PI)
+            this.ctx.arc(overX, overY, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI)
             this.ctx.fill()
             this.ctx.stroke()
             this.ctx.closePath()
@@ -454,12 +455,11 @@ export class Chart {
          height,
          padding,
          rowsCount,
-         guideDotsRadius,
          data: { xAxis, yAxis } = {},
          i18n: { months } = {},
+         interactivity: { horisontalGuide, guideDotsRadius, fpsLimit } = {},
          style: { textFont, textColor, secondaryColor, backgroundColor } = {},
-         flags: { horGuide, immediateInit } = {},
-         insertMethod
+         technical: { insertMethod, immediateInit } = {}
       } = options
 
       if (width) {
@@ -484,9 +484,18 @@ export class Chart {
          if (rowsCount <= 0) throw new ChartOptionsError('rowsCount should be greater than 0')
       }
 
+      if (horisontalGuide) {
+         if (typeof horisontalGuide !== 'boolean') throw new ChartOptionsError('interactivity.horisontalGuide should be a boolean')
+      }
+
       if (guideDotsRadius) {
-         if (typeof guideDotsRadius !== 'number') throw new ChartOptionsError('guideDotsRadius should be a number')
-         if (guideDotsRadius <= 0) throw new ChartOptionsError('guideDotsRadius should be greater than 0')
+         if (typeof guideDotsRadius !== 'number') throw new ChartOptionsError('interactivity.guideDotsRadius should be a number')
+         if (guideDotsRadius <= 0) throw new ChartOptionsError('interactivity.guideDotsRadius should be greater than 0')
+      }
+
+      if (fpsLimit) {
+         if (typeof fpsLimit !== 'number') throw new ChartOptionsError('interactivity.fpsLimit should be a number')
+         if (fpsLimit <= 0) throw new ChartOptionsError('interactivity.fpsLimit should be greater than 0')
       }
 
       if (xAxis) {
@@ -538,19 +547,15 @@ export class Chart {
          if (typeof backgroundColor !== 'string') throw new ChartOptionsError('style.backgroundColor should be a string')
       }
 
-      if (horGuide) {
-         if (typeof horGuide !== 'boolean') throw new ChartOptionsError('flags.horGuide should be a boolean')
+      if (insertMethod) {
+         if (typeof insertMethod !== 'string' && typeof insertMethod !== 'function') throw new ChartOptionsError('technical.insertMethod should be a string or function')
+         if (typeof insertMethod === 'string') {
+            if (!['append', 'prepend'].includes(insertMethod)) throw new ChartOptionsError('technical.insertMethod should be "append" or "prepend" or function')
+         }
       }
 
       if (immediateInit) {
-         if (typeof immediateInit !== 'boolean') throw new ChartOptionsError('flags.immediateInit should be a boolean')
-      }
-
-      if (insertMethod) {
-         if (typeof insertMethod !== 'string' && typeof insertMethod !== 'function') throw new ChartOptionsError('insertMethod should be a string or function')
-         if (typeof insertMethod === 'string') {
-            if (!['append', 'prepend'].includes(insertMethod)) throw new ChartOptionsError('insertMethod should be "append" or "prepend" or function')
-         }
+         if (typeof immediateInit !== 'boolean') throw new ChartOptionsError('technical.immediateInit should be a boolean')
       }
    }
 
@@ -568,7 +573,6 @@ export class Chart {
          height: options.height || this.presetOptions.height,
          padding: options.padding ?? this.presetOptions.padding,
          rowsCount: options.rowsCount || this.presetOptions.rowsCount,
-         guideDotsRadius: options.guideDotsRadius || this.presetOptions.guideDotsRadius,
          data: {
             xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
             yAxis: options.data?.yAxis || this.presetOptions.data.yAxis
@@ -576,17 +580,21 @@ export class Chart {
          i18n: {
             months: options.i18n?.months || this.presetOptions.i18n.months
          },
+         interactivity: {
+            horisontalGuide: options.interactivity?.horisontalGuide || this.presetOptions.interactivity.horisontalGuide,
+            guideDotsRadius: options.interactivity?.guideDotsRadius || this.presetOptions.interactivity.guideDotsRadius,
+            fpsLimit: options.interactivity?.fpsLimit || this.presetOptions.interactivity.fpsLimit
+         },
          style: {
             textFont: options.style?.textFont || this.presetOptions.style.textFont,
             textColor: options.style?.textColor || this.presetOptions.style.textColor,
             secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor,
             backgroundColor: options.style?.backgroundColor || this.presetOptions.style.backgroundColor
          },
-         flags: {
-            horGuide: options.flags?.horGuide ?? this.presetOptions.flags.horGuide,
-            immediateInit: options.flags?.immediateInit ?? this.presetOptions.flags.immediateInit
-         },
-         insertMethod: options.insertMethod || this.presetOptions.insertMethod
+         technical: {
+            insertMethod: options.technical?.insertMethod || this.presetOptions.technical.insertMethod,
+            immediateInit: options.technical?.immediateInit || this.presetOptions.technical.immediateInit
+         }
       }
    }
 
@@ -598,20 +606,21 @@ export class Chart {
    // prettier-ignore
    public static changePresetOptions(options: Partial<IChartOptions> = {}): void {
       this.validateOptions(options)
-      this.presetOptions.width                 = options.width                  || this.presetOptions.width
-      this.presetOptions.height                = options.height                 || this.presetOptions.height
-      this.presetOptions.padding               = options.padding                ?? this.presetOptions.padding
-      this.presetOptions.rowsCount             = options.rowsCount              || this.presetOptions.rowsCount
-      this.presetOptions.guideDotsRadius       = options.guideDotsRadius        || this.presetOptions.guideDotsRadius
-      this.presetOptions.i18n.months           = options.i18n?.months           || this.presetOptions.i18n.months
-      this.presetOptions.style.textFont        = options.style?.textFont        || this.presetOptions.style.textFont
-      this.presetOptions.style.textColor       = options.style?.textColor       || this.presetOptions.style.textColor
-      this.presetOptions.style.secondaryColor  = options.style?.secondaryColor  || this.presetOptions.style.secondaryColor
-      this.presetOptions.style.backgroundColor = options.style?.backgroundColor || this.presetOptions.style.backgroundColor
-      this.presetOptions.data.xAxis            = options.data?.xAxis            || this.presetOptions.data.xAxis
-      this.presetOptions.data.yAxis            = options.data?.yAxis            || this.presetOptions.data.yAxis
-      this.presetOptions.flags.horGuide        = options.flags?.horGuide        ?? this.presetOptions.flags.horGuide
-      this.presetOptions.flags.immediateInit   = options.flags?.immediateInit   ?? this.presetOptions.flags.immediateInit
-      this.presetOptions.insertMethod          = options.insertMethod           || this.presetOptions.insertMethod
+      this.presetOptions.width                         = options.width                          || this.presetOptions.width
+      this.presetOptions.height                        = options.height                         || this.presetOptions.height
+      this.presetOptions.padding                       = options.padding                        ?? this.presetOptions.padding
+      this.presetOptions.rowsCount                     = options.rowsCount                      || this.presetOptions.rowsCount
+      this.presetOptions.data.xAxis                    = options.data?.xAxis                    || this.presetOptions.data.xAxis
+      this.presetOptions.data.yAxis                    = options.data?.yAxis                    || this.presetOptions.data.yAxis
+      this.presetOptions.i18n.months                   = options.i18n?.months                   || this.presetOptions.i18n.months
+      this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide || this.presetOptions.interactivity.horisontalGuide
+      this.presetOptions.interactivity.guideDotsRadius = options.interactivity?.guideDotsRadius || this.presetOptions.interactivity.guideDotsRadius
+      this.presetOptions.interactivity.fpsLimit        = options.interactivity?.fpsLimit        || this.presetOptions.interactivity.fpsLimit
+      this.presetOptions.style.textFont                = options.style?.textFont                || this.presetOptions.style.textFont
+      this.presetOptions.style.textColor               = options.style?.textColor               || this.presetOptions.style.textColor
+      this.presetOptions.style.secondaryColor          = options.style?.secondaryColor          || this.presetOptions.style.secondaryColor
+      this.presetOptions.style.backgroundColor         = options.style?.backgroundColor         || this.presetOptions.style.backgroundColor
+      this.presetOptions.technical.insertMethod        = options.technical?.insertMethod        || this.presetOptions.technical.insertMethod
+      this.presetOptions.technical.immediateInit       = options.technical?.immediateInit       || this.presetOptions.technical.immediateInit
    }
 }

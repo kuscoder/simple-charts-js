@@ -8,8 +8,6 @@ async function main() {
       height: 250,
       padding: 40,
       rowsCount: 5,
-      guideDotsRadius: 8,
-
       data: {
          xAxis: {
             type: 'date',
@@ -57,24 +55,24 @@ async function main() {
             }
          ]
       },
-
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
-
+      interactivity: {
+         horisontalGuide: true,
+         guideDotsRadius: 8,
+         fpsLimit: 60
+      },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
          secondaryColor: '#bbbbbb',
          backgroundColor: '#ffffff'
       },
-
-      flags: {
-         horGuide: true,
+      technical: {
+         insertMethod: 'append',
          immediateInit: true
-      },
-
-      insertMethod: 'append'
+      }
    })
 
    // Manual chart initialization / destroying test

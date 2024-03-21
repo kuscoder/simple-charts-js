@@ -5,12 +5,11 @@ export declare class Chart {
     private readonly HEIGHT;
     private readonly PADDING;
     private readonly ROWS_COUNT;
-    private readonly GUIDE_DOTS_RADIUS;
     private readonly DATA;
     private readonly I18N;
+    private readonly INTERACTIVITY;
     private readonly STYLE;
-    private readonly FLAGS;
-    private readonly INSERT_METHOD;
+    private readonly TECHNICAL;
     private readonly DPI_WIDTH;
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;
