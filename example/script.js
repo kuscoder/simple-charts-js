@@ -68,8 +68,8 @@ async function main() {
       },
 
       flags: {
-         horGuide: false,
-         immediateInit: false
+         horGuide: true,
+         immediateInit: true
       }
    })
 
@@ -87,7 +87,7 @@ async function getSimpleChartsJSModule() {
    if (hostname) {
       // For library GitHub pages
       if (hostname.includes('kuscoder.github.io')) {
-         return import('https://raw.githubusercontent.com/kuscoder/simple-charts-js/master/dist/index.js')
+         return import('https://cdn.jsdelivr.net/gh/kuscoder/simple-charts-js/dist/index.js')
       }
 
       // For localhost server
