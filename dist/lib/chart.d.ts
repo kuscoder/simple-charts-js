@@ -13,7 +13,7 @@ export declare class Chart {
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;
     private readonly VIEW_HEIGHT;
-    private readonly Y_BOUNDARIES;
+    private readonly Y_AXIS_DATA_BOUNDARIES;
     private readonly X_RATIO;
     private readonly Y_RATIO;
     private readonly ROWS_STEP;
@@ -60,7 +60,7 @@ export declare class Chart {
      * @param {IDataAxisY[]} columns - an array of data axis Y values
      * @return {[number, number]} an array containing the minimum and maximum y values
      */
-    private getBoundariesY;
+    private getYAxisDataBoundaries;
     /**
      * Returns a formatted date string for x-axis based on the given timestamp.
      *

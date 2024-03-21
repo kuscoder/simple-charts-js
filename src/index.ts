@@ -5,3 +5,4 @@ export type * from './lib/types'
 // TODO: The ability to add types for x Axis other than "date"
 // TODO: Debug mode
 // TODO: Controls and hints in example
+// TODO: Vector2 util

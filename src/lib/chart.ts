@@ -41,7 +41,7 @@ export class Chart {
    private readonly DPI_HEIGHT: number
    private readonly VIEW_WIDTH: number
    private readonly VIEW_HEIGHT: number
-   private readonly Y_BOUNDARIES: [number, number]
+   private readonly Y_AXIS_DATA_BOUNDARIES: [number, number]
    private readonly X_RATIO: number
    private readonly Y_RATIO: number
    private readonly ROWS_STEP: number
@@ -91,12 +91,12 @@ export class Chart {
       this.VIEW_WIDTH = this.DPI_WIDTH
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
 
-      this.Y_BOUNDARIES = this.getBoundariesY(this.DATA.yAxis)
+      this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis)
       this.X_RATIO = this.VIEW_WIDTH / (yLength - 1)
-      this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0])
+      this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0])
 
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
-      this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT
+      this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT
 
       this.X_AXIS_DATA_COUNT = 6
       this.X_AXIS_DATA_STEP = xLength && Math.round(xLength / this.X_AXIS_DATA_COUNT)
@@ -200,10 +200,12 @@ export class Chart {
 
       const length = this.DATA.xAxis?.values.length || 0
       const isOver = length && Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
+      const topHeight = this.PADDING / 2
+      const bottomHeight = this.DPI_HEIGHT - this.PADDING
 
-      if (isOver) {
+      if (isOver && this.mouse.y >= topHeight) {
          // Dashed guide line for Y axis
-         if (this.FLAGS.horGuide) {
+         if (this.FLAGS.horGuide && this.mouse.y <= bottomHeight) {
             this.ctx.beginPath()
             this.ctx.setLineDash([20, 25])
             this.ctx.moveTo(0, this.mouse.y)
@@ -215,8 +217,8 @@ export class Chart {
          // Solid guide line for X axis
          this.ctx.beginPath()
          this.ctx.setLineDash([])
-         this.ctx.moveTo(x, this.PADDING)
-         this.ctx.lineTo(x, this.DPI_HEIGHT - this.PADDING)
+         this.ctx.moveTo(x, topHeight)
+         this.ctx.lineTo(x, bottomHeight)
          this.ctx.stroke()
          this.ctx.closePath()
       }
@@ -231,7 +233,7 @@ export class Chart {
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
-         const text = String(Math.round(this.Y_BOUNDARIES[1] - this.TEXT_STEP * i))
+         const text = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * i))
          const posY = i * this.ROWS_STEP + this.PADDING
          this.ctx.fillText(text, 5, posY - 10)
          this.ctx.moveTo(0, posY)
@@ -280,7 +282,7 @@ export class Chart {
     * @param {IDataAxisY[]} columns - an array of data axis Y values
     * @return {[number, number]} an array containing the minimum and maximum y values
     */
-   private getBoundariesY(columns: IDataAxisY[]): [number, number] {
+   private getYAxisDataBoundaries(columns: IDataAxisY[]): [number, number] {
       let yMin: number | null = null
       let yMax: number | null = null
 
