@@ -22,9 +22,9 @@ export declare class Chart {
     private readonly TEXT_STEP;
     private readonly X_AXIS_DATA_COUNT;
     private readonly X_AXIS_DATA_STEP;
+    private readonly mouse;
     private isInitialized;
     private rafID;
-    private readonly mouse;
     private containerElement;
     private wrapperElement;
     private canvasElement;
@@ -61,17 +61,12 @@ export declare class Chart {
     private drawAxisY;
     /** Draws the lines of the chart. */
     private drawLines;
-    /**
-     * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
-     *
-     * @param {number} x - The x-axis data item coordinate to check.
-     * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
-     */
-    private isMouseOverYAxisDataItem;
     /** Event handler that updates the mouse position by canvas coordinates. */
     private mouseMoveHandler;
     /** Event handler that resets the mouse position when the mouse leaves the canvas. */
     private mouseLeaveHandler;
+    /** Event handler that update the chart interactivity when the window is resized. */
+    private resizeHandler;
     /**
      * Generates boundaries for the y-axis based on the provided columns.
      *
@@ -100,6 +95,20 @@ export declare class Chart {
      * @return {number} y coordinate in canvas
      */
     private getY;
+    /**
+     * Calculate the maximum length of the Y-axis data.
+     *
+     * @param {?IDataAxisY[]} yAxisData - optional parameter for the Y-axis data
+     * @return {number} the maximum length of the Y-axis data.
+     */
+    private getAxisYDataLength;
+    /**
+     * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+     *
+     * @param {number} x - The x-axis data item coordinate to check.
+     * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+     */
+    private isMouseOverYAxisDataItem;
     /**
      * Validates the provided options for a chart constructor.
      *

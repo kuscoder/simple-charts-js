@@ -1,12 +1,18 @@
 var O = Object.defineProperty;
-var _ = (c, t, s) => t in c ? O(c, t, { enumerable: !0, configurable: !0, writable: !0, value: s }) : c[t] = s;
-var i = (c, t, s) => (_(c, typeof t != "symbol" ? t + "" : t, s), s);
+var _ = (d, t, s) => t in d ? O(d, t, { enumerable: !0, configurable: !0, writable: !0, value: s }) : d[t] = s;
+var i = (d, t, s) => (_(d, typeof t != "symbol" ? t + "" : t, s), s);
+function v(d, t) {
+  let s;
+  return (...e) => {
+    clearTimeout(s), s = setTimeout(() => d(...e), t);
+  };
+}
 class b extends Error {
   constructor(t) {
     super(t), this.name = "ChartError";
   }
 }
-class h extends b {
+class n extends b {
   constructor(t) {
     super(t), this.name = "ChartOptionsError";
   }
@@ -43,9 +49,9 @@ const f = class f {
     i(this, "X_AXIS_DATA_COUNT");
     i(this, "X_AXIS_DATA_STEP");
     // Interactivity
+    i(this, "mouse");
     i(this, "isInitialized", !1);
     i(this, "rafID", 0);
-    i(this, "mouse");
     // DOM
     i(this, "containerElement");
     i(this, "wrapperElement");
@@ -53,9 +59,9 @@ const f = class f {
     i(this, "tooltipElement");
     i(this, "canvasRect");
     i(this, "ctx");
-    var r;
-    const e = f.getOptions(s), n = ((r = e.data.xAxis) == null ? void 0 : r.values.length) || 0, o = e.data.yAxis[0].values.length;
-    this.containerElement = t, this.WIDTH = e.width, this.HEIGHT = e.height, this.PADDING = e.padding, this.ROWS_COUNT = e.rowsCount, this.GUIDE_DOTS_RADIUS = e.guideDotsRadius, this.DATA = e.data, this.I18N = e.i18n, this.STYLE = e.style, this.FLAGS = e.flags, this.INSERT_METHOD = e.insertMethod, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (o - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = n && Math.round(n / this.X_AXIS_DATA_COUNT), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = this.drawChart.bind(this), this.mouse = new Proxy(
+    var o;
+    const e = f.getOptions(s), h = ((o = e.data.xAxis) == null ? void 0 : o.values.length) || 0, r = this.getAxisYDataLength(e.data.yAxis);
+    this.containerElement = t, this.WIDTH = e.width, this.HEIGHT = e.height, this.PADDING = e.padding, this.ROWS_COUNT = e.rowsCount, this.GUIDE_DOTS_RADIUS = e.guideDotsRadius, this.DATA = e.data, this.I18N = e.i18n, this.STYLE = e.style, this.FLAGS = e.flags, this.INSERT_METHOD = e.insertMethod, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (r - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = h && Math.round(h / this.X_AXIS_DATA_COUNT), this.resizeHandler = v(this.resizeHandler.bind(this), 100), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = this.drawChart.bind(this), this.mouse = new Proxy(
       {},
       {
         set: (...a) => {
@@ -71,15 +77,15 @@ const f = class f {
   }
   /** Initializes the component by appending the canvas to the container element and drawing the chart. */
   initialize() {
-    this.isInitialized || (this.isInitialized = !0, this.INSERT_METHOD === "append" ? this.containerElement.appendChild(this.wrapperElement) : this.INSERT_METHOD === "prepend" ? this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild) : this.INSERT_METHOD(this.containerElement, this.wrapperElement), this.wrapperElement.appendChild(this.canvasElement), this.wrapperElement.appendChild(this.tooltipElement), this.canvasElement.addEventListener("mousemove", this.mouseMoveHandler), this.canvasElement.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawChart());
+    this.isInitialized || (this.isInitialized = !0, this.INSERT_METHOD === "append" ? this.containerElement.appendChild(this.wrapperElement) : this.INSERT_METHOD === "prepend" ? this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild) : this.INSERT_METHOD(this.containerElement, this.wrapperElement), this.wrapperElement.appendChild(this.canvasElement), this.wrapperElement.appendChild(this.tooltipElement), window.addEventListener("resize", this.resizeHandler), window.addEventListener("orientationchange", this.resizeHandler), this.canvasElement.addEventListener("mousemove", this.mouseMoveHandler), this.canvasElement.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawChart());
   }
   /** Destroys the component from the DOM. */
   destroy() {
-    this.isInitialized && (this.isInitialized = !1, this.wrapperElement.removeChild(this.tooltipElement), this.wrapperElement.removeChild(this.canvasElement), this.containerElement.removeChild(this.wrapperElement), window.cancelAnimationFrame(this.rafID), this.canvasElement.removeEventListener("mousemove", this.mouseMoveHandler), this.canvasElement.removeEventListener("mouseleave", this.mouseLeaveHandler));
+    this.isInitialized && (this.isInitialized = !1, this.wrapperElement.removeChild(this.tooltipElement), this.wrapperElement.removeChild(this.canvasElement), this.containerElement.removeChild(this.wrapperElement), window.cancelAnimationFrame(this.rafID), window.removeEventListener("resize", this.resizeHandler), window.removeEventListener("orientationchange", this.resizeHandler), this.canvasElement.removeEventListener("mousemove", this.mouseMoveHandler), this.canvasElement.removeEventListener("mouseleave", this.mouseLeaveHandler));
   }
   /** Main method that draws the chart by clearing the canvas. */
   drawChart() {
-    this.drawBackground(), this.drawAxisX(), this.drawAxisY(), this.drawLines();
+    console.log("draw"), this.drawBackground(), this.drawAxisX(), this.drawAxisY(), this.drawLines();
   }
   /** Draws the background of the chart. */
   drawBackground() {
@@ -107,9 +113,9 @@ const f = class f {
    */
   drawGuideLinesIsOver(t) {
     if (this.mouse.x && this.mouse.y) {
-      const s = this.isMouseOverYAxisDataItem(t), e = this.PADDING / 2, n = this.DPI_HEIGHT - this.PADDING;
+      const s = this.isMouseOverYAxisDataItem(t), e = this.PADDING / 2, h = this.DPI_HEIGHT - this.PADDING;
       if (s && this.mouse.y >= e)
-        return this.FLAGS.horGuide && this.mouse.y <= n && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, e), this.ctx.lineTo(t, n), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.arc(t, e, 2, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath(), !0;
+        return this.FLAGS.horGuide && this.mouse.y <= h && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, e), this.ctx.lineTo(t, h), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.arc(t, e, 2, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath(), !0;
     }
     return !1;
   }
@@ -128,23 +134,12 @@ const f = class f {
     for (const t of this.DATA.yAxis) {
       let s = null, e = null;
       this.ctx.strokeStyle = t.color, this.ctx.beginPath();
-      for (let n = 0; n < t.values.length; n++) {
-        const o = this.getX(n), r = this.getY(t.values[n]);
-        this.ctx.lineTo(o, r), this.isMouseOverYAxisDataItem(o) && (s = o, e = r);
+      for (let h = 0; h < t.values.length; h++) {
+        const r = this.getX(h), o = this.getY(t.values[h]);
+        this.ctx.lineTo(r, o), this.isMouseOverYAxisDataItem(r) && (s = r, e = o);
       }
       this.ctx.stroke(), this.ctx.closePath(), s && e && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2 && (this.ctx.beginPath(), this.ctx.arc(s, e, this.GUIDE_DOTS_RADIUS, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath());
     }
-  }
-  /**
-   * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
-   *
-   * @param {number} x - The x-axis data item coordinate to check.
-   * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
-   */
-  isMouseOverYAxisDataItem(t) {
-    var e;
-    const s = (e = this.DATA.xAxis) == null ? void 0 : e.values.length;
-    return !s || !this.mouse.x ? !1 : Math.abs(t - this.mouse.x) < this.DPI_WIDTH / s / 2;
   }
   /** Event handler that updates the mouse position by canvas coordinates. */
   mouseMoveHandler(t) {
@@ -154,6 +149,10 @@ const f = class f {
   mouseLeaveHandler() {
     this.mouse.x = null, this.mouse.y = null;
   }
+  /** Event handler that update the chart interactivity when the window is resized. */
+  resizeHandler() {
+    this.canvasRect = this.canvasElement.getBoundingClientRect();
+  }
   /**
    * Generates boundaries for the y-axis based on the provided columns.
    *
@@ -162,9 +161,9 @@ const f = class f {
    */
   getYAxisDataBoundaries(t) {
     let s = null, e = null;
-    for (const n of t)
-      for (const o of n.values)
-        (s === null || o < s) && (s = o), (e === null || o > e) && (e = o);
+    for (const h of t)
+      for (const r of h.values)
+        (s === null || r < s) && (s = r), (e === null || r > e) && (e = r);
     return [s ?? 0, e ?? 0];
   }
   /**
@@ -174,8 +173,8 @@ const f = class f {
    * @return {string} The formatted date string in the format "day month".
    */
   getDate(t) {
-    const s = new Date(t), e = s.getDate(), n = s.getMonth();
-    return `${e} ${this.I18N.months[n]}`;
+    const s = new Date(t), e = s.getDate(), h = s.getMonth();
+    return `${e} ${this.I18N.months[h]}`;
   }
   /**
    * Converts x coordinate from x-axis data to canvas coordinate.
@@ -196,6 +195,29 @@ const f = class f {
     return this.DPI_HEIGHT - this.PADDING - t * this.Y_RATIO;
   }
   /**
+   * Calculate the maximum length of the Y-axis data.
+   *
+   * @param {?IDataAxisY[]} yAxisData - optional parameter for the Y-axis data
+   * @return {number} the maximum length of the Y-axis data.
+   */
+  getAxisYDataLength(t) {
+    t ?? (t = this.DATA.yAxis);
+    let s = 0;
+    for (const e of t)
+      e.values.length > s && (s = e.values.length);
+    return s;
+  }
+  /**
+   * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+   *
+   * @param {number} x - The x-axis data item coordinate to check.
+   * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+   */
+  isMouseOverYAxisDataItem(t) {
+    const s = this.getAxisYDataLength() - 1;
+    return !s || !this.mouse.x ? !1 : Math.abs(t - this.mouse.x) < this.DPI_WIDTH / s / 2;
+  }
+  /**
    * Validates the provided options for a chart constructor.
    *
    * @param {Partial<IChartOptions>} options - the options to be validated
@@ -207,102 +229,102 @@ const f = class f {
     const {
       width: s,
       height: e,
-      padding: n,
-      rowsCount: o,
-      guideDotsRadius: r,
+      padding: h,
+      rowsCount: r,
+      guideDotsRadius: o,
       data: { xAxis: a, yAxis: l } = {},
-      i18n: { months: d } = {},
-      style: { textFont: u, textColor: A, secondaryColor: I, backgroundColor: g } = {},
-      flags: { horGuide: w, immediateInit: E } = {},
+      i18n: { months: u } = {},
+      style: { textFont: c, textColor: A, secondaryColor: g, backgroundColor: w } = {},
+      flags: { horGuide: I, immediateInit: E } = {},
       insertMethod: x
     } = t;
     if (s) {
       if (typeof s != "number")
-        throw new h("width should be a number");
+        throw new n("width should be a number");
       if (s <= 0)
-        throw new h("width should be greater than 0");
+        throw new n("width should be greater than 0");
       if (s % 2 !== 0)
-        throw new h("width should be an even number");
+        throw new n("width should be an even number");
     }
     if (e) {
       if (typeof e != "number")
-        throw new h("height should be a number");
+        throw new n("height should be a number");
       if (e <= 0)
-        throw new h("height should be greater than 0");
+        throw new n("height should be greater than 0");
       if (e % 2 !== 0)
-        throw new h("height should be an even number");
+        throw new n("height should be an even number");
     }
-    if (n) {
-      if (typeof n != "number")
-        throw new h("padding should be a number");
-      if (n < 0)
-        throw new h("padding should be greater or equal to 0");
-    }
-    if (o) {
-      if (typeof o != "number")
-        throw new h("rowsCount should be a number");
-      if (o <= 0)
-        throw new h("rowsCount should be greater than 0");
+    if (h) {
+      if (typeof h != "number")
+        throw new n("padding should be a number");
+      if (h < 0)
+        throw new n("padding should be greater or equal to 0");
     }
     if (r) {
       if (typeof r != "number")
-        throw new h("guideDotsRadius should be a number");
+        throw new n("rowsCount should be a number");
       if (r <= 0)
-        throw new h("guideDotsRadius should be greater than 0");
+        throw new n("rowsCount should be greater than 0");
+    }
+    if (o) {
+      if (typeof o != "number")
+        throw new n("guideDotsRadius should be a number");
+      if (o <= 0)
+        throw new n("guideDotsRadius should be greater than 0");
     }
     if (a) {
       if (typeof a != "object")
-        throw new h("data.xAxis should be an object");
+        throw new n("data.xAxis should be an object");
       if (typeof a.type != "string")
-        throw new h("data.xAxis.type should be a string");
+        throw new n("data.xAxis.type should be a string");
       if (!["date"].includes(a.type))
-        throw new h('data.xAxis.type should be "date"');
+        throw new n('data.xAxis.type should be "date"');
       if (!Array.isArray(a.values))
-        throw new h("data.xAxis.values should be an array");
+        throw new n("data.xAxis.values should be an array");
       a.type === "date" && a.values.forEach((p, m) => {
         if (typeof p != "number")
-          throw new h(`data.xAxis.values[${m}] should be a number`);
+          throw new n(`data.xAxis.values[${m}] should be a number`);
       });
     }
     if (l) {
       if (!Array.isArray(l))
-        throw new h("data.columns should be an array");
+        throw new n("data.columns should be an array");
       l.forEach((p, m) => {
         if (typeof p.name != "string")
-          throw new h(`data.yAxis[${m}].name should be a string`);
+          throw new n(`data.yAxis[${m}].name should be a string`);
         if (typeof p.color != "string")
-          throw new h(`data.yAxis[${m}].color should be a string`);
+          throw new n(`data.yAxis[${m}].color should be a string`);
         if (!Array.isArray(p.values))
-          throw new h(`data.yAxis[${m}].values should be an array`);
+          throw new n(`data.yAxis[${m}].values should be an array`);
         p.values.forEach((D, T) => {
           if (typeof D != "number")
-            throw new h(`data.yAxis[${m}].values[${T}] should be a number`);
+            throw new n(`data.yAxis[${m}].values[${T}] should be a number`);
         });
       });
     }
-    if (d) {
-      if (!Array.isArray(d))
-        throw new h("i18n.months should be an array");
-      if (d.length !== 12)
-        throw new h("i18n.months should have 12 elements");
+    if (u) {
+      if (!Array.isArray(u))
+        throw new n("i18n.months should be an array");
+      if (u.length !== 12)
+        throw new n("i18n.months should have 12 elements");
     }
-    if (u && typeof u != "string")
-      throw new h("style.textFont should be a string");
+    if (c && typeof c != "string")
+      throw new n("style.textFont should be a string");
     if (A && typeof A != "string")
-      throw new h("style.textColor should be a string");
-    if (I && typeof I != "string")
-      throw new h("style.secondaryColor should be a string");
+      throw new n("style.textColor should be a string");
     if (g && typeof g != "string")
-      throw new h("style.backgroundColor should be a string");
-    if (w && typeof w != "boolean")
-      throw new h("flags.horGuide should be a boolean");
+      throw new n("style.secondaryColor should be a string");
+    if (w && typeof w != "string")
+      throw new n("style.backgroundColor should be a string");
+    if (I && typeof I != "boolean")
+      throw new n("flags.horGuide should be a boolean");
     if (E && typeof E != "boolean")
-      throw new h("flags.immediateInit should be a boolean");
+      throw new n("flags.immediateInit should be a boolean");
     if (x) {
       if (typeof x != "string" && typeof x != "function")
-        throw new h("insertMethod should be a string or function");
+        throw new n("insertMethod should be a string or function");
       if (typeof x == "string" && !["append", "prepend"].includes(x))
-        throw new h('insertMethod should be "append" or "prepend" or function');
+        throw new n('insertMethod should be "append" or "prepend" or function');
     }
   }
   /**
@@ -312,7 +334,7 @@ const f = class f {
    * @return {IChartOptions} The merged options.
    */
   static getOptions(t = {}) {
-    var s, e, n, o, r, a, l, d, u;
+    var s, e, h, r, o, a, l, u, c;
     return this.validateOptions(t), {
       width: t.width || this.presetOptions.width,
       height: t.height || this.presetOptions.height,
@@ -324,17 +346,17 @@ const f = class f {
         yAxis: ((e = t.data) == null ? void 0 : e.yAxis) || this.presetOptions.data.yAxis
       },
       i18n: {
-        months: ((n = t.i18n) == null ? void 0 : n.months) || this.presetOptions.i18n.months
+        months: ((h = t.i18n) == null ? void 0 : h.months) || this.presetOptions.i18n.months
       },
       style: {
-        textFont: ((o = t.style) == null ? void 0 : o.textFont) || this.presetOptions.style.textFont,
-        textColor: ((r = t.style) == null ? void 0 : r.textColor) || this.presetOptions.style.textColor,
+        textFont: ((r = t.style) == null ? void 0 : r.textFont) || this.presetOptions.style.textFont,
+        textColor: ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor,
         secondaryColor: ((a = t.style) == null ? void 0 : a.secondaryColor) || this.presetOptions.style.secondaryColor,
         backgroundColor: ((l = t.style) == null ? void 0 : l.backgroundColor) || this.presetOptions.style.backgroundColor
       },
       flags: {
-        horGuide: ((d = t.flags) == null ? void 0 : d.horGuide) ?? this.presetOptions.flags.horGuide,
-        immediateInit: ((u = t.flags) == null ? void 0 : u.immediateInit) ?? this.presetOptions.flags.immediateInit
+        horGuide: ((u = t.flags) == null ? void 0 : u.horGuide) ?? this.presetOptions.flags.horGuide,
+        immediateInit: ((c = t.flags) == null ? void 0 : c.immediateInit) ?? this.presetOptions.flags.immediateInit
       },
       insertMethod: t.insertMethod || this.presetOptions.insertMethod
     };
@@ -346,8 +368,8 @@ const f = class f {
    */
   // prettier-ignore
   static changePresetOptions(t = {}) {
-    var s, e, n, o, r, a, l, d, u;
-    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.guideDotsRadius = t.guideDotsRadius || this.presetOptions.guideDotsRadius, this.presetOptions.i18n.months = ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((n = t.style) == null ? void 0 : n.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((o = t.style) == null ? void 0 : o.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.style.backgroundColor = ((r = t.style) == null ? void 0 : r.backgroundColor) || this.presetOptions.style.backgroundColor, this.presetOptions.data.xAxis = ((a = t.data) == null ? void 0 : a.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((l = t.data) == null ? void 0 : l.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.flags.horGuide = ((d = t.flags) == null ? void 0 : d.horGuide) ?? this.presetOptions.flags.horGuide, this.presetOptions.flags.immediateInit = ((u = t.flags) == null ? void 0 : u.immediateInit) ?? this.presetOptions.flags.immediateInit, this.presetOptions.insertMethod = t.insertMethod || this.presetOptions.insertMethod;
+    var s, e, h, r, o, a, l, u, c;
+    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.guideDotsRadius = t.guideDotsRadius || this.presetOptions.guideDotsRadius, this.presetOptions.i18n.months = ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((h = t.style) == null ? void 0 : h.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((r = t.style) == null ? void 0 : r.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.style.backgroundColor = ((o = t.style) == null ? void 0 : o.backgroundColor) || this.presetOptions.style.backgroundColor, this.presetOptions.data.xAxis = ((a = t.data) == null ? void 0 : a.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((l = t.data) == null ? void 0 : l.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.flags.horGuide = ((u = t.flags) == null ? void 0 : u.horGuide) ?? this.presetOptions.flags.horGuide, this.presetOptions.flags.immediateInit = ((c = t.flags) == null ? void 0 : c.immediateInit) ?? this.presetOptions.flags.immediateInit, this.presetOptions.insertMethod = t.insertMethod || this.presetOptions.insertMethod;
   }
 };
 // Static options preset
@@ -380,5 +402,5 @@ let y = f;
 export {
   y as Chart,
   b as ChartError,
-  h as ChartOptionsError
+  n as ChartOptionsError
 };

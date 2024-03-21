@@ -1,3 +1,4 @@
+import { debounce } from '@/utils'
 import { ChartOptionsError } from './chart-error'
 import type { IDataAxisY, IChartOptions } from './types'
 
@@ -55,12 +56,9 @@ export class Chart {
    private readonly X_AXIS_DATA_STEP: number
 
    // Interactivity
+   private readonly mouse: { x?: number | null; y?: number | null }
    private isInitialized: boolean = false
    private rafID: number = 0
-   private readonly mouse: {
-      x?: number | null
-      y?: number | null
-   }
 
    // DOM
    private containerElement: HTMLElement
@@ -79,7 +77,7 @@ export class Chart {
    constructor(containerElement: HTMLElement, options: Partial<IChartOptions> = {}) {
       const formattedOptions = Chart.getOptions(options)
       const xLength = formattedOptions.data.xAxis?.values.length || 0
-      const yLength = formattedOptions.data.yAxis[0].values.length
+      const yLength = this.getAxisYDataLength(formattedOptions.data.yAxis)
 
       // Chart container
       this.containerElement = containerElement
@@ -101,18 +99,16 @@ export class Chart {
       this.DPI_HEIGHT = this.HEIGHT * 2
       this.VIEW_WIDTH = this.DPI_WIDTH
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
-
       this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis)
       this.X_RATIO = this.VIEW_WIDTH / (yLength - 1)
       this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0])
-
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
       this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT
-
       this.X_AXIS_DATA_COUNT = 6
       this.X_AXIS_DATA_STEP = xLength && Math.round(xLength / this.X_AXIS_DATA_COUNT)
 
       // Event handlers bindings
+      this.resizeHandler = debounce(this.resizeHandler.bind(this), 100)
       this.mouseMoveHandler = this.mouseMoveHandler.bind(this)
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
       this.drawChart = this.drawChart.bind(this)
@@ -175,6 +171,8 @@ export class Chart {
       this.wrapperElement.appendChild(this.tooltipElement)
 
       // Add event listeners and drawing
+      window.addEventListener('resize', this.resizeHandler)
+      window.addEventListener('orientationchange', this.resizeHandler)
       this.canvasElement.addEventListener('mousemove', this.mouseMoveHandler)
       this.canvasElement.addEventListener('mouseleave', this.mouseLeaveHandler)
       this.drawChart()
@@ -190,14 +188,17 @@ export class Chart {
       this.wrapperElement.removeChild(this.canvasElement)
       this.containerElement.removeChild(this.wrapperElement)
 
-      // Remove event listeners and animation frame
+      // Remove event listeners and cancel animations frames
       window.cancelAnimationFrame(this.rafID)
+      window.removeEventListener('resize', this.resizeHandler)
+      window.removeEventListener('orientationchange', this.resizeHandler)
       this.canvasElement.removeEventListener('mousemove', this.mouseMoveHandler)
       this.canvasElement.removeEventListener('mouseleave', this.mouseLeaveHandler)
    }
 
    /** Main method that draws the chart by clearing the canvas. */
    private drawChart(): void {
+      console.log('draw')
       this.drawBackground()
       this.drawAxisX()
       this.drawAxisY()
@@ -339,18 +340,6 @@ export class Chart {
       }
    }
 
-   /**
-    * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
-    *
-    * @param {number} x - The x-axis data item coordinate to check.
-    * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
-    */
-   private isMouseOverYAxisDataItem(x: number): boolean {
-      const length = this.DATA.xAxis?.values.length
-      if (!length || !this.mouse.x) return false
-      return Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
-   }
-
    /** Event handler that updates the mouse position by canvas coordinates. */
    private mouseMoveHandler(e: MouseEvent): void {
       this.canvasRect ??= this.canvasElement.getBoundingClientRect()
@@ -362,6 +351,11 @@ export class Chart {
    private mouseLeaveHandler(): void {
       this.mouse.x = null
       this.mouse.y = null
+   }
+
+   /** Event handler that update the chart interactivity when the window is resized. */
+   private resizeHandler(): void {
+      this.canvasRect = this.canvasElement.getBoundingClientRect()
    }
 
    /**
@@ -415,6 +409,35 @@ export class Chart {
     */
    private getY(y: number): number {
       return this.DPI_HEIGHT - this.PADDING - y * this.Y_RATIO
+   }
+
+   /**
+    * Calculate the maximum length of the Y-axis data.
+    *
+    * @param {?IDataAxisY[]} yAxisData - optional parameter for the Y-axis data
+    * @return {number} the maximum length of the Y-axis data.
+    */
+   private getAxisYDataLength(yAxisData?: IDataAxisY[]): number {
+      yAxisData ??= this.DATA.yAxis
+      let maxLength = 0
+
+      for (const col of yAxisData) {
+         if (col.values.length > maxLength) maxLength = col.values.length
+      }
+
+      return maxLength
+   }
+
+   /**
+    * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+    *
+    * @param {number} x - The x-axis data item coordinate to check.
+    * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+    */
+   private isMouseOverYAxisDataItem(x: number): boolean {
+      const length = this.getAxisYDataLength() - 1
+      if (!length || !this.mouse.x) return false
+      return Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
    }
 
    /**
