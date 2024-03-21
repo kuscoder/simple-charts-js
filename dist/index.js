@@ -1,12 +1,12 @@
 var O = Object.defineProperty;
-var _ = (c, t, e) => t in c ? O(c, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : c[t] = e;
-var h = (c, t, e) => (_(c, typeof t != "symbol" ? t + "" : t, e), e);
+var _ = (c, t, s) => t in c ? O(c, t, { enumerable: !0, configurable: !0, writable: !0, value: s }) : c[t] = s;
+var i = (c, t, s) => (_(c, typeof t != "symbol" ? t + "" : t, s), s);
 class b extends Error {
   constructor(t) {
     super(t), this.name = "ChartError";
   }
 }
-class i extends b {
+class h extends b {
   constructor(t) {
     super(t), this.name = "ChartOptionsError";
   }
@@ -15,60 +15,67 @@ const f = class f {
   /**
    * Constructor for creating a new instance of the Chart class.
    *
-   * @param {HTMLElement} container - the HTML element that will contain the chart
+   * @param {HTMLElement} containerElement - the HTML element that will contain the chart
    * @param {Partial<IChartOptions>} options - optional chart options
    */
-  constructor(t, e = {}) {
+  constructor(t, s = {}) {
     // Options
-    h(this, "WIDTH");
-    h(this, "HEIGHT");
-    h(this, "PADDING");
-    h(this, "ROWS_COUNT");
-    h(this, "GUIDE_DOTS_RADIUS");
-    h(this, "DATA");
-    h(this, "I18N");
-    h(this, "STYLE");
-    h(this, "FLAGS");
+    i(this, "WIDTH");
+    i(this, "HEIGHT");
+    i(this, "PADDING");
+    i(this, "ROWS_COUNT");
+    i(this, "GUIDE_DOTS_RADIUS");
+    i(this, "DATA");
+    i(this, "I18N");
+    i(this, "STYLE");
+    i(this, "FLAGS");
+    i(this, "INSERT_METHOD");
     // Calculated
-    h(this, "DPI_WIDTH");
-    h(this, "DPI_HEIGHT");
-    h(this, "VIEW_WIDTH");
-    h(this, "VIEW_HEIGHT");
-    h(this, "Y_AXIS_DATA_BOUNDARIES");
-    h(this, "X_RATIO");
-    h(this, "Y_RATIO");
-    h(this, "ROWS_STEP");
-    h(this, "TEXT_STEP");
-    h(this, "X_AXIS_DATA_COUNT");
-    h(this, "X_AXIS_DATA_STEP");
+    i(this, "DPI_WIDTH");
+    i(this, "DPI_HEIGHT");
+    i(this, "VIEW_WIDTH");
+    i(this, "VIEW_HEIGHT");
+    i(this, "Y_AXIS_DATA_BOUNDARIES");
+    i(this, "X_RATIO");
+    i(this, "Y_RATIO");
+    i(this, "ROWS_STEP");
+    i(this, "TEXT_STEP");
+    i(this, "X_AXIS_DATA_COUNT");
+    i(this, "X_AXIS_DATA_STEP");
     // Interactivity
-    h(this, "isInitialized", !1);
-    h(this, "rafID", 0);
-    h(this, "mouse");
+    i(this, "isInitialized", !1);
+    i(this, "rafID", 0);
+    i(this, "mouse");
     // DOM
-    h(this, "container");
-    h(this, "canvas");
-    h(this, "ctx");
-    h(this, "canvasRect");
+    i(this, "containerElement");
+    i(this, "wrapperElement");
+    i(this, "canvasElement");
+    i(this, "tooltipElement");
+    i(this, "canvasRect");
+    i(this, "ctx");
     var r;
-    const s = f.getOptions(e), o = ((r = s.data.xAxis) == null ? void 0 : r.values.length) || 0, a = s.data.yAxis[0].values.length;
-    this.WIDTH = s.width, this.HEIGHT = s.height, this.PADDING = s.padding, this.ROWS_COUNT = s.rowsCount, this.GUIDE_DOTS_RADIUS = s.guideDotsRadius, this.DATA = s.data, this.I18N = s.i18n, this.STYLE = s.style, this.FLAGS = s.flags, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (a - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = o && Math.round(o / this.X_AXIS_DATA_COUNT), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = this.drawChart.bind(this), this.mouse = new Proxy(
+    const e = f.getOptions(s), n = ((r = e.data.xAxis) == null ? void 0 : r.values.length) || 0, o = e.data.yAxis[0].values.length;
+    this.containerElement = t, this.WIDTH = e.width, this.HEIGHT = e.height, this.PADDING = e.padding, this.ROWS_COUNT = e.rowsCount, this.GUIDE_DOTS_RADIUS = e.guideDotsRadius, this.DATA = e.data, this.I18N = e.i18n, this.STYLE = e.style, this.FLAGS = e.flags, this.INSERT_METHOD = e.insertMethod, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (o - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = n && Math.round(n / this.X_AXIS_DATA_COUNT), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = this.drawChart.bind(this), this.mouse = new Proxy(
       {},
       {
-        set: (...n) => {
-          const l = Reflect.set(...n);
+        set: (...a) => {
+          const l = Reflect.set(...a);
           return this.rafID = window.requestAnimationFrame(this.drawChart), l;
         }
       }
-    ), this.container = t, this.canvas = document.createElement("canvas"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, this.ctx = this.canvas.getContext("2d"), this.FLAGS.immediateInit && this.initialize();
+    ), this.createDOMElements(), this.FLAGS.immediateInit && this.initialize();
+  }
+  /** Create the necessary DOM elements for the chart, but does not insert into the DOM. */
+  createDOMElements() {
+    this.wrapperElement = document.createElement("div"), this.wrapperElement.className = "simple-chart", this.canvasElement = document.createElement("canvas"), this.canvasElement.className = "simple-chart__canvas", this.canvasElement.width = this.DPI_WIDTH, this.canvasElement.height = this.DPI_HEIGHT, this.canvasElement.style.width = this.WIDTH + "px", this.canvasElement.style.height = this.HEIGHT + "px", this.ctx = this.canvasElement.getContext("2d"), this.tooltipElement = document.createElement("div"), this.tooltipElement.className = "simple-chart__tooltip";
   }
   /** Initializes the component by appending the canvas to the container element and drawing the chart. */
   initialize() {
-    this.isInitialized || (this.isInitialized = !0, this.container.appendChild(this.canvas), this.canvas.addEventListener("mousemove", this.mouseMoveHandler), this.canvas.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawChart());
+    this.isInitialized || (this.isInitialized = !0, this.INSERT_METHOD === "append" ? this.containerElement.appendChild(this.wrapperElement) : this.INSERT_METHOD === "prepend" ? this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild) : this.INSERT_METHOD(this.containerElement, this.wrapperElement), this.wrapperElement.appendChild(this.canvasElement), this.wrapperElement.appendChild(this.tooltipElement), this.canvasElement.addEventListener("mousemove", this.mouseMoveHandler), this.canvasElement.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawChart());
   }
   /** Destroys the component from the DOM. */
   destroy() {
-    this.isInitialized && (this.isInitialized = !1, window.cancelAnimationFrame(this.rafID), this.canvas.removeEventListener("mousemove", this.mouseMoveHandler), this.canvas.removeEventListener("mouseleave", this.mouseLeaveHandler), this.canvas.remove());
+    this.isInitialized && (this.isInitialized = !1, this.wrapperElement.removeChild(this.tooltipElement), this.wrapperElement.removeChild(this.canvasElement), this.containerElement.removeChild(this.wrapperElement), window.cancelAnimationFrame(this.rafID), this.canvasElement.removeEventListener("mousemove", this.mouseMoveHandler), this.canvasElement.removeEventListener("mouseleave", this.mouseLeaveHandler));
   }
   /** Main method that draws the chart by clearing the canvas. */
   drawChart() {
@@ -83,12 +90,12 @@ const f = class f {
     if (this.DATA.xAxis) {
       this.ctx.fillStyle = this.STYLE.textColor, this.ctx.font = this.STYLE.textFont, this.ctx.lineWidth = 2, this.ctx.strokeStyle = this.STYLE.secondaryColor;
       for (let t = 1; t <= this.DATA.xAxis.values.length; t++) {
-        const e = this.getX(t);
+        const s = this.getX(t);
         if ((t - 1) % this.X_AXIS_DATA_STEP === 0) {
-          const s = this.getDate(this.DATA.xAxis.values[t - 1]);
-          this.ctx.fillText(s, e, this.DPI_HEIGHT - 10);
+          const e = this.getDate(this.DATA.xAxis.values[t - 1]);
+          this.ctx.fillText(e, s, this.DPI_HEIGHT - 10);
         }
-        this.drawGuideLinesIsOver(e);
+        this.drawGuideLinesIsOver(s);
       }
     }
   }
@@ -100,9 +107,9 @@ const f = class f {
    */
   drawGuideLinesIsOver(t) {
     if (this.mouse.x && this.mouse.y) {
-      const e = this.isMouseOverYAxisDataItem(t), s = this.PADDING / 2, o = this.DPI_HEIGHT - this.PADDING;
-      if (e && this.mouse.y >= s)
-        return this.FLAGS.horGuide && this.mouse.y <= o && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, s), this.ctx.lineTo(t, o), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.arc(t, s, 2, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath(), !0;
+      const s = this.isMouseOverYAxisDataItem(t), e = this.PADDING / 2, n = this.DPI_HEIGHT - this.PADDING;
+      if (s && this.mouse.y >= e)
+        return this.FLAGS.horGuide && this.mouse.y <= n && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, e), this.ctx.lineTo(t, n), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.arc(t, e, 2, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath(), !0;
     }
     return !1;
   }
@@ -110,8 +117,8 @@ const f = class f {
   drawAxisY() {
     this.ctx.lineWidth = 1, this.ctx.strokeStyle = this.STYLE.secondaryColor, this.ctx.fillStyle = this.STYLE.textColor, this.ctx.font = this.STYLE.textFont, this.ctx.beginPath();
     for (let t = 1; t <= this.ROWS_COUNT; t++) {
-      const e = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * t)), s = t * this.ROWS_STEP + this.PADDING;
-      this.ctx.fillText(e, 5, s - 10), this.ctx.moveTo(0, s), this.ctx.lineTo(this.DPI_WIDTH, s);
+      const s = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * t)), e = t * this.ROWS_STEP + this.PADDING;
+      this.ctx.fillText(s, 5, e - 10), this.ctx.moveTo(0, e), this.ctx.lineTo(this.DPI_WIDTH, e);
     }
     this.ctx.stroke(), this.ctx.closePath();
   }
@@ -119,13 +126,13 @@ const f = class f {
   drawLines() {
     this.ctx.lineWidth = 4, this.ctx.fillStyle = this.STYLE.backgroundColor;
     for (const t of this.DATA.yAxis) {
-      let e = null, s = null;
+      let s = null, e = null;
       this.ctx.strokeStyle = t.color, this.ctx.beginPath();
-      for (let o = 0; o < t.values.length; o++) {
-        const a = this.getX(o), r = this.getY(t.values[o]);
-        this.ctx.lineTo(a, r), this.isMouseOverYAxisDataItem(a) && (e = a, s = r);
+      for (let n = 0; n < t.values.length; n++) {
+        const o = this.getX(n), r = this.getY(t.values[n]);
+        this.ctx.lineTo(o, r), this.isMouseOverYAxisDataItem(o) && (s = o, e = r);
       }
-      this.ctx.stroke(), this.ctx.closePath(), e && s && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2 && (this.ctx.beginPath(), this.ctx.arc(e, s, this.GUIDE_DOTS_RADIUS, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath());
+      this.ctx.stroke(), this.ctx.closePath(), s && e && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2 && (this.ctx.beginPath(), this.ctx.arc(s, e, this.GUIDE_DOTS_RADIUS, 0, 2 * Math.PI), this.ctx.fill(), this.ctx.stroke(), this.ctx.closePath());
     }
   }
   /**
@@ -135,13 +142,13 @@ const f = class f {
    * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
    */
   isMouseOverYAxisDataItem(t) {
-    var s;
-    const e = (s = this.DATA.xAxis) == null ? void 0 : s.values.length;
-    return !e || !this.mouse.x ? !1 : Math.abs(t - this.mouse.x) < this.DPI_WIDTH / e / 2;
+    var e;
+    const s = (e = this.DATA.xAxis) == null ? void 0 : e.values.length;
+    return !s || !this.mouse.x ? !1 : Math.abs(t - this.mouse.x) < this.DPI_WIDTH / s / 2;
   }
   /** Event handler that updates the mouse position by canvas coordinates. */
   mouseMoveHandler(t) {
-    this.canvasRect ?? (this.canvasRect = this.canvas.getBoundingClientRect()), this.mouse.x = (t.clientX - this.canvasRect.left) * 2, this.mouse.y = (t.clientY - this.canvasRect.top) * 2;
+    this.canvasRect ?? (this.canvasRect = this.canvasElement.getBoundingClientRect()), this.mouse.x = (t.clientX - this.canvasRect.left) * 2, this.mouse.y = (t.clientY - this.canvasRect.top) * 2;
   }
   /** Event handler that resets the mouse position when the mouse leaves the canvas. */
   mouseLeaveHandler() {
@@ -154,11 +161,11 @@ const f = class f {
    * @return {[number, number]} an array containing the minimum and maximum y values
    */
   getYAxisDataBoundaries(t) {
-    let e = null, s = null;
-    for (const o of t)
-      for (const a of o.values)
-        (e === null || a < e) && (e = a), (s === null || a > s) && (s = a);
-    return [e ?? 0, s ?? 0];
+    let s = null, e = null;
+    for (const n of t)
+      for (const o of n.values)
+        (s === null || o < s) && (s = o), (e === null || o > e) && (e = o);
+    return [s ?? 0, e ?? 0];
   }
   /**
    * Returns a formatted date string for x-axis based on the given timestamp.
@@ -167,8 +174,8 @@ const f = class f {
    * @return {string} The formatted date string in the format "day month".
    */
   getDate(t) {
-    const e = new Date(t), s = e.getDate(), o = e.getMonth();
-    return `${s} ${this.I18N.months[o]}`;
+    const s = new Date(t), e = s.getDate(), n = s.getMonth();
+    return `${e} ${this.I18N.months[n]}`;
   }
   /**
    * Converts x coordinate from x-axis data to canvas coordinate.
@@ -198,98 +205,105 @@ const f = class f {
   // prettier-ignore
   static validateOptions(t = {}) {
     const {
-      width: e,
-      height: s,
-      padding: o,
-      rowsCount: a,
+      width: s,
+      height: e,
+      padding: n,
+      rowsCount: o,
       guideDotsRadius: r,
-      data: { xAxis: n, yAxis: l } = {},
+      data: { xAxis: a, yAxis: l } = {},
       i18n: { months: d } = {},
-      style: { textFont: u, textColor: I, secondaryColor: g, backgroundColor: y } = {},
-      flags: { horGuide: p, immediateInit: D } = {}
+      style: { textFont: u, textColor: A, secondaryColor: I, backgroundColor: g } = {},
+      flags: { horGuide: w, immediateInit: E } = {},
+      insertMethod: x
     } = t;
-    if (e) {
-      if (typeof e != "number")
-        throw new i("width should be a number");
-      if (e <= 0)
-        throw new i("width should be greater than 0");
-      if (e % 2 !== 0)
-        throw new i("width should be an even number");
-    }
     if (s) {
       if (typeof s != "number")
-        throw new i("height should be a number");
+        throw new h("width should be a number");
       if (s <= 0)
-        throw new i("height should be greater than 0");
+        throw new h("width should be greater than 0");
       if (s % 2 !== 0)
-        throw new i("height should be an even number");
+        throw new h("width should be an even number");
+    }
+    if (e) {
+      if (typeof e != "number")
+        throw new h("height should be a number");
+      if (e <= 0)
+        throw new h("height should be greater than 0");
+      if (e % 2 !== 0)
+        throw new h("height should be an even number");
+    }
+    if (n) {
+      if (typeof n != "number")
+        throw new h("padding should be a number");
+      if (n < 0)
+        throw new h("padding should be greater or equal to 0");
     }
     if (o) {
       if (typeof o != "number")
-        throw new i("padding should be a number");
-      if (o < 0)
-        throw new i("padding should be greater or equal to 0");
-    }
-    if (a) {
-      if (typeof a != "number")
-        throw new i("rowsCount should be a number");
-      if (a <= 0)
-        throw new i("rowsCount should be greater than 0");
+        throw new h("rowsCount should be a number");
+      if (o <= 0)
+        throw new h("rowsCount should be greater than 0");
     }
     if (r) {
       if (typeof r != "number")
-        throw new i("guideDotsRadius should be a number");
+        throw new h("guideDotsRadius should be a number");
       if (r <= 0)
-        throw new i("guideDotsRadius should be greater than 0");
+        throw new h("guideDotsRadius should be greater than 0");
     }
-    if (n) {
-      if (typeof n != "object")
-        throw new i("data.xAxis should be an object");
-      if (typeof n.type != "string")
-        throw new i("data.xAxis.type should be a string");
-      if (!["date"].includes(n.type))
-        throw new i('data.xAxis.type should be "date"');
-      if (!Array.isArray(n.values))
-        throw new i("data.xAxis.values should be an array");
-      n.type === "date" && n.values.forEach((x, A) => {
-        if (typeof x != "number")
-          throw new i(`data.xAxis.values[${A}] should be a number`);
+    if (a) {
+      if (typeof a != "object")
+        throw new h("data.xAxis should be an object");
+      if (typeof a.type != "string")
+        throw new h("data.xAxis.type should be a string");
+      if (!["date"].includes(a.type))
+        throw new h('data.xAxis.type should be "date"');
+      if (!Array.isArray(a.values))
+        throw new h("data.xAxis.values should be an array");
+      a.type === "date" && a.values.forEach((p, m) => {
+        if (typeof p != "number")
+          throw new h(`data.xAxis.values[${m}] should be a number`);
       });
     }
     if (l) {
       if (!Array.isArray(l))
-        throw new i("data.columns should be an array");
-      l.forEach((x, A) => {
-        if (typeof x.name != "string")
-          throw new i(`data.yAxis[${A}].name should be a string`);
-        if (typeof x.color != "string")
-          throw new i(`data.yAxis[${A}].color should be a string`);
-        if (!Array.isArray(x.values))
-          throw new i(`data.yAxis[${A}].values should be an array`);
-        x.values.forEach((m, T) => {
-          if (typeof m != "number")
-            throw new i(`data.yAxis[${A}].values[${T}] should be a number`);
+        throw new h("data.columns should be an array");
+      l.forEach((p, m) => {
+        if (typeof p.name != "string")
+          throw new h(`data.yAxis[${m}].name should be a string`);
+        if (typeof p.color != "string")
+          throw new h(`data.yAxis[${m}].color should be a string`);
+        if (!Array.isArray(p.values))
+          throw new h(`data.yAxis[${m}].values should be an array`);
+        p.values.forEach((D, T) => {
+          if (typeof D != "number")
+            throw new h(`data.yAxis[${m}].values[${T}] should be a number`);
         });
       });
     }
     if (d) {
       if (!Array.isArray(d))
-        throw new i("i18n.months should be an array");
+        throw new h("i18n.months should be an array");
       if (d.length !== 12)
-        throw new i("i18n.months should have 12 elements");
+        throw new h("i18n.months should have 12 elements");
     }
     if (u && typeof u != "string")
-      throw new i("style.textFont should be a string");
+      throw new h("style.textFont should be a string");
+    if (A && typeof A != "string")
+      throw new h("style.textColor should be a string");
     if (I && typeof I != "string")
-      throw new i("style.textColor should be a string");
+      throw new h("style.secondaryColor should be a string");
     if (g && typeof g != "string")
-      throw new i("style.secondaryColor should be a string");
-    if (y && typeof y != "string")
-      throw new i("style.backgroundColor should be a string");
-    if (p && typeof p != "boolean")
-      throw new i("flags.horGuide should be a boolean");
-    if (D && typeof D != "boolean")
-      throw new i("flags.immediateInit should be a boolean");
+      throw new h("style.backgroundColor should be a string");
+    if (w && typeof w != "boolean")
+      throw new h("flags.horGuide should be a boolean");
+    if (E && typeof E != "boolean")
+      throw new h("flags.immediateInit should be a boolean");
+    if (x) {
+      if (typeof x != "string" && typeof x != "function")
+        throw new h("insertMethod should be a string or function");
+      if (typeof x == "string" && !["append", "prepend"].includes(x))
+        throw new h('insertMethod should be "append" or "prepend" or function');
+    }
   }
   /**
    * Returns the formatted options for the chart constructor by merging the provided options with the preset options.
@@ -298,7 +312,7 @@ const f = class f {
    * @return {IChartOptions} The merged options.
    */
   static getOptions(t = {}) {
-    var e, s, o, a, r, n, l, d, u;
+    var s, e, n, o, r, a, l, d, u;
     return this.validateOptions(t), {
       width: t.width || this.presetOptions.width,
       height: t.height || this.presetOptions.height,
@@ -306,22 +320,23 @@ const f = class f {
       rowsCount: t.rowsCount || this.presetOptions.rowsCount,
       guideDotsRadius: t.guideDotsRadius || this.presetOptions.guideDotsRadius,
       data: {
-        xAxis: ((e = t.data) == null ? void 0 : e.xAxis) || this.presetOptions.data.xAxis,
-        yAxis: ((s = t.data) == null ? void 0 : s.yAxis) || this.presetOptions.data.yAxis
+        xAxis: ((s = t.data) == null ? void 0 : s.xAxis) || this.presetOptions.data.xAxis,
+        yAxis: ((e = t.data) == null ? void 0 : e.yAxis) || this.presetOptions.data.yAxis
       },
       i18n: {
-        months: ((o = t.i18n) == null ? void 0 : o.months) || this.presetOptions.i18n.months
+        months: ((n = t.i18n) == null ? void 0 : n.months) || this.presetOptions.i18n.months
       },
       style: {
-        textFont: ((a = t.style) == null ? void 0 : a.textFont) || this.presetOptions.style.textFont,
+        textFont: ((o = t.style) == null ? void 0 : o.textFont) || this.presetOptions.style.textFont,
         textColor: ((r = t.style) == null ? void 0 : r.textColor) || this.presetOptions.style.textColor,
-        secondaryColor: ((n = t.style) == null ? void 0 : n.secondaryColor) || this.presetOptions.style.secondaryColor,
+        secondaryColor: ((a = t.style) == null ? void 0 : a.secondaryColor) || this.presetOptions.style.secondaryColor,
         backgroundColor: ((l = t.style) == null ? void 0 : l.backgroundColor) || this.presetOptions.style.backgroundColor
       },
       flags: {
         horGuide: ((d = t.flags) == null ? void 0 : d.horGuide) ?? this.presetOptions.flags.horGuide,
         immediateInit: ((u = t.flags) == null ? void 0 : u.immediateInit) ?? this.presetOptions.flags.immediateInit
-      }
+      },
+      insertMethod: t.insertMethod || this.presetOptions.insertMethod
     };
   }
   /**
@@ -331,12 +346,12 @@ const f = class f {
    */
   // prettier-ignore
   static changePresetOptions(t = {}) {
-    var e, s, o, a, r, n, l, d, u;
-    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.guideDotsRadius = t.guideDotsRadius || this.presetOptions.guideDotsRadius, this.presetOptions.i18n.months = ((e = t.i18n) == null ? void 0 : e.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((s = t.style) == null ? void 0 : s.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((o = t.style) == null ? void 0 : o.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((a = t.style) == null ? void 0 : a.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.style.backgroundColor = ((r = t.style) == null ? void 0 : r.backgroundColor) || this.presetOptions.style.backgroundColor, this.presetOptions.data.xAxis = ((n = t.data) == null ? void 0 : n.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((l = t.data) == null ? void 0 : l.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.flags.horGuide = ((d = t.flags) == null ? void 0 : d.horGuide) ?? this.presetOptions.flags.horGuide, this.presetOptions.flags.immediateInit = ((u = t.flags) == null ? void 0 : u.immediateInit) ?? this.presetOptions.flags.immediateInit;
+    var s, e, n, o, r, a, l, d, u;
+    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.guideDotsRadius = t.guideDotsRadius || this.presetOptions.guideDotsRadius, this.presetOptions.i18n.months = ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((n = t.style) == null ? void 0 : n.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((o = t.style) == null ? void 0 : o.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.style.backgroundColor = ((r = t.style) == null ? void 0 : r.backgroundColor) || this.presetOptions.style.backgroundColor, this.presetOptions.data.xAxis = ((a = t.data) == null ? void 0 : a.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((l = t.data) == null ? void 0 : l.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.flags.horGuide = ((d = t.flags) == null ? void 0 : d.horGuide) ?? this.presetOptions.flags.horGuide, this.presetOptions.flags.immediateInit = ((u = t.flags) == null ? void 0 : u.immediateInit) ?? this.presetOptions.flags.immediateInit, this.presetOptions.insertMethod = t.insertMethod || this.presetOptions.insertMethod;
   }
 };
 // Static options preset
-h(f, "presetOptions", {
+i(f, "presetOptions", {
   width: 600,
   height: 250,
   padding: 40,
@@ -358,11 +373,12 @@ h(f, "presetOptions", {
   flags: {
     horGuide: !0,
     immediateInit: !0
-  }
+  },
+  insertMethod: "append"
 });
-let w = f;
+let y = f;
 export {
-  w as Chart,
+  y as Chart,
   b as ChartError,
-  i as ChartOptionsError
+  h as ChartOptionsError
 };

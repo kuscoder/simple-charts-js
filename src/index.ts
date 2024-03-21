@@ -8,3 +8,4 @@ export type * from '@/lib/types'
 // TODO: Controls and hints in example
 // TODO: Vector2 util
 // TODO: Resize handling
+// TODO: Chart insert into DOM custom \ variuos method

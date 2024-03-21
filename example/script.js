@@ -72,7 +72,9 @@ async function main() {
       flags: {
          horGuide: true,
          immediateInit: true
-      }
+      },
+
+      insertMethod: 'append'
    })
 
    // Manual chart initialization / destroying test

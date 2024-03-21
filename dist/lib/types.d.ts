@@ -30,4 +30,5 @@ export interface IChartOptions {
         horGuide: boolean;
         immediateInit: boolean;
     };
+    insertMethod: 'append' | 'prepend' | ((containerElement: HTMLElement, chartWrapperElement: HTMLDivElement) => void);
 }

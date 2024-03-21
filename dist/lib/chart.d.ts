@@ -10,6 +10,7 @@ export declare class Chart {
     private readonly I18N;
     private readonly STYLE;
     private readonly FLAGS;
+    private readonly INSERT_METHOD;
     private readonly DPI_WIDTH;
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;
@@ -24,17 +25,21 @@ export declare class Chart {
     private isInitialized;
     private rafID;
     private readonly mouse;
-    private readonly container;
-    private readonly canvas;
-    private readonly ctx;
+    private containerElement;
+    private wrapperElement;
+    private canvasElement;
+    private tooltipElement;
     private canvasRect;
+    private ctx;
     /**
      * Constructor for creating a new instance of the Chart class.
      *
-     * @param {HTMLElement} container - the HTML element that will contain the chart
+     * @param {HTMLElement} containerElement - the HTML element that will contain the chart
      * @param {Partial<IChartOptions>} options - optional chart options
      */
-    constructor(container: HTMLElement, options?: Partial<IChartOptions>);
+    constructor(containerElement: HTMLElement, options?: Partial<IChartOptions>);
+    /** Create the necessary DOM elements for the chart, but does not insert into the DOM. */
+    private createDOMElements;
     /** Initializes the component by appending the canvas to the container element and drawing the chart. */
     initialize(): void;
     /** Destroys the component from the DOM. */

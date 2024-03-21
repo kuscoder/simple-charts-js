@@ -25,7 +25,8 @@ export class Chart {
       flags: {
          horGuide: true,
          immediateInit: true
-      }
+      },
+      insertMethod: 'append'
    }
 
    // Options
@@ -38,6 +39,7 @@ export class Chart {
    private readonly I18N: IChartOptions['i18n']
    private readonly STYLE: IChartOptions['style']
    private readonly FLAGS: IChartOptions['flags']
+   private readonly INSERT_METHOD: IChartOptions['insertMethod']
 
    // Calculated
    private readonly DPI_WIDTH: number
@@ -55,28 +57,32 @@ export class Chart {
    // Interactivity
    private isInitialized: boolean = false
    private rafID: number = 0
-
    private readonly mouse: {
       x?: number | null
       y?: number | null
    }
 
    // DOM
-   private readonly container: HTMLElement
-   private readonly canvas: HTMLCanvasElement
-   private readonly ctx: CanvasRenderingContext2D
+   private containerElement: HTMLElement
+   private wrapperElement: HTMLDivElement
+   private canvasElement: HTMLCanvasElement
+   private tooltipElement: HTMLDivElement
    private canvasRect: DOMRect | null
+   private ctx: CanvasRenderingContext2D
 
    /**
     * Constructor for creating a new instance of the Chart class.
     *
-    * @param {HTMLElement} container - the HTML element that will contain the chart
+    * @param {HTMLElement} containerElement - the HTML element that will contain the chart
     * @param {Partial<IChartOptions>} options - optional chart options
     */
-   constructor(container: HTMLElement, options: Partial<IChartOptions> = {}) {
+   constructor(containerElement: HTMLElement, options: Partial<IChartOptions> = {}) {
       const formattedOptions = Chart.getOptions(options)
       const xLength = formattedOptions.data.xAxis?.values.length || 0
       const yLength = formattedOptions.data.yAxis[0].values.length
+
+      // Chart container
+      this.containerElement = containerElement
 
       // Options
       this.WIDTH = formattedOptions.width
@@ -88,6 +94,7 @@ export class Chart {
       this.I18N = formattedOptions.i18n
       this.STYLE = formattedOptions.style
       this.FLAGS = formattedOptions.flags
+      this.INSERT_METHOD = formattedOptions.insertMethod
 
       // Calculated
       this.DPI_WIDTH = this.WIDTH * 2
@@ -122,14 +129,8 @@ export class Chart {
          }
       )
 
-      // HTML Elements
-      this.container = container
-      this.canvas = document.createElement('canvas')
-      this.canvas.style.width = this.WIDTH + 'px'
-      this.canvas.style.height = this.HEIGHT + 'px'
-      this.canvas.width = this.DPI_WIDTH
-      this.canvas.height = this.DPI_HEIGHT
-      this.ctx = this.canvas.getContext('2d')!
+      // Create chart DOM elements
+      this.createDOMElements()
 
       // Initialize if in immediate mode
       if (this.FLAGS.immediateInit) {
@@ -137,14 +138,45 @@ export class Chart {
       }
    }
 
+   /** Create the necessary DOM elements for the chart, but does not insert into the DOM. */
+   private createDOMElements(): void {
+      // Chart wrapper
+      this.wrapperElement = document.createElement('div')
+      this.wrapperElement.className = 'simple-chart'
+
+      // Canvas
+      this.canvasElement = document.createElement('canvas')
+      this.canvasElement.className = 'simple-chart__canvas'
+      this.canvasElement.width = this.DPI_WIDTH
+      this.canvasElement.height = this.DPI_HEIGHT
+      this.canvasElement.style.width = this.WIDTH + 'px'
+      this.canvasElement.style.height = this.HEIGHT + 'px'
+      this.ctx = this.canvasElement.getContext('2d')!
+
+      // Tooltip
+      this.tooltipElement = document.createElement('div')
+      this.tooltipElement.className = 'simple-chart__tooltip'
+   }
+
    /** Initializes the component by appending the canvas to the container element and drawing the chart. */
    public initialize(): void {
       if (this.isInitialized) return
       this.isInitialized = true
 
-      this.container.appendChild(this.canvas)
-      this.canvas.addEventListener('mousemove', this.mouseMoveHandler)
-      this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler)
+      // Insert into DOM
+      if (this.INSERT_METHOD === 'append') {
+         this.containerElement.appendChild(this.wrapperElement)
+      } else if (this.INSERT_METHOD === 'prepend') {
+         this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild)
+      } else {
+         this.INSERT_METHOD(this.containerElement, this.wrapperElement)
+      }
+      this.wrapperElement.appendChild(this.canvasElement)
+      this.wrapperElement.appendChild(this.tooltipElement)
+
+      // Add event listeners and drawing
+      this.canvasElement.addEventListener('mousemove', this.mouseMoveHandler)
+      this.canvasElement.addEventListener('mouseleave', this.mouseLeaveHandler)
       this.drawChart()
    }
 
@@ -153,10 +185,15 @@ export class Chart {
       if (!this.isInitialized) return
       this.isInitialized = false
 
+      // Delete from DOM
+      this.wrapperElement.removeChild(this.tooltipElement)
+      this.wrapperElement.removeChild(this.canvasElement)
+      this.containerElement.removeChild(this.wrapperElement)
+
+      // Remove event listeners and animation frame
       window.cancelAnimationFrame(this.rafID)
-      this.canvas.removeEventListener('mousemove', this.mouseMoveHandler)
-      this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler)
-      this.canvas.remove()
+      this.canvasElement.removeEventListener('mousemove', this.mouseMoveHandler)
+      this.canvasElement.removeEventListener('mouseleave', this.mouseLeaveHandler)
    }
 
    /** Main method that draws the chart by clearing the canvas. */
@@ -316,7 +353,7 @@ export class Chart {
 
    /** Event handler that updates the mouse position by canvas coordinates. */
    private mouseMoveHandler(e: MouseEvent): void {
-      this.canvasRect ??= this.canvas.getBoundingClientRect()
+      this.canvasRect ??= this.canvasElement.getBoundingClientRect()
       this.mouse.x = (e.clientX - this.canvasRect.left) * 2
       this.mouse.y = (e.clientY - this.canvasRect.top) * 2
    }
@@ -398,7 +435,8 @@ export class Chart {
          data: { xAxis, yAxis } = {},
          i18n: { months } = {},
          style: { textFont, textColor, secondaryColor, backgroundColor } = {},
-         flags: { horGuide, immediateInit } = {}
+         flags: { horGuide, immediateInit } = {},
+         insertMethod
       } = options
 
       if (width) {
@@ -484,6 +522,13 @@ export class Chart {
       if (immediateInit) {
          if (typeof immediateInit !== 'boolean') throw new ChartOptionsError('flags.immediateInit should be a boolean')
       }
+
+      if (insertMethod) {
+         if (typeof insertMethod !== 'string' && typeof insertMethod !== 'function') throw new ChartOptionsError('insertMethod should be a string or function')
+         if (typeof insertMethod === 'string') {
+            if (!['append', 'prepend'].includes(insertMethod)) throw new ChartOptionsError('insertMethod should be "append" or "prepend" or function')
+         }
+      }
    }
 
    /**
@@ -517,7 +562,8 @@ export class Chart {
          flags: {
             horGuide: options.flags?.horGuide ?? this.presetOptions.flags.horGuide,
             immediateInit: options.flags?.immediateInit ?? this.presetOptions.flags.immediateInit
-         }
+         },
+         insertMethod: options.insertMethod || this.presetOptions.insertMethod
       }
    }
 
@@ -543,5 +589,6 @@ export class Chart {
       this.presetOptions.data.yAxis            = options.data?.yAxis            || this.presetOptions.data.yAxis
       this.presetOptions.flags.horGuide        = options.flags?.horGuide        ?? this.presetOptions.flags.horGuide
       this.presetOptions.flags.immediateInit   = options.flags?.immediateInit   ?? this.presetOptions.flags.immediateInit
+      this.presetOptions.insertMethod          = options.insertMethod           || this.presetOptions.insertMethod
    }
 }

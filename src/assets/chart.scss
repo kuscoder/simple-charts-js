@@ -1,3 +1,9 @@
-.chart {
-   display: block;
+.simple-chart {
+   &__canvas {
+      display: block;
+   }
+
+   &__tooltip {
+      display: none;
+   }
 }
