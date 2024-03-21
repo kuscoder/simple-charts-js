@@ -8,9 +8,8 @@ async function main() {
       height: 250,
       padding: 40,
       rowsCount: 5,
-
       data: {
-         xAxis: {
+         timeline: {
             type: 'date',
             values: [
                1542412800000, 1542499200000, 1542585600000, 1542672000000, 1542758400000, 1542844800000, 1542931200000,
@@ -31,7 +30,7 @@ async function main() {
                1551484800000, 1551571200000, 1551657600000, 1551744000000, 1551830400000, 1551916800000, 1552003200000
             ]
          },
-         yAxis: [
+         vertices: [
             {
                name: 'y0',
                color: 'green',
@@ -56,19 +55,22 @@ async function main() {
             }
          ]
       },
-
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
-
+      interactivity: {
+         horisontalGuide: true,
+         guideDotsRadius: 8,
+         fpsLimit: 60
+      },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
-         secondaryColor: '#bbbbbb'
+         secondaryColor: '#bbbbbb',
+         backgroundColor: '#ffffff'
       },
-
-      flags: {
-         horGuide: true,
+      technical: {
+         insertMethod: 'append',
          immediateInit: true
       }
    })
