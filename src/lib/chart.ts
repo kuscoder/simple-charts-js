@@ -64,7 +64,12 @@ export class Chart {
    private readonly ctx: CanvasRenderingContext2D
    private canvasRect: DOMRect | null
 
-   /** */
+   /**
+    * Constructor for creating a new instance of the Chart class.
+    *
+    * @param {HTMLElement} container - the HTML element that will contain the chart
+    * @param {Partial<IChartOptions>} options - optional chart options
+    */
    constructor(container: HTMLElement, options: Partial<IChartOptions> = {}) {
       const formattedOptions = Chart.getOptions(options)
       const xLength = formattedOptions.data.xAxis?.values.length || 0
@@ -99,7 +104,7 @@ export class Chart {
       // Event handlers bindings
       this.mouseMoveHandler = this.mouseMoveHandler.bind(this)
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
-      this.drawGraph = this.drawGraph.bind(this)
+      this.drawChart = this.drawChart.bind(this)
 
       // Interactivity
       this.mouse = new Proxy(
@@ -107,7 +112,7 @@ export class Chart {
          {
             set: (...args) => {
                const result = Reflect.set(...args)
-               this.rafID = window.requestAnimationFrame(this.drawGraph)
+               this.rafID = window.requestAnimationFrame(this.drawChart)
                return result
             }
          }
@@ -128,19 +133,19 @@ export class Chart {
       }
    }
 
-   /** Initializes the component by appending the canvas to the container element and drawing the chart */
-   public initialize() {
+   /** Initializes the component by appending the canvas to the container element and drawing the chart. */
+   public initialize(): void {
       if (this.isInitialized) return
       this.isInitialized = true
 
       this.container.appendChild(this.canvas)
       this.canvas.addEventListener('mousemove', this.mouseMoveHandler)
       this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler)
-      this.drawGraph()
+      this.drawChart()
    }
 
-   /** Destroys the component from the DOM */
-   public destroy() {
+   /** Destroys the component from the DOM. */
+   public destroy(): void {
       if (!this.isInitialized) return
       this.isInitialized = false
 
@@ -150,21 +155,21 @@ export class Chart {
       this.canvas.remove()
    }
 
-   /** */
-   private drawGraph() {
+   /** Main method that draws the chart by clearing the canvas. */
+   private drawChart(): void {
       this.clearAll()
       this.drawAxisX()
       this.drawAxisY()
       this.drawLines()
    }
 
-   /** */
-   private clearAll() {
+   /** Сlears the entire canvas. */
+   private clearAll(): void {
       this.ctx.clearRect(0, 0, this.DPI_WIDTH, this.DPI_HEIGHT)
    }
 
-   /** */
-   private drawAxisX() {
+   /** Draws the X axis of the chart and guide lines. */
+   private drawAxisX(): void {
       if (!this.DATA.xAxis) return
 
       // For X axis
@@ -185,11 +190,12 @@ export class Chart {
          }
 
          // Draw guides
-         this.drawGuides(x)
+         this.drawGuideLines(x)
       }
    }
 
-   private drawGuides(x: number) {
+   /** Draws the guide lines. */
+   private drawGuideLines(x: number): void {
       if (!this.mouse.x || !this.mouse.y) return
 
       const length = this.DATA.xAxis?.values.length || 0
@@ -216,8 +222,8 @@ export class Chart {
       }
    }
 
-   /** */
-   private drawAxisY() {
+   /** Draws the Y axis of the chart. */
+   private drawAxisY(): void {
       this.ctx.lineWidth = 1
       this.ctx.strokeStyle = this.STYLE.secondaryColor
       this.ctx.fillStyle = this.STYLE.textColor
@@ -236,8 +242,8 @@ export class Chart {
       this.ctx.closePath()
    }
 
-   /** */
-   private drawLines() {
+   /** Draws the lines of the chart. */
+   private drawLines(): void {
       this.ctx.lineWidth = 4
 
       for (const col of this.DATA.yAxis) {
@@ -255,53 +261,79 @@ export class Chart {
       }
    }
 
-   /** */
-   private mouseMoveHandler(e: MouseEvent) {
+   /** Event handler that updates the mouse position by canvas coordinates. */
+   private mouseMoveHandler(e: MouseEvent): void {
       this.canvasRect ??= this.canvas.getBoundingClientRect()
       this.mouse.x = (e.clientX - this.canvasRect.left) * 2
       this.mouse.y = (e.clientY - this.canvasRect.top) * 2
    }
 
-   /** */
-   private mouseLeaveHandler() {
+   /** Event handler that resets the mouse position when the mouse leaves the canvas. */
+   private mouseLeaveHandler(): void {
       this.mouse.x = null
       this.mouse.y = null
    }
 
-   /** */
-   private getBoundariesY(columns: IDataAxisY[]) {
+   /**
+    * Generates boundaries for the y-axis based on the provided columns.
+    *
+    * @param {IDataAxisY[]} columns - an array of data axis Y values
+    * @return {[number, number]} an array containing the minimum and maximum y values
+    */
+   private getBoundariesY(columns: IDataAxisY[]): [number, number] {
       let yMin: number | null = null
       let yMax: number | null = null
 
       for (const col of columns) {
          for (const y of col.values) {
-            yMin = yMin === null || y < yMin ? y : yMin
-            yMax = yMax === null || y > yMax ? y : yMax
+            if (yMin === null || y < yMin) yMin = y
+            if (yMax === null || y > yMax) yMax = y
          }
       }
 
-      return [yMin, yMax] as [number, number]
+      return [yMin ?? 0, yMax ?? 0]
    }
 
-   /** */
-   private getDate(timestamp: number) {
+   /**
+    * Returns a formatted date string for x-axis based on the given timestamp.
+    *
+    * @param {number} timestamp - The timestamp to convert to a date.
+    * @return {string} The formatted date string in the format "day month".
+    */
+   private getDate(timestamp: number): string {
       const date = new Date(timestamp)
       const day = date.getDate()
       const month = date.getMonth()
       return `${day} ${this.I18N.months[month]}`
    }
 
-   /** */
-   private getX(x: number) {
+   /**
+    * Converts x coordinate from x-axis data to canvas coordinate.
+    *
+    * @param {number} x - x coordinate in x-axis data
+    * @return {number} x coordinate in canvas
+    */
+   private getX(x: number): number {
       return x * this.X_RATIO
    }
 
-   /** */
-   private getY(y: number) {
+   /**
+    * Converts x coordinate from y-axis data to canvas coordinate.
+    *
+    * @param {number} y - y coordinate in y-axis data
+    * @return {number} y coordinate in canvas
+    */
+   private getY(y: number): number {
       return this.DPI_HEIGHT - this.PADDING - y * this.Y_RATIO
    }
 
-   /** */
+   /**
+    * Validates the provided options for a chart constructor.
+    *
+    * @param {Partial<IChartOptions>} options - the options to be validated
+    * @throws {ChartOptionsError} if the options are invalid
+    * @return {void}
+    */
    private static validateOptions(options: Partial<IChartOptions> = {}): void {
       const {
          width,
@@ -390,7 +422,12 @@ export class Chart {
       }
    }
 
-   /** */
+   /**
+    * Returns the formatted options for the chart constructor by merging the provided options with the preset options.
+    *
+    * @param {Partial<IChartOptions>} options - The options to merge with the preset options.
+    * @return {IChartOptions} The merged options.
+    */
    private static getOptions(options: Partial<IChartOptions> = {}): IChartOptions {
       this.validateOptions(options)
 
@@ -423,7 +460,7 @@ export class Chart {
     *
     * @param {Partial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
     */
-   public static changePresetOptions(options: Partial<IChartOptions> = {}) {
+   public static changePresetOptions(options: Partial<IChartOptions> = {}): void {
       this.validateOptions(options)
       this.presetOptions.width = options.width || this.presetOptions.width
       this.presetOptions.height = options.height || this.presetOptions.height
