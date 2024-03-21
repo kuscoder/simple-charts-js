@@ -58,10 +58,9 @@ export class Chart {
    private isInitialized: boolean = false
    private rafID: number = 0
 
-   private readonly mouse = {
-      isOver: false,
-      x: 0,
-      y: 0
+   private readonly mouse: {
+      x?: number | null
+      y?: number | null
    }
 
    // DOM
@@ -111,19 +110,21 @@ export class Chart {
       this.X_AXIS_DATA_STEP = xLength && Math.round(xLength / this.X_AXIS_DATA_COUNT)
 
       // Event handlers bindings
-      this.mouseEnterHandler = this.mouseEnterHandler.bind(this)
       this.mouseMoveHandler = this.mouseMoveHandler.bind(this)
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
       this.drawGraph = this.drawGraph.bind(this)
 
       // Interactivity
-      this.mouse = new Proxy(this.mouse, {
-         set: (...args) => {
-            const result = Reflect.set(...args)
-            this.rafID = window.requestAnimationFrame(this.drawGraph)
-            return result
+      this.mouse = new Proxy(
+         {},
+         {
+            set: (...args) => {
+               const result = Reflect.set(...args)
+               this.rafID = window.requestAnimationFrame(this.drawGraph)
+               return result
+            }
          }
-      })
+      )
 
       // HTML Elements
       this.container = container
@@ -146,7 +147,6 @@ export class Chart {
       this.isInitialized = true
 
       this.container.appendChild(this.canvas)
-      this.canvas.addEventListener('mouseenter', this.mouseEnterHandler)
       this.canvas.addEventListener('mousemove', this.mouseMoveHandler)
       this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler)
       this.drawGraph()
@@ -158,7 +158,6 @@ export class Chart {
       this.isInitialized = false
 
       window.cancelAnimationFrame(this.rafID)
-      this.canvas.removeEventListener('mouseenter', this.mouseEnterHandler)
       this.canvas.removeEventListener('mousemove', this.mouseMoveHandler)
       this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler)
       this.canvas.remove()
@@ -199,13 +198,13 @@ export class Chart {
          }
 
          // Draw guides
-         if (this.mouse.isOver) {
-            this.drawGuides(x)
-         }
+         this.drawGuides(x)
       }
    }
 
    private drawGuides(x: number) {
+      if (!this.mouse.x || !this.mouse.y) return
+
       const length = this.DATA.xAxis?.values.length || 0
       const isOver = length && Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
 
@@ -268,11 +267,6 @@ export class Chart {
    }
 
    /** */
-   private mouseEnterHandler() {
-      this.mouse.isOver = true
-   }
-
-   /** */
    private mouseMoveHandler(e: MouseEvent) {
       this.canvasRect ??= this.canvas.getBoundingClientRect()
       this.mouse.x = (e.clientX - this.canvasRect.left) * 2
@@ -281,7 +275,8 @@ export class Chart {
 
    /** */
    private mouseLeaveHandler() {
-      this.mouse.isOver = false
+      this.mouse.x = null
+      this.mouse.y = null
    }
 
    /** */

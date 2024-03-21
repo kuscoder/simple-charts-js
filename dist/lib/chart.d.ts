@@ -44,8 +44,6 @@ export declare class Chart {
     /** */
     private drawLines;
     /** */
-    private mouseEnterHandler;
-    /** */
     private mouseMoveHandler;
     /** */
     private mouseLeaveHandler;

@@ -1,12 +1,12 @@
 var I = Object.defineProperty;
 var O = (l, t, e) => t in l ? I(l, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : l[t] = e;
 var i = (l, t, e) => (O(l, typeof t != "symbol" ? t + "" : t, e), e);
-class v extends Error {
+class g extends Error {
   constructor(t) {
     super(t), this.name = "ChartError";
   }
 }
-class h extends v {
+class h extends g {
   constructor(t) {
     super(t), this.name = "ChartOptionsError";
   }
@@ -37,11 +37,7 @@ const u = class u {
     // Interactivity
     i(this, "isInitialized", !1);
     i(this, "rafID", 0);
-    i(this, "mouse", {
-      isOver: !1,
-      x: 0,
-      y: 0
-    });
+    i(this, "mouse");
     // DOM
     i(this, "container");
     i(this, "canvas");
@@ -56,20 +52,23 @@ const u = class u {
       textFont: s.style.textFont,
       textColor: s.style.textColor,
       secondaryColor: s.style.secondaryColor
-    }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_BOUNDARIES = this.getBoundariesY(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (o - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = n && Math.round(n / this.X_AXIS_DATA_COUNT), this.mouseEnterHandler = this.mouseEnterHandler.bind(this), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawGraph = this.drawGraph.bind(this), this.mouse = new Proxy(this.mouse, {
-      set: (...a) => {
-        const c = Reflect.set(...a);
-        return this.rafID = window.requestAnimationFrame(this.drawGraph), c;
+    }, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_BOUNDARIES = this.getBoundariesY(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (o - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = n && Math.round(n / this.X_AXIS_DATA_COUNT), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawGraph = this.drawGraph.bind(this), this.mouse = new Proxy(
+      {},
+      {
+        set: (...a) => {
+          const c = Reflect.set(...a);
+          return this.rafID = window.requestAnimationFrame(this.drawGraph), c;
+        }
       }
-    }), this.container = t, this.canvas = document.createElement("canvas"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, this.ctx = this.canvas.getContext("2d"), s.immediate && this.initialize();
+    ), this.container = t, this.canvas = document.createElement("canvas"), this.canvas.style.width = this.WIDTH + "px", this.canvas.style.height = this.HEIGHT + "px", this.canvas.width = this.DPI_WIDTH, this.canvas.height = this.DPI_HEIGHT, this.ctx = this.canvas.getContext("2d"), s.immediate && this.initialize();
   }
   /** Initializes the component by appending the canvas to the container element and drawing the chart */
   initialize() {
-    this.isInitialized || (this.isInitialized = !0, this.container.appendChild(this.canvas), this.canvas.addEventListener("mouseenter", this.mouseEnterHandler), this.canvas.addEventListener("mousemove", this.mouseMoveHandler), this.canvas.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawGraph());
+    this.isInitialized || (this.isInitialized = !0, this.container.appendChild(this.canvas), this.canvas.addEventListener("mousemove", this.mouseMoveHandler), this.canvas.addEventListener("mouseleave", this.mouseLeaveHandler), this.drawGraph());
   }
   /** Destroys the component from the DOM */
   destroy() {
-    this.isInitialized && (this.isInitialized = !1, window.cancelAnimationFrame(this.rafID), this.canvas.removeEventListener("mouseenter", this.mouseEnterHandler), this.canvas.removeEventListener("mousemove", this.mouseMoveHandler), this.canvas.removeEventListener("mouseleave", this.mouseLeaveHandler), this.canvas.remove());
+    this.isInitialized && (this.isInitialized = !1, window.cancelAnimationFrame(this.rafID), this.canvas.removeEventListener("mousemove", this.mouseMoveHandler), this.canvas.removeEventListener("mouseleave", this.mouseLeaveHandler), this.canvas.remove());
   }
   /** */
   drawGraph() {
@@ -89,12 +88,14 @@ const u = class u {
           const s = this.getDate(this.DATA.xAxis.values[t - 1]);
           this.ctx.fillText(s, e, this.DPI_HEIGHT - 10);
         }
-        this.mouse.isOver && this.drawGuides(e);
+        this.drawGuides(e);
       }
     }
   }
   drawGuides(t) {
     var n;
+    if (!this.mouse.x || !this.mouse.y)
+      return;
     const e = ((n = this.DATA.xAxis) == null ? void 0 : n.values.length) || 0;
     e && Math.abs(t - this.mouse.x) < this.DPI_WIDTH / e / 2 && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath(), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, 0), this.ctx.lineTo(t, this.DPI_HEIGHT), this.ctx.stroke(), this.ctx.closePath());
   }
@@ -120,16 +121,12 @@ const u = class u {
     }
   }
   /** */
-  mouseEnterHandler() {
-    this.mouse.isOver = !0;
-  }
-  /** */
   mouseMoveHandler(t) {
     this.canvasRect ?? (this.canvasRect = this.canvas.getBoundingClientRect()), this.mouse.x = (t.clientX - this.canvasRect.left) * 2, this.mouse.y = (t.clientY - this.canvasRect.top) * 2;
   }
   /** */
   mouseLeaveHandler() {
-    this.mouse.isOver = !1;
+    this.mouse.x = null, this.mouse.y = null;
   }
   /** */
   getBoundariesY(t) {
@@ -161,8 +158,8 @@ const u = class u {
       rowsCount: o,
       i18n: { months: r } = {},
       data: { xAxis: a, yAxis: c } = {},
-      style: { textFont: A, textColor: y, secondaryColor: m } = {},
-      immediate: p
+      style: { textFont: A, textColor: y, secondaryColor: p } = {},
+      immediate: w
     } = t;
     if (e) {
       if (typeof e != "number")
@@ -232,9 +229,9 @@ const u = class u {
       throw new h("style.textFont should be a string");
     if (y && typeof y != "string")
       throw new h("style.textColor should be a string");
-    if (m && typeof m != "string")
+    if (p && typeof p != "string")
       throw new h("style.secondaryColor should be a string");
-    if (p && typeof p != "boolean")
+    if (w && typeof w != "boolean")
       throw new h("immediate should be a boolean");
   }
   /** */
@@ -290,9 +287,9 @@ i(u, "presetOptions", {
   },
   immediate: !0
 });
-let w = u;
+let m = u;
 export {
-  w as Chart,
-  v as ChartError,
+  m as Chart,
+  g as ChartError,
   h as ChartOptionsError
 };
