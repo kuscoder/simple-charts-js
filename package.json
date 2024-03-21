@@ -2,7 +2,7 @@
    "name": "simple-charts-js",
    "description": "simple-charts-js - a library for drawing charts.",
    "author": "Nikita Kus <kuscoder@yandex.ru>",
-   "version": "0.0.1",
+   "version": "0.1.0",
    "license": "ISC",
    "keywords": [
       "chart",
