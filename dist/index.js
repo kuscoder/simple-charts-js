@@ -11,7 +11,7 @@ class h extends D {
     super(t), this.name = "ChartOptionsError";
   }
 }
-const f = class f {
+const A = class A {
   /**
    * Constructor for creating a new instance of the Chart class.
    *
@@ -50,7 +50,7 @@ const f = class f {
     i(this, "ctx");
     i(this, "canvasRect");
     var o;
-    const e = f.getOptions(s), n = ((o = e.data.xAxis) == null ? void 0 : o.values.length) || 0, a = e.data.yAxis[0].values.length;
+    const e = A.getOptions(s), n = ((o = e.data.xAxis) == null ? void 0 : o.values.length) || 0, a = e.data.yAxis[0].values.length;
     this.WIDTH = e.width, this.HEIGHT = e.height, this.PADDING = e.padding, this.ROWS_COUNT = e.rowsCount, this.DATA = e.data, this.I18N = e.i18n, this.STYLE = e.style, this.FLAGS = e.flags, this.DPI_WIDTH = this.WIDTH * 2, this.DPI_HEIGHT = this.HEIGHT * 2, this.VIEW_WIDTH = this.DPI_WIDTH, this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2, this.Y_BOUNDARIES = this.getBoundariesY(this.DATA.yAxis), this.X_RATIO = this.VIEW_WIDTH / (a - 1), this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]), this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT, this.TEXT_STEP = (this.Y_BOUNDARIES[1] - this.Y_BOUNDARIES[0]) / this.ROWS_COUNT, this.X_AXIS_DATA_COUNT = 6, this.X_AXIS_DATA_STEP = n && Math.round(n / this.X_AXIS_DATA_COUNT), this.mouseMoveHandler = this.mouseMoveHandler.bind(this), this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this), this.drawChart = this.drawChart.bind(this), this.mouse = new Proxy(
       {},
       {
@@ -97,7 +97,7 @@ const f = class f {
     if (!this.mouse.x || !this.mouse.y)
       return;
     const s = ((n = this.DATA.xAxis) == null ? void 0 : n.values.length) || 0;
-    s && Math.abs(t - this.mouse.x) < this.DPI_WIDTH / s / 2 && (this.FLAGS.horGuide && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, 0), this.ctx.lineTo(t, this.DPI_HEIGHT), this.ctx.stroke(), this.ctx.closePath());
+    s && Math.abs(t - this.mouse.x) < this.DPI_WIDTH / s / 2 && (this.FLAGS.horGuide && (this.ctx.beginPath(), this.ctx.setLineDash([20, 25]), this.ctx.moveTo(0, this.mouse.y), this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y), this.ctx.stroke(), this.ctx.closePath()), this.ctx.beginPath(), this.ctx.setLineDash([]), this.ctx.moveTo(t, this.PADDING), this.ctx.lineTo(t, this.DPI_HEIGHT - this.PADDING), this.ctx.stroke(), this.ctx.closePath());
   }
   /** Draws the Y axis of the chart. */
   drawAxisY() {
@@ -184,7 +184,7 @@ const f = class f {
       rowsCount: a,
       data: { xAxis: o, yAxis: r } = {},
       i18n: { months: l } = {},
-      style: { textFont: d, textColor: A, secondaryColor: p } = {},
+      style: { textFont: d, textColor: f, secondaryColor: p } = {},
       flags: { horGuide: y, immediateInit: I } = {}
     } = t;
     if (s) {
@@ -253,7 +253,7 @@ const f = class f {
     }
     if (d && typeof d != "string")
       throw new h("style.textFont should be a string");
-    if (A && typeof A != "string")
+    if (f && typeof f != "string")
       throw new h("style.textColor should be a string");
     if (p && typeof p != "string")
       throw new h("style.secondaryColor should be a string");
@@ -273,7 +273,7 @@ const f = class f {
     return this.validateOptions(t), {
       width: t.width || this.presetOptions.width,
       height: t.height || this.presetOptions.height,
-      padding: t.padding || this.presetOptions.padding,
+      padding: t.padding ?? this.presetOptions.padding,
       rowsCount: t.rowsCount || this.presetOptions.rowsCount,
       data: {
         xAxis: ((s = t.data) == null ? void 0 : s.xAxis) || this.presetOptions.data.xAxis,
@@ -300,11 +300,11 @@ const f = class f {
    */
   static changePresetOptions(t = {}) {
     var s, e, n, a, o, r, l, d;
-    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding || this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.i18n.months = ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((n = t.style) == null ? void 0 : n.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((a = t.style) == null ? void 0 : a.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.data.xAxis = ((o = t.data) == null ? void 0 : o.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((r = t.data) == null ? void 0 : r.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.flags.horGuide = ((l = t.flags) == null ? void 0 : l.horGuide) ?? this.presetOptions.flags.horGuide, this.presetOptions.flags.immediateInit = ((d = t.flags) == null ? void 0 : d.immediateInit) ?? this.presetOptions.flags.immediateInit;
+    this.validateOptions(t), this.presetOptions.width = t.width || this.presetOptions.width, this.presetOptions.height = t.height || this.presetOptions.height, this.presetOptions.padding = t.padding ?? this.presetOptions.padding, this.presetOptions.rowsCount = t.rowsCount || this.presetOptions.rowsCount, this.presetOptions.i18n.months = ((s = t.i18n) == null ? void 0 : s.months) || this.presetOptions.i18n.months, this.presetOptions.style.textFont = ((e = t.style) == null ? void 0 : e.textFont) || this.presetOptions.style.textFont, this.presetOptions.style.textColor = ((n = t.style) == null ? void 0 : n.textColor) || this.presetOptions.style.textColor, this.presetOptions.style.secondaryColor = ((a = t.style) == null ? void 0 : a.secondaryColor) || this.presetOptions.style.secondaryColor, this.presetOptions.data.xAxis = ((o = t.data) == null ? void 0 : o.xAxis) || this.presetOptions.data.xAxis, this.presetOptions.data.yAxis = ((r = t.data) == null ? void 0 : r.yAxis) || this.presetOptions.data.yAxis, this.presetOptions.flags.horGuide = ((l = t.flags) == null ? void 0 : l.horGuide) ?? this.presetOptions.flags.horGuide, this.presetOptions.flags.immediateInit = ((d = t.flags) == null ? void 0 : d.immediateInit) ?? this.presetOptions.flags.immediateInit;
   }
 };
 // Static options preset
-i(f, "presetOptions", {
+i(A, "presetOptions", {
   width: 600,
   height: 250,
   padding: 40,
@@ -326,7 +326,7 @@ i(f, "presetOptions", {
     immediateInit: !0
   }
 });
-let w = f;
+let w = A;
 export {
   w as Chart,
   D as ChartError,

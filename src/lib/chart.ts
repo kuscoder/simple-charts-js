@@ -215,8 +215,8 @@ export class Chart {
          // Solid guide line for X axis
          this.ctx.beginPath()
          this.ctx.setLineDash([])
-         this.ctx.moveTo(x, 0)
-         this.ctx.lineTo(x, this.DPI_HEIGHT)
+         this.ctx.moveTo(x, this.PADDING)
+         this.ctx.lineTo(x, this.DPI_HEIGHT - this.PADDING)
          this.ctx.stroke()
          this.ctx.closePath()
       }
@@ -434,7 +434,7 @@ export class Chart {
       return {
          width: options.width || this.presetOptions.width,
          height: options.height || this.presetOptions.height,
-         padding: options.padding || this.presetOptions.padding,
+         padding: options.padding ?? this.presetOptions.padding,
          rowsCount: options.rowsCount || this.presetOptions.rowsCount,
          data: {
             xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
@@ -464,7 +464,7 @@ export class Chart {
       this.validateOptions(options)
       this.presetOptions.width = options.width || this.presetOptions.width
       this.presetOptions.height = options.height || this.presetOptions.height
-      this.presetOptions.padding = options.padding || this.presetOptions.padding
+      this.presetOptions.padding = options.padding ?? this.presetOptions.padding
       this.presetOptions.rowsCount = options.rowsCount || this.presetOptions.rowsCount
       this.presetOptions.i18n.months = options.i18n?.months || this.presetOptions.i18n.months
       this.presetOptions.style.textFont = options.style?.textFont || this.presetOptions.style.textFont
