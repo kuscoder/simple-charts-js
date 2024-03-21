@@ -42,13 +42,13 @@ Download and install with `script`.
 Recommended for learning purposes, you can use the latest version:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/simple-charts-js/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-charts-js@latest/dist/index.js"></script>
 ```
 
 Recommended for production for avoiding unexpected breakage from newer versions:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/simple-charts-js@0.0.1/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-charts-js@0.1.0/dist/index.js"></script>
 ```
 
 ### Initialization
