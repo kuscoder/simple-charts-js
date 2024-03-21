@@ -1,9 +1,9 @@
-export interface IDataAxisX {
+export interface ITimeline {
    type: 'date'
    values: number[]
 }
 
-export interface IDataAxisY {
+export interface IVertices {
    name: string
    color: string
    values: number[]
@@ -16,8 +16,8 @@ export interface IChartOptions {
    padding: number
    rowsCount: number
    data: {
-      xAxis: IDataAxisX | null
-      yAxis: IDataAxisY[]
+      timeline: ITimeline | null
+      vertices: IVertices[]
    }
    i18n: {
       months: string[]

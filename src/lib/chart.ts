@@ -1,6 +1,6 @@
 import { debounce, throttle } from '@/utils'
 import { ChartOptionsError } from './chart-error'
-import type { IDataAxisY, IChartOptions } from './types'
+import type { IVertices, IChartOptions } from './types'
 
 export class Chart {
    // Static options preset
@@ -10,8 +10,8 @@ export class Chart {
       padding: 40,
       rowsCount: 5,
       data: {
-         xAxis: null,
-         yAxis: []
+         timeline: null,
+         vertices: []
       },
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -49,13 +49,13 @@ export class Chart {
    private readonly DPI_HEIGHT: number
    private readonly VIEW_WIDTH: number
    private readonly VIEW_HEIGHT: number
-   private readonly Y_AXIS_DATA_BOUNDARIES: [number, number]
+   private readonly VERTICES_BOUNDARIES: [number, number]
    private readonly X_RATIO: number
    private readonly Y_RATIO: number
    private readonly ROWS_STEP: number
    private readonly TEXT_STEP: number
-   private readonly X_AXIS_DATA_COUNT: number
-   private readonly X_AXIS_DATA_STEP: number
+   private readonly TIMELINE_ITEMS_COUNT: number
+   private readonly TIMELINE_ITEMS_STEP: number
 
    // Interactivity
    private readonly mouse: { x?: number | null; y?: number | null }
@@ -78,8 +78,8 @@ export class Chart {
     */
    constructor(containerElement: HTMLElement, options: Partial<IChartOptions> = {}) {
       const formattedOptions = Chart.getOptions(options)
-      const xLength = formattedOptions.data.xAxis?.values.length || 0
-      const yLength = this.getAxisYDataLength(formattedOptions.data.yAxis)
+      const timelineLength = formattedOptions.data.timeline?.values.length || 0
+      const verticesLength = this.getVerticesLongestLength(formattedOptions.data.vertices)
 
       // Chart container
       this.containerElement = containerElement
@@ -100,13 +100,13 @@ export class Chart {
       this.DPI_HEIGHT = this.HEIGHT * 2
       this.VIEW_WIDTH = this.DPI_WIDTH
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
-      this.Y_AXIS_DATA_BOUNDARIES = this.getYAxisDataBoundaries(this.DATA.yAxis)
-      this.X_RATIO = this.VIEW_WIDTH / (yLength - 1)
-      this.Y_RATIO = this.VIEW_HEIGHT / (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0])
+      this.VERTICES_BOUNDARIES = this.getVerticesBoundaries(this.DATA.vertices)
+      this.X_RATIO = this.VIEW_WIDTH / (verticesLength - 1)
+      this.Y_RATIO = this.VIEW_HEIGHT / (this.VERTICES_BOUNDARIES[1] - this.VERTICES_BOUNDARIES[0])
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
-      this.TEXT_STEP = (this.Y_AXIS_DATA_BOUNDARIES[1] - this.Y_AXIS_DATA_BOUNDARIES[0]) / this.ROWS_COUNT
-      this.X_AXIS_DATA_COUNT = 6
-      this.X_AXIS_DATA_STEP = xLength && Math.round(xLength / this.X_AXIS_DATA_COUNT)
+      this.TEXT_STEP = (this.VERTICES_BOUNDARIES[1] - this.VERTICES_BOUNDARIES[0]) / this.ROWS_COUNT
+      this.TIMELINE_ITEMS_COUNT = 6
+      this.TIMELINE_ITEMS_STEP = timelineLength && Math.round(timelineLength / this.TIMELINE_ITEMS_COUNT)
 
       // Event handlers bindings
       this.resizeHandler = debounce(this.resizeHandler.bind(this), 100)
@@ -114,17 +114,15 @@ export class Chart {
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
       this.drawChart = throttle(this.drawChart.bind(this), 1000 / this.INTERACTIVITY.fpsLimit)
 
+      // prettier-ignore
       // Interactivity
-      this.mouse = new Proxy(
-         {},
-         {
-            set: (...args) => {
-               const result = Reflect.set(...args)
-               this.rafID = window.requestAnimationFrame(this.drawChart)
-               return result
-            }
+      this.mouse = new Proxy({}, {
+         set: (...args) => {
+            const result = Reflect.set(...args)
+            this.rafID = window.requestAnimationFrame(this.drawChart)
+            return result
          }
-      )
+      })
 
       // Create chart DOM elements
       this.createDOMElements()
@@ -161,6 +159,9 @@ export class Chart {
       this.isInitialized = true
 
       // Insert into DOM
+      this.wrapperElement.appendChild(this.canvasElement)
+      this.wrapperElement.appendChild(this.tooltipElement)
+
       if (this.TECHNICAL.insertMethod === 'append') {
          this.containerElement.appendChild(this.wrapperElement)
       } else if (this.TECHNICAL.insertMethod === 'prepend') {
@@ -168,8 +169,6 @@ export class Chart {
       } else {
          this.TECHNICAL.insertMethod(this.containerElement, this.wrapperElement)
       }
-      this.wrapperElement.appendChild(this.canvasElement)
-      this.wrapperElement.appendChild(this.tooltipElement)
 
       // Add event listeners and drawing
       window.addEventListener('resize', this.resizeHandler)
@@ -199,10 +198,9 @@ export class Chart {
 
    /** Main method that draws the chart by clearing the canvas. */
    private drawChart(): void {
-      console.log('draw')
       this.drawBackground()
-      this.drawAxisX()
-      this.drawAxisY()
+      this.drawTimeline()
+      this.drawRows()
       this.drawLines()
    }
 
@@ -212,11 +210,11 @@ export class Chart {
       this.ctx.fillRect(0, 0, this.DPI_WIDTH, this.DPI_HEIGHT)
    }
 
-   /** Draws the X axis of the chart and guide lines. */
-   private drawAxisX(): void {
-      if (!this.DATA.xAxis) return
+   /** Draws the timeline of the chart and guide lines. */
+   private drawTimeline(): void {
+      if (!this.DATA.timeline) return
 
-      // For X axis
+      // For timeline
       this.ctx.fillStyle = this.STYLE.textColor
       this.ctx.font = this.STYLE.textFont
 
@@ -224,12 +222,12 @@ export class Chart {
       this.ctx.lineWidth = 2
       this.ctx.strokeStyle = this.STYLE.secondaryColor
 
-      for (let i = 1; i <= this.DATA.xAxis.values.length; i++) {
+      for (let i = 1; i <= this.DATA.timeline.values.length; i++) {
          const x = this.getX(i)
 
-         // Draw the X axis
-         if ((i - 1) % this.X_AXIS_DATA_STEP === 0) {
-            const text = this.getDate(this.DATA.xAxis.values[i - 1])
+         // Draw the timeline
+         if ((i - 1) % this.TIMELINE_ITEMS_STEP === 0) {
+            const text = this.getDate(this.DATA.timeline.values[i - 1])
             this.ctx.fillText(text, x, this.DPI_HEIGHT - 10)
          }
 
@@ -239,14 +237,14 @@ export class Chart {
    }
 
    /**
-    * Draws the guide lines if the mouse-x is over the y-axis data item.
+    * Draws the guide lines if the mouse-x is over the vertice
     *
     * @param {number} x - The x-coordinate to check for mouse position and draw the guide lines.
     * @return {boolean} true if the guide lines were drawn, false otherwise
     */
    private drawGuideLinesIsOver(x: number): boolean {
       if (this.mouse.x && this.mouse.y) {
-         const isOver = this.isMouseOverYAxisDataItem(x)
+         const isOver = this.isMouseVerticeOver(x)
          const topHeight = this.PADDING / 2
          const bottomHeight = this.DPI_HEIGHT - this.PADDING
 
@@ -283,8 +281,8 @@ export class Chart {
       return false
    }
 
-   /** Draws the Y axis of the chart. */
-   private drawAxisY(): void {
+   /** Draws the rows of the chart. */
+   private drawRows(): void {
       this.ctx.lineWidth = 1
       this.ctx.strokeStyle = this.STYLE.secondaryColor
       this.ctx.fillStyle = this.STYLE.textColor
@@ -292,7 +290,7 @@ export class Chart {
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
-         const text = String(Math.round(this.Y_AXIS_DATA_BOUNDARIES[1] - this.TEXT_STEP * i))
+         const text = String(Math.round(this.VERTICES_BOUNDARIES[1] - this.TEXT_STEP * i))
          const y = i * this.ROWS_STEP + this.PADDING
          this.ctx.fillText(text, 5, y - 10)
          this.ctx.moveTo(0, y)
@@ -308,20 +306,20 @@ export class Chart {
       this.ctx.lineWidth = 4
       this.ctx.fillStyle = this.STYLE.backgroundColor
 
-      for (const col of this.DATA.yAxis) {
+      for (const verticesItem of this.DATA.vertices) {
          let overX: number | null = null
          let overY: number | null = null
 
-         this.ctx.strokeStyle = col.color
+         this.ctx.strokeStyle = verticesItem.color
          this.ctx.beginPath()
 
-         for (let i = 0; i < col.values.length; i++) {
+         for (let i = 0; i < verticesItem.values.length; i++) {
             const x = this.getX(i)
-            const y = this.getY(col.values[i])
+            const y = this.getY(verticesItem.values[i])
             this.ctx.lineTo(x, y)
 
-            // Write x and y values if the mouse-x is over the y-axis data item
-            if (this.isMouseOverYAxisDataItem(x)) {
+            // Write x and y values if the mouse-x is over the vertice
+            if (this.isMouseVerticeOver(x)) {
                overX = x
                overY = y
             }
@@ -330,7 +328,7 @@ export class Chart {
          this.ctx.stroke()
          this.ctx.closePath()
 
-         // Draw guide dots if the mouse-x is over the y-axis data item
+         // Draw guide dots if the mouse-x is over the vertice
          if (overX && overY && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2) {
             this.ctx.beginPath()
             this.ctx.arc(overX, overY, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI)
@@ -360,19 +358,19 @@ export class Chart {
    }
 
    /**
-    * Generates boundaries for the y-axis based on the provided columns.
+    * Returns an array containing the minimum and maximum y values in the given vertices array.
     *
-    * @param {IDataAxisY[]} columns - an array of data axis Y values
+    * @param {IVertices[]} vertices - an array of vertices
     * @return {[number, number]} an array containing the minimum and maximum y values
     */
-   private getYAxisDataBoundaries(columns: IDataAxisY[]): [number, number] {
+   private getVerticesBoundaries(vertices: IVertices[]): [number, number] {
       let yMin: number | null = null
       let yMax: number | null = null
 
-      for (const col of columns) {
-         for (const y of col.values) {
-            if (yMin === null || y < yMin) yMin = y
-            if (yMax === null || y > yMax) yMax = y
+      for (const verticesItem of vertices) {
+         for (const vertice of verticesItem.values) {
+            if (yMin === null || vertice < yMin) yMin = vertice
+            if (yMax === null || vertice > yMax) yMax = vertice
          }
       }
 
@@ -380,7 +378,7 @@ export class Chart {
    }
 
    /**
-    * Returns a formatted date string for x-axis based on the given timestamp.
+    * Returns a formatted date string for timeline based on the given timestamp.
     *
     * @param {number} timestamp - The timestamp to convert to a date.
     * @return {string} The formatted date string in the format "day month".
@@ -393,52 +391,51 @@ export class Chart {
    }
 
    /**
-    * Converts x coordinate from x-axis data to canvas coordinate.
+    * Calculates the x-coordinate value based on the given input value.
     *
-    * @param {number} x - x coordinate in x-axis data
-    * @return {number} x coordinate in canvas
+    * @param {number} value - The input value used to calculate the x-coordinate.
+    * @return {number} The calculated x-coordinate value.
     */
-   private getX(x: number): number {
-      return x * this.X_RATIO
+   private getX(value: number): number {
+      return value * this.X_RATIO
    }
 
    /**
-    * Converts x coordinate from y-axis data to canvas coordinate.
+    * Calculates the y-coordinate value based on the given input value.
     *
-    * @param {number} y - y coordinate in y-axis data
-    * @return {number} y coordinate in canvas
+    * @param {number} value - The input value used to calculate the y-coordinate.
+    * @return {number} The calculated y-coordinate value.
     */
-   private getY(y: number): number {
-      return this.DPI_HEIGHT - this.PADDING - y * this.Y_RATIO
+   private getY(value: number): number {
+      return this.DPI_HEIGHT - this.PADDING - value * this.Y_RATIO
    }
 
    /**
-    * Calculate the maximum length of the Y-axis data.
+    * Calculate the maximum length of the vertices item.
     *
-    * @param {?IDataAxisY[]} yAxisData - optional parameter for the Y-axis data
-    * @return {number} the maximum length of the Y-axis data.
+    * @param {?IVertices[]} vertices - optional parameter for the vertices
+    * @return {number} the maximum length of the vertices item.
     */
-   private getAxisYDataLength(yAxisData?: IDataAxisY[]): number {
-      yAxisData ??= this.DATA.yAxis
+   private getVerticesLongestLength(vertices?: IVertices[]): number {
+      vertices ??= this.DATA.vertices
       let maxLength = 0
 
-      for (const col of yAxisData) {
-         if (col.values.length > maxLength) maxLength = col.values.length
+      for (const verticesItem of vertices) {
+         if (verticesItem.values.length > maxLength) maxLength = verticesItem.values.length
       }
 
       return maxLength
    }
 
    /**
-    * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+    * Checks if the mouse-x is hovering over an vertice at its x-coordinate.
     *
-    * @param {number} x - The x-axis data item coordinate to check.
-    * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+    * @param {number} x - The vertice coordinate to check.
+    * @return {boolean} true if the mouse-x is hovering over the vertice, false otherwise.
     */
-   private isMouseOverYAxisDataItem(x: number): boolean {
-      const length = this.getAxisYDataLength() - 1
-      if (!length || !this.mouse.x) return false
-      return Math.abs(x - this.mouse.x) < this.DPI_WIDTH / length / 2
+   private isMouseVerticeOver(x: number): boolean {
+      if (!this.mouse.x) return false
+      return Math.abs(x - this.mouse.x) < this.X_RATIO / 2
    }
 
    /**
@@ -455,7 +452,7 @@ export class Chart {
          height,
          padding,
          rowsCount,
-         data: { xAxis, yAxis } = {},
+         data: { timeline, vertices } = {},
          i18n: { months } = {},
          interactivity: { horisontalGuide, guideDotsRadius, fpsLimit } = {},
          style: { textFont, textColor, secondaryColor, backgroundColor } = {},
@@ -498,30 +495,30 @@ export class Chart {
          if (fpsLimit <= 0) throw new ChartOptionsError('interactivity.fpsLimit should be greater than 0')
       }
 
-      if (xAxis) {
-         if (typeof xAxis !== 'object') throw new ChartOptionsError('data.xAxis should be an object')
-         if (typeof xAxis.type !== 'string') throw new ChartOptionsError('data.xAxis.type should be a string')
-         if (!['date'].includes(xAxis.type)) throw new ChartOptionsError('data.xAxis.type should be "date"')
-         if (!Array.isArray(xAxis.values)) throw new ChartOptionsError('data.xAxis.values should be an array')
+      if (timeline) {
+         if (typeof timeline !== 'object') throw new ChartOptionsError('data.timeline should be an object')
+         if (typeof timeline.type !== 'string') throw new ChartOptionsError('data.timeline.type should be a string')
+         if (!['date'].includes(timeline.type)) throw new ChartOptionsError('data.timeline.type should be "date"')
+         if (!Array.isArray(timeline.values)) throw new ChartOptionsError('data.timeline.values should be an array')
 
-         if (xAxis.type === 'date') {
-            xAxis.values.forEach((value, i) => {
-               if (typeof value !== 'number') throw new ChartOptionsError(`data.xAxis.values[${i}] should be a number`)
+         if (timeline.type === 'date') {
+            timeline.values.forEach((value, i) => {
+               if (typeof value !== 'number') throw new ChartOptionsError(`data.timeline.values[${i}] should be a number`)
             })
          }
       }
 
-      if (yAxis) {
-         if (!Array.isArray(yAxis)) throw new ChartOptionsError('data.columns should be an array')
+      if (vertices) {
+         if (!Array.isArray(vertices)) throw new ChartOptionsError('data.vertices should be an array')
 
-         yAxis.forEach((col, i) => {
-            if (typeof col.name !== 'string') throw new ChartOptionsError(`data.yAxis[${i}].name should be a string`)
-            if (typeof col.color !== 'string') throw new ChartOptionsError(`data.yAxis[${i}].color should be a string`)
-            if (!Array.isArray(col.values)) throw new ChartOptionsError(`data.yAxis[${i}].values should be an array`)
+         vertices.forEach((verticesItem, i) => {
+            if (typeof verticesItem.name !== 'string') throw new ChartOptionsError(`data.vertices[${i}].name should be a string`)
+            if (typeof verticesItem.color !== 'string') throw new ChartOptionsError(`data.vertices[${i}].color should be a string`)
+            if (!Array.isArray(verticesItem.values)) throw new ChartOptionsError(`data.vertices[${i}].values should be an array`)
 
-            col.values.forEach((value, j) => {
-               if (typeof value !== 'number')
-                  throw new ChartOptionsError(`data.yAxis[${i}].values[${j}] should be a number`)
+            verticesItem.values.forEach((vertice, j) => {
+               if (typeof vertice !== 'number')
+                  throw new ChartOptionsError(`data.vertices[${i}].values[${j}] should be a number`)
             })
          })
       }
@@ -574,8 +571,8 @@ export class Chart {
          padding: options.padding ?? this.presetOptions.padding,
          rowsCount: options.rowsCount || this.presetOptions.rowsCount,
          data: {
-            xAxis: options.data?.xAxis || this.presetOptions.data.xAxis,
-            yAxis: options.data?.yAxis || this.presetOptions.data.yAxis
+            timeline: options.data?.timeline || this.presetOptions.data.timeline,
+            vertices: options.data?.vertices || this.presetOptions.data.vertices
          },
          i18n: {
             months: options.i18n?.months || this.presetOptions.i18n.months
@@ -610,8 +607,8 @@ export class Chart {
       this.presetOptions.height                        = options.height                         || this.presetOptions.height
       this.presetOptions.padding                       = options.padding                        ?? this.presetOptions.padding
       this.presetOptions.rowsCount                     = options.rowsCount                      || this.presetOptions.rowsCount
-      this.presetOptions.data.xAxis                    = options.data?.xAxis                    || this.presetOptions.data.xAxis
-      this.presetOptions.data.yAxis                    = options.data?.yAxis                    || this.presetOptions.data.yAxis
+      this.presetOptions.data.timeline                 = options.data?.timeline                 || this.presetOptions.data.timeline
+      this.presetOptions.data.vertices                 = options.data?.vertices                 || this.presetOptions.data.vertices
       this.presetOptions.i18n.months                   = options.i18n?.months                   || this.presetOptions.i18n.months
       this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide || this.presetOptions.interactivity.horisontalGuide
       this.presetOptions.interactivity.guideDotsRadius = options.interactivity?.guideDotsRadius || this.presetOptions.interactivity.guideDotsRadius

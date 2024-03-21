@@ -14,13 +14,13 @@ export declare class Chart {
     private readonly DPI_HEIGHT;
     private readonly VIEW_WIDTH;
     private readonly VIEW_HEIGHT;
-    private readonly Y_AXIS_DATA_BOUNDARIES;
+    private readonly VERTICES_BOUNDARIES;
     private readonly X_RATIO;
     private readonly Y_RATIO;
     private readonly ROWS_STEP;
     private readonly TEXT_STEP;
-    private readonly X_AXIS_DATA_COUNT;
-    private readonly X_AXIS_DATA_STEP;
+    private readonly TIMELINE_ITEMS_COUNT;
+    private readonly TIMELINE_ITEMS_STEP;
     private readonly mouse;
     private isInitialized;
     private rafID;
@@ -47,17 +47,17 @@ export declare class Chart {
     private drawChart;
     /** Draws the background of the chart. */
     private drawBackground;
-    /** Draws the X axis of the chart and guide lines. */
-    private drawAxisX;
+    /** Draws the timeline of the chart and guide lines. */
+    private drawTimeline;
     /**
-     * Draws the guide lines if the mouse-x is over the y-axis data item.
+     * Draws the guide lines if the mouse-x is over the vertice
      *
      * @param {number} x - The x-coordinate to check for mouse position and draw the guide lines.
      * @return {boolean} true if the guide lines were drawn, false otherwise
      */
     private drawGuideLinesIsOver;
-    /** Draws the Y axis of the chart. */
-    private drawAxisY;
+    /** Draws the rows of the chart. */
+    private drawRows;
     /** Draws the lines of the chart. */
     private drawLines;
     /** Event handler that updates the mouse position by canvas coordinates. */
@@ -67,47 +67,47 @@ export declare class Chart {
     /** Event handler that update the chart interactivity when the window is resized. */
     private resizeHandler;
     /**
-     * Generates boundaries for the y-axis based on the provided columns.
+     * Returns an array containing the minimum and maximum y values in the given vertices array.
      *
-     * @param {IDataAxisY[]} columns - an array of data axis Y values
+     * @param {IVertices[]} vertices - an array of vertices
      * @return {[number, number]} an array containing the minimum and maximum y values
      */
-    private getYAxisDataBoundaries;
+    private getVerticesBoundaries;
     /**
-     * Returns a formatted date string for x-axis based on the given timestamp.
+     * Returns a formatted date string for timeline based on the given timestamp.
      *
      * @param {number} timestamp - The timestamp to convert to a date.
      * @return {string} The formatted date string in the format "day month".
      */
     private getDate;
     /**
-     * Converts x coordinate from x-axis data to canvas coordinate.
+     * Calculates the x-coordinate value based on the given input value.
      *
-     * @param {number} x - x coordinate in x-axis data
-     * @return {number} x coordinate in canvas
+     * @param {number} value - The input value used to calculate the x-coordinate.
+     * @return {number} The calculated x-coordinate value.
      */
     private getX;
     /**
-     * Converts x coordinate from y-axis data to canvas coordinate.
+     * Calculates the y-coordinate value based on the given input value.
      *
-     * @param {number} y - y coordinate in y-axis data
-     * @return {number} y coordinate in canvas
+     * @param {number} value - The input value used to calculate the y-coordinate.
+     * @return {number} The calculated y-coordinate value.
      */
     private getY;
     /**
-     * Calculate the maximum length of the Y-axis data.
+     * Calculate the maximum length of the vertices item.
      *
-     * @param {?IDataAxisY[]} yAxisData - optional parameter for the Y-axis data
-     * @return {number} the maximum length of the Y-axis data.
+     * @param {?IVertices[]} vertices - optional parameter for the vertices
+     * @return {number} the maximum length of the vertices item.
      */
-    private getAxisYDataLength;
+    private getVerticesLongestLength;
     /**
-     * Checks if the mouse-x is hovering over an x-axis data item at its x-coordinate.
+     * Checks if the mouse-x is hovering over an vertice at its x-coordinate.
      *
-     * @param {number} x - The x-axis data item coordinate to check.
-     * @return {boolean} true if the mouse-x is hovering over the x-axis data item, false otherwise.
+     * @param {number} x - The vertice coordinate to check.
+     * @return {boolean} true if the mouse-x is hovering over the vertice, false otherwise.
      */
-    private isMouseOverYAxisDataItem;
+    private isMouseVerticeOver;
     /**
      * Validates the provided options for a chart constructor.
      *
