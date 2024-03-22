@@ -19,15 +19,22 @@ export class Chart {
       interactivity: {
          horisontalGuide: true,
          guideDotsRadius: 8,
-         fpsLimit: 60
+         fpsLimit: 60,
+         disable: false
       },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
          secondaryColor: '#bbbbbb',
-         backgroundColor: '#ffffff'
+         backgroundColor: '#ffffff',
+         classNames: {
+            wrapper: 'simple-chart',
+            canvas: 'simple-chart__canvas',
+            tooltip: 'simple-chart__tooltip'
+         }
       },
       technical: {
+         debug: false,
          insertMethod: 'append',
          immediateInit: true
       }
@@ -137,11 +144,11 @@ export class Chart {
    private createDOMElements(): void {
       // Chart wrapper
       this.wrapperElement = document.createElement('div')
-      this.wrapperElement.className = 'simple-chart'
+      this.wrapperElement.className = this.STYLE.classNames.wrapper
 
       // Canvas
       this.canvasElement = document.createElement('canvas')
-      this.canvasElement.className = 'simple-chart__canvas'
+      this.canvasElement.className = this.STYLE.classNames.canvas
       this.canvasElement.width = this.DPI_WIDTH
       this.canvasElement.height = this.DPI_HEIGHT
       this.canvasElement.style.width = this.WIDTH + 'px'
@@ -150,50 +157,92 @@ export class Chart {
 
       // Tooltip
       this.tooltipElement = document.createElement('div')
-      this.tooltipElement.className = 'simple-chart__tooltip'
+      this.tooltipElement.className = this.STYLE.classNames.tooltip
    }
 
-   /** Initializes the component by appending the canvas to the container element and drawing the chart. */
-   public initialize(): void {
-      if (this.isInitialized) return
-      this.isInitialized = true
+   /**
+    * Initializes the component by appending the canvas to the container element and drawing the chart.
+    *
+    * @return {boolean} Returns true if the chart is successfully initialized, false otherwise.
+    */
+   public initialize(): boolean {
+      if (!this.isInitialized) {
+         this.isInitialized = true
 
-      // Insert into DOM
-      this.wrapperElement.appendChild(this.canvasElement)
-      this.wrapperElement.appendChild(this.tooltipElement)
+         // Insert into DOM
+         this.wrapperElement.appendChild(this.canvasElement)
+         this.wrapperElement.appendChild(this.tooltipElement)
 
-      if (this.TECHNICAL.insertMethod === 'append') {
-         this.containerElement.appendChild(this.wrapperElement)
-      } else if (this.TECHNICAL.insertMethod === 'prepend') {
-         this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild)
-      } else {
-         this.TECHNICAL.insertMethod(this.containerElement, this.wrapperElement)
+         if (this.TECHNICAL.insertMethod === 'append') {
+            this.containerElement.appendChild(this.wrapperElement)
+         } else if (this.TECHNICAL.insertMethod === 'prepend') {
+            this.containerElement.insertBefore(this.wrapperElement, this.containerElement.firstChild)
+         } else {
+            this.TECHNICAL.insertMethod(this.containerElement, this.wrapperElement)
+         }
+
+         // Add event listeners
+         if (!this.INTERACTIVITY.disable) {
+            window.addEventListener('resize', this.resizeHandler)
+            window.addEventListener('orientationchange', this.resizeHandler)
+            this.canvasElement.addEventListener('mousemove', this.mouseMoveHandler)
+            this.canvasElement.addEventListener('mouseleave', this.mouseLeaveHandler)
+         }
+
+         // Debug
+         if (this.TECHNICAL.debug) {
+            this.debugLog('INITIALIZE', 'Chart initialized successfully')
+         }
+
+         this.drawChart()
+         return true
       }
 
-      // Add event listeners and drawing
-      window.addEventListener('resize', this.resizeHandler)
-      window.addEventListener('orientationchange', this.resizeHandler)
-      this.canvasElement.addEventListener('mousemove', this.mouseMoveHandler)
-      this.canvasElement.addEventListener('mouseleave', this.mouseLeaveHandler)
-      this.drawChart()
+      // Debug
+      if (this.TECHNICAL.debug) {
+         this.debugLog('INITIALIZE', 'Chart already initialized')
+      }
+
+      return false
    }
 
-   /** Destroys the component from the DOM. */
-   public destroy(): void {
-      if (!this.isInitialized) return
-      this.isInitialized = false
+   /**
+    * Destroys the instance and cleans up all resources.
+    *
+    * @return {boolean} Returns true if the chart is successfully destroyed, false otherwise.
+    */
+   public destroy(): boolean {
+      if (this.isInitialized) {
+         this.isInitialized = false
 
-      // Delete from DOM
-      this.wrapperElement.removeChild(this.tooltipElement)
-      this.wrapperElement.removeChild(this.canvasElement)
-      this.containerElement.removeChild(this.wrapperElement)
+         // Delete from DOM
+         this.wrapperElement.removeChild(this.tooltipElement)
+         this.wrapperElement.removeChild(this.canvasElement)
+         this.containerElement.removeChild(this.wrapperElement)
 
-      // Remove event listeners and cancel animations frames
-      window.cancelAnimationFrame(this.rafID)
-      window.removeEventListener('resize', this.resizeHandler)
-      window.removeEventListener('orientationchange', this.resizeHandler)
-      this.canvasElement.removeEventListener('mousemove', this.mouseMoveHandler)
-      this.canvasElement.removeEventListener('mouseleave', this.mouseLeaveHandler)
+         // Remove event listeners and cancel animations frames
+         if (!this.INTERACTIVITY.disable) {
+            window.cancelAnimationFrame(this.rafID)
+            window.removeEventListener('resize', this.resizeHandler)
+            window.removeEventListener('orientationchange', this.resizeHandler)
+            this.canvasElement.removeEventListener('mousemove', this.mouseMoveHandler)
+            this.canvasElement.removeEventListener('mouseleave', this.mouseLeaveHandler)
+         }
+
+         // Debug
+         if (this.TECHNICAL.debug) {
+            this.debugLog('DESTROY', 'Chart destroyed successfully')
+         }
+
+         return true
+      }
+
+      // Debug
+      if (this.TECHNICAL.debug) {
+         this.debugLog('DESTROY', 'Chart already destroyed')
+      }
+
+      return false
    }
 
    /** Main method that draws the chart by clearing the canvas. */
@@ -202,6 +251,11 @@ export class Chart {
       this.drawTimeline()
       this.drawRows()
       this.drawLines()
+
+      // Debug
+      if (this.TECHNICAL.debug) {
+         this.debugLog('RENDER', 'Chart (re)drawn')
+      }
    }
 
    /** Draws the background of the chart. */
@@ -232,7 +286,9 @@ export class Chart {
          }
 
          // Draw guides
-         this.drawGuideLinesIsOver(x)
+         if (!this.INTERACTIVITY.disable) {
+            this.drawGuideLinesIsOver(x)
+         }
       }
    }
 
@@ -329,12 +385,14 @@ export class Chart {
          this.ctx.closePath()
 
          // Draw guide dots if the mouse-x is over the vertice
-         if (overX && overY && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2) {
-            this.ctx.beginPath()
-            this.ctx.arc(overX, overY, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI)
-            this.ctx.fill()
-            this.ctx.stroke()
-            this.ctx.closePath()
+         if (!this.INTERACTIVITY.disable) {
+            if (overX && overY && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2) {
+               this.ctx.beginPath()
+               this.ctx.arc(overX, overY, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI)
+               this.ctx.fill()
+               this.ctx.stroke()
+               this.ctx.closePath()
+            }
          }
       }
    }
@@ -439,6 +497,17 @@ export class Chart {
    }
 
    /**
+    * Logs a debug message
+    *
+    * @param {string} scope - the scope of the debug message
+    * @param {string} message - the message to be logged
+    */
+   private debugLog(scope: string, message: string): void {
+      if (!this.TECHNICAL.debug) return
+      console.log(`[${scope}]: ${message}`, this)
+   }
+
+   /**
     * Validates the provided options for a chart constructor.
     *
     * @param {Partial<IChartOptions>} options - the options to be validated
@@ -452,11 +521,11 @@ export class Chart {
          height,
          padding,
          rowsCount,
-         data: { timeline, vertices } = {},
-         i18n: { months } = {},
-         interactivity: { horisontalGuide, guideDotsRadius, fpsLimit } = {},
-         style: { textFont, textColor, secondaryColor, backgroundColor } = {},
-         technical: { insertMethod, immediateInit } = {}
+         data,
+         i18n,
+         interactivity,
+         style,
+         technical
       } = options
 
       if (width) {
@@ -481,78 +550,117 @@ export class Chart {
          if (rowsCount <= 0) throw new ChartOptionsError('rowsCount should be greater than 0')
       }
 
-      if (horisontalGuide) {
-         if (typeof horisontalGuide !== 'boolean') throw new ChartOptionsError('interactivity.horisontalGuide should be a boolean')
-      }
+      // data
+      if (data) {
+         if (data.timeline) {
+            if (typeof data.timeline !== 'object') throw new ChartOptionsError('data.timeline should be an object')
+            if (typeof data.timeline.type !== 'string') throw new ChartOptionsError('data.timeline.type should be a string')
+            if (!['date'].includes(data.timeline.type)) throw new ChartOptionsError('data.timeline.type should be "date"')
+            if (!Array.isArray(data.timeline.values)) throw new ChartOptionsError('data.timeline.values should be an array')
 
-      if (guideDotsRadius) {
-         if (typeof guideDotsRadius !== 'number') throw new ChartOptionsError('interactivity.guideDotsRadius should be a number')
-         if (guideDotsRadius <= 0) throw new ChartOptionsError('interactivity.guideDotsRadius should be greater than 0')
-      }
+            if (data.timeline.type === 'date') {
+               data.timeline.values.forEach((value, i) => {
+                  if (typeof value !== 'number') throw new ChartOptionsError(`data.timeline.values[${i}] should be a number`)
+               })
+            }
+         }
 
-      if (fpsLimit) {
-         if (typeof fpsLimit !== 'number') throw new ChartOptionsError('interactivity.fpsLimit should be a number')
-         if (fpsLimit <= 0) throw new ChartOptionsError('interactivity.fpsLimit should be greater than 0')
-      }
+         if (data.vertices) {
+            if (!Array.isArray(data.vertices)) throw new ChartOptionsError('data.vertices should be an array')
 
-      if (timeline) {
-         if (typeof timeline !== 'object') throw new ChartOptionsError('data.timeline should be an object')
-         if (typeof timeline.type !== 'string') throw new ChartOptionsError('data.timeline.type should be a string')
-         if (!['date'].includes(timeline.type)) throw new ChartOptionsError('data.timeline.type should be "date"')
-         if (!Array.isArray(timeline.values)) throw new ChartOptionsError('data.timeline.values should be an array')
+            data.vertices.forEach((verticesItem, i) => {
+               if (typeof verticesItem.name !== 'string') throw new ChartOptionsError(`data.vertices[${i}].name should be a string`)
+               if (typeof verticesItem.color !== 'string') throw new ChartOptionsError(`data.vertices[${i}].color should be a string`)
+               if (!Array.isArray(verticesItem.values)) throw new ChartOptionsError(`data.vertices[${i}].values should be an array`)
 
-         if (timeline.type === 'date') {
-            timeline.values.forEach((value, i) => {
-               if (typeof value !== 'number') throw new ChartOptionsError(`data.timeline.values[${i}] should be a number`)
+               verticesItem.values.forEach((vertice, j) => {
+                  if (typeof vertice !== 'number')
+                     throw new ChartOptionsError(`data.vertices[${i}].values[${j}] should be a number`)
+               })
             })
          }
       }
 
-      if (vertices) {
-         if (!Array.isArray(vertices)) throw new ChartOptionsError('data.vertices should be an array')
-
-         vertices.forEach((verticesItem, i) => {
-            if (typeof verticesItem.name !== 'string') throw new ChartOptionsError(`data.vertices[${i}].name should be a string`)
-            if (typeof verticesItem.color !== 'string') throw new ChartOptionsError(`data.vertices[${i}].color should be a string`)
-            if (!Array.isArray(verticesItem.values)) throw new ChartOptionsError(`data.vertices[${i}].values should be an array`)
-
-            verticesItem.values.forEach((vertice, j) => {
-               if (typeof vertice !== 'number')
-                  throw new ChartOptionsError(`data.vertices[${i}].values[${j}] should be a number`)
-            })
-         })
-      }
-
-      if (months) {
-         if (!Array.isArray(months)) throw new ChartOptionsError('i18n.months should be an array')
-         if (months.length !== 12) throw new ChartOptionsError('i18n.months should have 12 elements')
-      }
-
-      if (textFont) {
-         if (typeof textFont !== 'string') throw new ChartOptionsError('style.textFont should be a string')
-      }
-
-      if (textColor) {
-         if (typeof textColor !== 'string') throw new ChartOptionsError('style.textColor should be a string')
-      }
-
-      if (secondaryColor) {
-         if (typeof secondaryColor !== 'string') throw new ChartOptionsError('style.secondaryColor should be a string')
-      }
-
-      if (backgroundColor) {
-         if (typeof backgroundColor !== 'string') throw new ChartOptionsError('style.backgroundColor should be a string')
-      }
-
-      if (insertMethod) {
-         if (typeof insertMethod !== 'string' && typeof insertMethod !== 'function') throw new ChartOptionsError('technical.insertMethod should be a string or function')
-         if (typeof insertMethod === 'string') {
-            if (!['append', 'prepend'].includes(insertMethod)) throw new ChartOptionsError('technical.insertMethod should be "append" or "prepend" or function')
+      // i18n
+      if (i18n) {
+         if (i18n.months) {
+            if (!Array.isArray(i18n.months)) throw new ChartOptionsError('i18n.months should be an array')
+            if (i18n.months.length !== 12) throw new ChartOptionsError('i18n.months should have 12 elements')
          }
       }
 
-      if (immediateInit) {
-         if (typeof immediateInit !== 'boolean') throw new ChartOptionsError('technical.immediateInit should be a boolean')
+      // interactivity
+      if (interactivity) {
+         if (interactivity.horisontalGuide) {
+            if (typeof interactivity.horisontalGuide !== 'boolean') throw new ChartOptionsError('interactivity.horisontalGuide should be a boolean')
+         }
+
+         if (interactivity.guideDotsRadius) {
+            if (typeof interactivity.guideDotsRadius !== 'number') throw new ChartOptionsError('interactivity.guideDotsRadius should be a number')
+            if (interactivity.guideDotsRadius <= 0) throw new ChartOptionsError('interactivity.guideDotsRadius should be greater than 0')
+         }
+
+         if (interactivity.fpsLimit) {
+            if (typeof interactivity.fpsLimit !== 'number') throw new ChartOptionsError('interactivity.fpsLimit should be a number')
+            if (interactivity.fpsLimit <= 0) throw new ChartOptionsError('interactivity.fpsLimit should be greater than 0')
+         }
+
+         if (interactivity.disable) {
+            if (typeof interactivity.disable !== 'boolean') throw new ChartOptionsError('interactivity.disable should be a boolean')
+         }
+      }
+
+      // style
+      if (style) {
+         if (style.textFont) {
+            if (typeof style.textFont !== 'string') throw new ChartOptionsError('style.textFont should be a string')
+         }
+
+         if (style.textColor) {
+            if (typeof style.textColor !== 'string') throw new ChartOptionsError('style.textColor should be a string')
+         }
+
+         if (style.secondaryColor) {
+            if (typeof style.secondaryColor !== 'string') throw new ChartOptionsError('style.secondaryColor should be a string')
+         }
+
+         if (style.backgroundColor) {
+            if (typeof style.backgroundColor !== 'string') throw new ChartOptionsError('style.backgroundColor should be a string')
+         }
+
+         if (style.classNames) {
+            if (typeof style.classNames !== 'object') throw new ChartOptionsError('style.classNames should be an object')
+
+            if (style.classNames.wrapper) {
+               if (typeof style.classNames.wrapper !== 'string') throw new ChartOptionsError('style.classNames.wrapper should be a string')
+            }
+
+            if (style.classNames.canvas) {
+               if (typeof style.classNames.canvas !== 'string') throw new ChartOptionsError('style.classNames.canvas should be a string')
+            }
+
+            if (style.classNames.tooltip) {
+               if (typeof style.classNames.tooltip !== 'string') throw new ChartOptionsError('style.classNames.tooltip should be a string')
+            }
+         }
+      }
+
+      // technical
+      if (technical) {
+         if (technical.debug) {
+            if (typeof technical.debug !== 'boolean') throw new ChartOptionsError('technical.debug should be a boolean')
+         }
+
+         if (technical.insertMethod) {
+            if (typeof technical.insertMethod !== 'string' && typeof technical.insertMethod !== 'function') throw new ChartOptionsError('technical.insertMethod should be a string or function')
+            if (typeof technical.insertMethod === 'string') {
+               if (!['append', 'prepend'].includes(technical.insertMethod)) throw new ChartOptionsError('technical.insertMethod should be "append" or "prepend" or function')
+            }
+         }
+
+         if (technical.immediateInit) {
+            if (typeof technical.immediateInit !== 'boolean') throw new ChartOptionsError('technical.immediateInit should be a boolean')
+         }
       }
    }
 
@@ -566,31 +674,38 @@ export class Chart {
       this.validateOptions(options)
 
       return {
-         width: options.width || this.presetOptions.width,
-         height: options.height || this.presetOptions.height,
+         width: options.width ?? this.presetOptions.width,
+         height: options.height ?? this.presetOptions.height,
          padding: options.padding ?? this.presetOptions.padding,
-         rowsCount: options.rowsCount || this.presetOptions.rowsCount,
+         rowsCount: options.rowsCount ?? this.presetOptions.rowsCount,
          data: {
-            timeline: options.data?.timeline || this.presetOptions.data.timeline,
-            vertices: options.data?.vertices || this.presetOptions.data.vertices
+            timeline: options.data?.timeline ?? this.presetOptions.data.timeline,
+            vertices: options.data?.vertices ?? this.presetOptions.data.vertices
          },
          i18n: {
             months: options.i18n?.months || this.presetOptions.i18n.months
          },
          interactivity: {
-            horisontalGuide: options.interactivity?.horisontalGuide || this.presetOptions.interactivity.horisontalGuide,
-            guideDotsRadius: options.interactivity?.guideDotsRadius || this.presetOptions.interactivity.guideDotsRadius,
-            fpsLimit: options.interactivity?.fpsLimit || this.presetOptions.interactivity.fpsLimit
+            horisontalGuide: options.interactivity?.horisontalGuide ?? this.presetOptions.interactivity.horisontalGuide,
+            guideDotsRadius: options.interactivity?.guideDotsRadius ?? this.presetOptions.interactivity.guideDotsRadius,
+            fpsLimit: options.interactivity?.fpsLimit ?? this.presetOptions.interactivity.fpsLimit,
+            disable: options.interactivity?.disable ?? this.presetOptions.interactivity.disable
          },
          style: {
-            textFont: options.style?.textFont || this.presetOptions.style.textFont,
-            textColor: options.style?.textColor || this.presetOptions.style.textColor,
-            secondaryColor: options.style?.secondaryColor || this.presetOptions.style.secondaryColor,
-            backgroundColor: options.style?.backgroundColor || this.presetOptions.style.backgroundColor
+            textFont: options.style?.textFont ?? this.presetOptions.style.textFont,
+            textColor: options.style?.textColor ?? this.presetOptions.style.textColor,
+            secondaryColor: options.style?.secondaryColor ?? this.presetOptions.style.secondaryColor,
+            backgroundColor: options.style?.backgroundColor ?? this.presetOptions.style.backgroundColor,
+            classNames: {
+               wrapper: options.style?.classNames?.wrapper ?? this.presetOptions.style.classNames.wrapper,
+               canvas: options.style?.classNames?.canvas ?? this.presetOptions.style.classNames.canvas,
+               tooltip: options.style?.classNames?.tooltip ?? this.presetOptions.style.classNames.tooltip
+            }
          },
          technical: {
-            insertMethod: options.technical?.insertMethod || this.presetOptions.technical.insertMethod,
-            immediateInit: options.technical?.immediateInit || this.presetOptions.technical.immediateInit
+            debug: options.technical?.debug ?? this.presetOptions.technical.debug,
+            insertMethod: options.technical?.insertMethod ?? this.presetOptions.technical.insertMethod,
+            immediateInit: options.technical?.immediateInit ?? this.presetOptions.technical.immediateInit
          }
       }
    }
@@ -603,21 +718,26 @@ export class Chart {
    // prettier-ignore
    public static changePresetOptions(options: Partial<IChartOptions> = {}): void {
       this.validateOptions(options)
-      this.presetOptions.width                         = options.width                          || this.presetOptions.width
-      this.presetOptions.height                        = options.height                         || this.presetOptions.height
+      this.presetOptions.width                         = options.width                          ?? this.presetOptions.width
+      this.presetOptions.height                        = options.height                         ?? this.presetOptions.height
       this.presetOptions.padding                       = options.padding                        ?? this.presetOptions.padding
-      this.presetOptions.rowsCount                     = options.rowsCount                      || this.presetOptions.rowsCount
-      this.presetOptions.data.timeline                 = options.data?.timeline                 || this.presetOptions.data.timeline
-      this.presetOptions.data.vertices                 = options.data?.vertices                 || this.presetOptions.data.vertices
-      this.presetOptions.i18n.months                   = options.i18n?.months                   || this.presetOptions.i18n.months
-      this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide || this.presetOptions.interactivity.horisontalGuide
-      this.presetOptions.interactivity.guideDotsRadius = options.interactivity?.guideDotsRadius || this.presetOptions.interactivity.guideDotsRadius
-      this.presetOptions.interactivity.fpsLimit        = options.interactivity?.fpsLimit        || this.presetOptions.interactivity.fpsLimit
-      this.presetOptions.style.textFont                = options.style?.textFont                || this.presetOptions.style.textFont
-      this.presetOptions.style.textColor               = options.style?.textColor               || this.presetOptions.style.textColor
-      this.presetOptions.style.secondaryColor          = options.style?.secondaryColor          || this.presetOptions.style.secondaryColor
-      this.presetOptions.style.backgroundColor         = options.style?.backgroundColor         || this.presetOptions.style.backgroundColor
-      this.presetOptions.technical.insertMethod        = options.technical?.insertMethod        || this.presetOptions.technical.insertMethod
-      this.presetOptions.technical.immediateInit       = options.technical?.immediateInit       || this.presetOptions.technical.immediateInit
+      this.presetOptions.rowsCount                     = options.rowsCount                      ?? this.presetOptions.rowsCount
+      this.presetOptions.data.timeline                 = options.data?.timeline                 ?? this.presetOptions.data.timeline
+      this.presetOptions.data.vertices                 = options.data?.vertices                 ?? this.presetOptions.data.vertices
+      this.presetOptions.i18n.months                   = options.i18n?.months                   ?? this.presetOptions.i18n.months
+      this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide ?? this.presetOptions.interactivity.horisontalGuide
+      this.presetOptions.interactivity.guideDotsRadius = options.interactivity?.guideDotsRadius ?? this.presetOptions.interactivity.guideDotsRadius
+      this.presetOptions.interactivity.fpsLimit        = options.interactivity?.fpsLimit        ?? this.presetOptions.interactivity.fpsLimit
+      this.presetOptions.interactivity.disable         = options.interactivity?.disable         ?? this.presetOptions.interactivity.disable
+      this.presetOptions.style.textFont                = options.style?.textFont                ?? this.presetOptions.style.textFont
+      this.presetOptions.style.textColor               = options.style?.textColor               ?? this.presetOptions.style.textColor
+      this.presetOptions.style.secondaryColor          = options.style?.secondaryColor          ?? this.presetOptions.style.secondaryColor
+      this.presetOptions.style.backgroundColor         = options.style?.backgroundColor         ?? this.presetOptions.style.backgroundColor
+      this.presetOptions.style.classNames.wrapper      = options.style?.classNames?.wrapper     ?? this.presetOptions.style.classNames.wrapper
+      this.presetOptions.style.classNames.canvas       = options.style?.classNames?.canvas      ?? this.presetOptions.style.classNames.canvas
+      this.presetOptions.style.classNames.tooltip      = options.style?.classNames?.tooltip     ?? this.presetOptions.style.classNames.tooltip
+      this.presetOptions.technical.debug               = options.technical?.debug               ?? this.presetOptions.technical.debug
+      this.presetOptions.technical.insertMethod        = options.technical?.insertMethod        ?? this.presetOptions.technical.insertMethod
+      this.presetOptions.technical.immediateInit       = options.technical?.immediateInit       ?? this.presetOptions.technical.immediateInit
    }
 }

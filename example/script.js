@@ -61,7 +61,8 @@ async function main() {
       interactivity: {
          horisontalGuide: true,
          guideDotsRadius: 8,
-         fpsLimit: 60
+         fpsLimit: 60,
+         disable: false
       },
       style: {
          textFont: 'normal 20px Helvetica,sans-serif',
@@ -70,6 +71,7 @@ async function main() {
          backgroundColor: '#ffffff'
       },
       technical: {
+         debug: false,
          insertMethod: 'append',
          immediateInit: true
       }

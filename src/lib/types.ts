@@ -26,14 +26,21 @@ export interface IChartOptions {
       horisontalGuide: boolean,
       guideDotsRadius: number,
       fpsLimit: number
+      disable: boolean
    },
    style: {
       textFont: string
       textColor: string
       secondaryColor: string
       backgroundColor: string
+      classNames: {
+         wrapper: string
+         canvas: string
+         tooltip: string
+      }
    }
    technical: {
+      debug: boolean
       insertMethod: 'append' | 'prepend' | ((containerElement: HTMLElement, chartWrapperElement: HTMLDivElement) => void)
       immediateInit: boolean
    }
