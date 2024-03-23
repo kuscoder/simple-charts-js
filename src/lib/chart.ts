@@ -1,6 +1,6 @@
 import { debounce, throttle } from '@/utils'
 import { ChartOptionsError } from './chart-error'
-import type { ILines, IChartOptions } from './chart-types'
+import type { ILine, IChartOptions, DeepPartial } from './chart-types'
 
 export class Chart {
    // Static options preset
@@ -10,7 +10,10 @@ export class Chart {
       padding: 40,
       rowsCount: 5,
       data: {
-         timeline: null,
+         timeline: {
+            type: 'date',
+            values: []
+         },
          lines: []
       },
       i18n: {
@@ -81,9 +84,9 @@ export class Chart {
     * Constructor for creating a new instance of the Chart class.
     *
     * @param {HTMLElement} containerElement - the HTML element that will contain the chart
-    * @param {Partial<IChartOptions>} options - optional chart options
+    * @param {DeepPartial<IChartOptions>} options - optional chart options
     */
-   constructor(containerElement: HTMLElement, options: Partial<IChartOptions> = {}) {
+   constructor(containerElement: HTMLElement, options: DeepPartial<IChartOptions> = {}) {
       const formattedOptions = Chart.getOptions(options)
       const timelineLength = formattedOptions.data.timeline?.values.length || 0
       const linesVerticesLength = this.getLinesVerticesLongestLength(formattedOptions.data.lines)
@@ -115,7 +118,7 @@ export class Chart {
       this.TIMELINE_ITEMS_COUNT = 6
       this.TIMELINE_ITEMS_STEP = timelineLength && Math.round(timelineLength / this.TIMELINE_ITEMS_COUNT)
 
-      // Event handlers bindings
+      // Decorators and bindings for instance methods
       this.resizeHandler = debounce(this.resizeHandler.bind(this), 100)
       this.mouseMoveHandler = this.mouseMoveHandler.bind(this)
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
@@ -418,10 +421,10 @@ export class Chart {
    /**
     * Returns an array containing the minimum and maximum y vertices values in the given lines array.
     *
-    * @param {ILines[]} lines - an array of lines
+    * @param {ILine[]} lines - an array of lines
     * @return {[number, number]} an array containing the minimum and maximum y values
     */
-   private getLinesVerticesBoundaries(lines: ILines[]): [number, number] {
+   private getLinesVerticesBoundaries(lines: ILine[]): [number, number] {
       let yMin: number | null = null
       let yMax: number | null = null
 
@@ -471,10 +474,10 @@ export class Chart {
    /**
     * Calculate the maximum length of the lines vertices values.
     *
-    * @param {?ILines[]} lines - optional parameter for the lines
+    * @param {?ILine[]} lines - optional parameter for the lines
     * @return {number} the maximum length of the lines vertices values.
     */
-   private getLinesVerticesLongestLength(lines?: ILines[]): number {
+   private getLinesVerticesLongestLength(lines?: ILine[]): number {
       lines ??= this.DATA.lines
       let maxLength = 0
 
@@ -510,12 +513,12 @@ export class Chart {
    /**
     * Validates the provided options for a chart constructor.
     *
-    * @param {Partial<IChartOptions>} options - the options to be validated
+    * @param {DeepPartial<IChartOptions>} options - the options to be validated
     * @throws {ChartOptionsError} if the options are invalid
     * @return {void}
     */
    // prettier-ignore
-   private static validateOptions(options: Partial<IChartOptions> = {}): void {
+   private static validateOptions(options: DeepPartial<IChartOptions> = {}): void {
       const {
          width,
          height,
@@ -528,49 +531,54 @@ export class Chart {
          technical
       } = options
 
-      if (width) {
+      if (width !== undefined) {
          if (typeof width !== 'number') throw new ChartOptionsError('width should be a number')
          if (width <= 0) throw new ChartOptionsError('width should be greater than 0')
          if (width % 2 !== 0) throw new ChartOptionsError('width should be an even number')
       }
 
-      if (height) {
+      if (height !== undefined) {
          if (typeof height !== 'number') throw new ChartOptionsError('height should be a number')
          if (height <= 0) throw new ChartOptionsError('height should be greater than 0')
          if (height % 2 !== 0) throw new ChartOptionsError('height should be an even number')
       }
 
-      if (padding) {
+      if (padding !== undefined) {
          if (typeof padding !== 'number') throw new ChartOptionsError('padding should be a number')
          if (padding < 0) throw new ChartOptionsError('padding should be greater or equal to 0')
       }
 
-      if (rowsCount) {
+      if (rowsCount !== undefined) {
          if (typeof rowsCount !== 'number') throw new ChartOptionsError('rowsCount should be a number')
          if (rowsCount <= 0) throw new ChartOptionsError('rowsCount should be greater than 0')
       }
 
       // data
-      if (data) {
-         if (data.timeline) {
-            if (typeof data.timeline !== 'object') throw new ChartOptionsError('data.timeline should be an object')
-            if (!data.timeline.type) throw new ChartOptionsError('data.timeline.type required')
-            if (!data.timeline.values) throw new ChartOptionsError('data.timeline.values required')
-            if (typeof data.timeline.type !== 'string') throw new ChartOptionsError('data.timeline.type should be a string')
-            if (!['date'].includes(data.timeline.type)) throw new ChartOptionsError('data.timeline.type should be "date"')
-            if (!Array.isArray(data.timeline.values)) throw new ChartOptionsError('data.timeline.values should be an array')
+      if (data !== undefined) {
+         if (typeof data !== 'object') throw new ChartOptionsError('data should be an object')
 
-            if (data.timeline.type === 'date') {
+         if (data.timeline !== undefined) {
+            if (typeof data.timeline !== 'object') throw new ChartOptionsError('data.timeline should be an object')
+
+            if (data.timeline.type !== undefined) {
+               if (typeof data.timeline.type !== 'string') throw new ChartOptionsError('data.timeline.type should be a string')
+               if (!['date'].includes(data.timeline.type)) throw new ChartOptionsError('data.timeline.type should be "date"')
+            }
+
+            if (data.timeline.values !== undefined) {
+               if (!Array.isArray(data.timeline.values)) throw new ChartOptionsError('data.timeline.values should be an array')
+
                data.timeline.values.forEach((value, i) => {
                   if (typeof value !== 'number') throw new ChartOptionsError(`data.timeline.values[${i}] should be a number`)
+                  if (value < 0) throw new ChartOptionsError(`data.timeline.values[${i}] should be greater or equal to 0`)
                })
             }
          }
 
-         if (data.lines) {
+         if (data.lines !== undefined) {
             if (!Array.isArray(data.lines)) throw new ChartOptionsError('data.vertices should be an array')
 
-            data.lines.forEach((line, i) => {
+            ;(data.lines as Partial<ILine>[]).forEach((line, i) => {
                if (!line.key) throw new ChartOptionsError(`data.lines[${i}].key required`)
                if (!line.name) throw new ChartOptionsError(`data.lines[${i}].name required`)
                if (!line.color) throw new ChartOptionsError(`data.lines[${i}].color required`)
@@ -590,83 +598,91 @@ export class Chart {
       }
 
       // i18n
-      if (i18n) {
-         if (i18n.months) {
+      if (i18n !== undefined) {
+         if (typeof i18n !== 'object') throw new ChartOptionsError('i18n should be an object')
+
+         if (i18n.months !== undefined) {
             if (!Array.isArray(i18n.months)) throw new ChartOptionsError('i18n.months should be an array')
             if (i18n.months.length !== 12) throw new ChartOptionsError('i18n.months should have 12 elements')
          }
       }
 
       // interactivity
-      if (interactivity) {
-         if (interactivity.horisontalGuide) {
+      if (interactivity !== undefined) {
+         if (typeof interactivity !== 'object') throw new ChartOptionsError('interactivity should be an object')
+
+         if (interactivity.horisontalGuide !== undefined) {
             if (typeof interactivity.horisontalGuide !== 'boolean') throw new ChartOptionsError('interactivity.horisontalGuide should be a boolean')
          }
 
-         if (interactivity.guideDotsRadius) {
+         if (interactivity.guideDotsRadius !== undefined) {
             if (typeof interactivity.guideDotsRadius !== 'number') throw new ChartOptionsError('interactivity.guideDotsRadius should be a number')
             if (interactivity.guideDotsRadius <= 0) throw new ChartOptionsError('interactivity.guideDotsRadius should be greater than 0')
          }
 
-         if (interactivity.fpsLimit) {
+         if (interactivity.fpsLimit !== undefined) {
             if (typeof interactivity.fpsLimit !== 'number') throw new ChartOptionsError('interactivity.fpsLimit should be a number')
             if (interactivity.fpsLimit <= 0) throw new ChartOptionsError('interactivity.fpsLimit should be greater than 0')
          }
 
-         if (interactivity.disable) {
+         if (interactivity.disable !== undefined) {
             if (typeof interactivity.disable !== 'boolean') throw new ChartOptionsError('interactivity.disable should be a boolean')
          }
       }
 
       // style
-      if (style) {
-         if (style.textFont) {
+      if (style !== undefined) {
+         if (typeof style !== 'object') throw new ChartOptionsError('style should be an object')
+
+         if (style.textFont !== undefined) {
             if (typeof style.textFont !== 'string') throw new ChartOptionsError('style.textFont should be a string')
          }
 
-         if (style.textColor) {
+         if (style.textColor !== undefined) {
             if (typeof style.textColor !== 'string') throw new ChartOptionsError('style.textColor should be a string')
          }
 
-         if (style.secondaryColor) {
+         if (style.secondaryColor !== undefined) {
             if (typeof style.secondaryColor !== 'string') throw new ChartOptionsError('style.secondaryColor should be a string')
          }
 
-         if (style.backgroundColor) {
+         if (style.backgroundColor !== undefined) {
             if (typeof style.backgroundColor !== 'string') throw new ChartOptionsError('style.backgroundColor should be a string')
          }
 
-         if (style.classNames) {
+         if (style.classNames !== undefined) {
             if (typeof style.classNames !== 'object') throw new ChartOptionsError('style.classNames should be an object')
 
-            if (style.classNames.wrapper) {
+            if (style.classNames.wrapper !== undefined) {
                if (typeof style.classNames.wrapper !== 'string') throw new ChartOptionsError('style.classNames.wrapper should be a string')
             }
 
-            if (style.classNames.canvas) {
+            if (style.classNames.canvas !== undefined) {
                if (typeof style.classNames.canvas !== 'string') throw new ChartOptionsError('style.classNames.canvas should be a string')
             }
 
-            if (style.classNames.tooltip) {
+            if (style.classNames.tooltip !== undefined) {
                if (typeof style.classNames.tooltip !== 'string') throw new ChartOptionsError('style.classNames.tooltip should be a string')
             }
          }
       }
 
       // technical
-      if (technical) {
-         if (technical.debug) {
+      if (technical !== undefined) {
+         if (typeof technical !== 'object') throw new ChartOptionsError('technical should be an object')
+
+         if (technical.debug !== undefined) {
             if (typeof technical.debug !== 'boolean') throw new ChartOptionsError('technical.debug should be a boolean')
          }
 
-         if (technical.insertMethod) {
+         if (technical.insertMethod !== undefined) {
             if (typeof technical.insertMethod !== 'string' && typeof technical.insertMethod !== 'function') throw new ChartOptionsError('technical.insertMethod should be a string or function')
             if (typeof technical.insertMethod === 'string') {
                if (!['append', 'prepend'].includes(technical.insertMethod)) throw new ChartOptionsError('technical.insertMethod should be "append" or "prepend" or function')
             }
          }
 
-         if (technical.immediateInit) {
+         if (technical.immediateInit !== undefined) {
             if (typeof technical.immediateInit !== 'boolean') throw new ChartOptionsError('technical.immediateInit should be a boolean')
          }
       }
@@ -675,10 +691,10 @@ export class Chart {
    /**
     * Returns the formatted options for the chart constructor by merging the provided options with the preset options.
     *
-    * @param {Partial<IChartOptions>} options - The options to merge with the preset options.
+    * @param {DeepPartial<IChartOptions>} options - The options to merge with the preset options.
     * @return {IChartOptions} The merged options.
     */
-   private static getOptions(options: Partial<IChartOptions> = {}): IChartOptions {
+   private static getOptions(options: DeepPartial<IChartOptions> = {}): IChartOptions {
       this.validateOptions(options)
 
       return {
@@ -687,7 +703,10 @@ export class Chart {
          padding: options.padding ?? this.presetOptions.padding,
          rowsCount: options.rowsCount ?? this.presetOptions.rowsCount,
          data: {
-            timeline: options.data?.timeline ?? this.presetOptions.data.timeline,
+            timeline: {
+               type: options.data?.timeline?.type ?? this.presetOptions.data.timeline.type,
+               values: options.data?.timeline?.values ?? this.presetOptions.data.timeline.values
+            },
             lines: options.data?.lines ?? this.presetOptions.data.lines
          },
          i18n: {
@@ -721,16 +740,17 @@ export class Chart {
    /**
     * Updates the preset options with the provided options.
     *
-    * @param {Partial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
+    * @param {DeepPartial<IChartOptions>} options - The options to update the preset options with. Default is an empty object.
     */
    // prettier-ignore
-   public static changePresetOptions(options: Partial<IChartOptions> = {}): void {
+   public static changePresetOptions(options: DeepPartial<IChartOptions> = {}): void {
       this.validateOptions(options)
       this.presetOptions.width                         = options.width                          ?? this.presetOptions.width
       this.presetOptions.height                        = options.height                         ?? this.presetOptions.height
       this.presetOptions.padding                       = options.padding                        ?? this.presetOptions.padding
       this.presetOptions.rowsCount                     = options.rowsCount                      ?? this.presetOptions.rowsCount
-      this.presetOptions.data.timeline                 = options.data?.timeline                 ?? this.presetOptions.data.timeline
+      this.presetOptions.data.timeline.type            = options.data?.timeline?.type           ?? this.presetOptions.data.timeline.type
+      this.presetOptions.data.timeline.values          = options.data?.timeline?.values         ?? this.presetOptions.data.timeline.values
       this.presetOptions.data.lines                    = options.data?.lines                    ?? this.presetOptions.data.lines
       this.presetOptions.i18n.months                   = options.i18n?.months                   ?? this.presetOptions.i18n.months
       this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide ?? this.presetOptions.interactivity.horisontalGuide

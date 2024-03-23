@@ -1,3 +1,5 @@
+/** @typedef {import('../dist/index.js')} SimpleChartsJS */
+
 async function main() {
    // Getting SimpleChartsJS module for current environment
    const { Chart } = await getSimpleChartsJSModule()
@@ -70,7 +72,12 @@ async function main() {
          textFont: 'normal 20px Helvetica,sans-serif',
          textColor: '#96a2aa',
          secondaryColor: '#bbbbbb',
-         backgroundColor: '#ffffff'
+         backgroundColor: '#ffffff',
+         classNames: {
+            wrapper: 'simple-chart',
+            canvas: 'simple-chart__canvas',
+            tooltip: 'simple-chart__tooltip'
+         }
       },
       technical: {
          debug: false,
@@ -86,7 +93,11 @@ async function main() {
    })
 }
 
-/** Gets SimpleChartsJS module for current environment */
+/**
+ * Gets SimpleChartsJS module for current environment
+ *
+ * @returns {Promise<SimpleChartsJS>}
+ */
 async function getSimpleChartsJSModule() {
    const { hostname, protocol } = window.location
 

@@ -1,9 +1,4 @@
-export interface ITimeline {
-   type: 'date'
-   values: number[]
-}
-
-export interface ILines {
+export interface ILine {
    key: string
    name: string
    color: string
@@ -16,8 +11,11 @@ export interface IChartOptions {
    padding: number
    rowsCount: number
    data: {
-      timeline: ITimeline | null
-      lines: ILines[]
+      timeline: {
+         type: 'date'
+         values: number[]
+      }
+      lines: ILine[]
    }
    i18n: {
       months: string[]
@@ -50,3 +48,11 @@ export type InsertMethod =
    | 'append'
    | 'prepend'
    | ((containerElement: HTMLElement, chartWrapperElement: HTMLDivElement) => void)
+
+export type DeepPartial<T> = T extends unknown[]
+   ? T
+   : T extends Function // eslint-disable-line @typescript-eslint/ban-types
+     ? T
+     : T extends Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+       ? { [P in keyof T]?: DeepPartial<T[P]> }
+       : T
