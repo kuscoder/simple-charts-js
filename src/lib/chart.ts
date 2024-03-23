@@ -447,7 +447,7 @@ export class Chart {
    private tooltipShow(title: string, items: ITooltipItem[]): boolean {
       const { tooltipLeft, tooltipTop } = this.mouse.value
 
-      if (tooltipLeft && tooltipTop) {
+      if (tooltipLeft && tooltipTop && this.canvasRect) {
          const tooltipRect = this.tooltipElement.getBoundingClientRect()
 
          // prettier-ignore
@@ -463,10 +463,22 @@ export class Chart {
             </ul>
          `
 
+         const offsetX = tooltipRect.width / 2
+         const offsetY = tooltipRect.height / 4
+
+         const toRight = tooltipLeft + offsetX
+         const toLeft = tooltipLeft - tooltipRect.width - offsetX
+
+         const toTop = tooltipTop - tooltipRect.height - offsetY
+         const toBottom = tooltipTop + offsetY
+
+         const left = toRight + tooltipRect.width + this.canvasRect.x >= window.innerWidth ? toLeft : toRight
+         const top = toTop + this.canvasRect.y <= 0 ? toBottom : toTop
+
          styles(this.tooltipElement, {
             visibility: 'visible',
-            left: tooltipLeft + tooltipRect.width / 2 + 'px',
-            top: tooltipTop - tooltipRect.height + 'px'
+            left: left + 'px',
+            top: top + 'px'
          })
 
          this.tooltipElement.innerHTML = ''
