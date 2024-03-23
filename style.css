@@ -1,7 +1,16 @@
+/* Gets SimpleChartsJS module styles for current environment */
+@import url('https://cdn.jsdelivr.net/npm/simple-charts-js@latest/dist/index.css');
+@import url('https://cdn.jsdelivr.net/gh/kuscoder/simple-charts-js@latest/dist/index.css');
+@import url('../dist/index.css');
+
 * {
    box-sizing: border-box;
    margin: 0;
    padding: 0;
+}
+
+html {
+   overflow-x: hidden;
 }
 
 body {
@@ -9,12 +18,18 @@ body {
    align-items: center;
    justify-content: center;
 
-   height: 100vh;
-   height: 100dvh;
-
+   padding: 5rem;
    background-color: #252e3d;
 }
 
 canvas {
    display: block;
+}
+
+#charts {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: center;
+   gap: 1rem;
 }
