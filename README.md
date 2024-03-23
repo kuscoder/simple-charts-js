@@ -2,7 +2,7 @@
 
 > simple-charts-js - a simple lightweight library for drawing charts.
 
-[![npm version](https://badge.fury.io/js/simple-charts-js.svg?v1.0.0)](https://www.npmjs.com/package/simple-charts-js)
+[![npm version](https://badge.fury.io/js/simple-charts-js.svg?v1.0.1)](https://www.npmjs.com/package/simple-charts-js)
 [![jsdelivr stats](https://data.jsdelivr.com/v1/package/npm/simple-charts-js/badge)](https://www.jsdelivr.com/package/npm/simple-charts-js)
 
 [View Demo](https://kuscoder.github.io/simple-charts-js/) •
