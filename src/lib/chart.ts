@@ -1,6 +1,6 @@
 import { debounce, throttle } from '@/utils'
 import { ChartOptionsError } from './chart-error'
-import type { IVertices, IChartOptions } from './types'
+import type { IVertices, IChartOptions } from './chart-types'
 
 export class Chart {
    // Static options preset
