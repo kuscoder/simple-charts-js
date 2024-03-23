@@ -21,6 +21,7 @@ export interface IChartOptions {
       months: string[]
    }
    interactivity: {
+      tooltipPosition: TooltipPositions
       horisontalGuide: boolean
       guideDotsRadius: number
       fpsLimit: number
@@ -43,6 +44,16 @@ export interface IChartOptions {
       immediateInit: boolean
    }
 }
+
+export type TooltipPositions =
+   | 'top'
+   | 'left'
+   | 'bottom'
+   | 'right'
+   | 'top-left'
+   | 'top-right'
+   | 'bottom-left'
+   | 'bottom-right'
 
 export type InsertMethod =
    | 'append'

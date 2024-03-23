@@ -63,6 +63,7 @@ async function main() {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
       interactivity: {
+         tooltipPosition: 'top-right',
          horisontalGuide: true,
          guideDotsRadius: 8,
          fpsLimit: 60,

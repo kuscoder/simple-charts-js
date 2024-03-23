@@ -1,6 +1,6 @@
 import { debounce, throttle, styles } from '@/utils'
 import { ChartOptionsError } from './chart-error'
-import type { ILine, IChartOptions, IMouseProxy, ITooltipItem, DeepPartial } from './chart-types'
+import type { ILine, IChartOptions, TooltipPositions, IMouseProxy, ITooltipItem, DeepPartial } from './chart-types'
 
 export class Chart {
    // Static options preset
@@ -20,6 +20,7 @@ export class Chart {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       },
       interactivity: {
+         tooltipPosition: 'top-right',
          horisontalGuide: true,
          guideDotsRadius: 8,
          fpsLimit: 60,
@@ -448,8 +449,6 @@ export class Chart {
       const { tooltipLeft, tooltipTop } = this.mouse.value
 
       if (tooltipLeft && tooltipTop && this.canvasRect) {
-         const tooltipRect = this.tooltipElement.getBoundingClientRect()
-
          // prettier-ignore
          const template = `
             <h2>${title}</h2>
@@ -463,17 +462,19 @@ export class Chart {
             </ul>
          `
 
-         const offsetX = tooltipRect.width / 2
-         const offsetY = tooltipRect.height / 4
+         // const left = toRight + tooltipRect.width + this.canvasRect.x >= window.innerWidth ? toLeft : toRight
+         // const top = toTop + this.canvasRect.y <= 0 ? toBottom : toTop
 
-         const toRight = tooltipLeft + offsetX
-         const toLeft = tooltipLeft - tooltipRect.width - offsetX
+         const tooltipRect = this.tooltipElement.getBoundingClientRect()
+         const coords = this.getTooltipCoordinatesByPosition(this.INTERACTIVITY.tooltipPosition, tooltipRect)
 
-         const toTop = tooltipTop - tooltipRect.height - offsetY
-         const toBottom = tooltipTop + offsetY
+         const isStopsWindowRight = coords.left + tooltipRect.width + this.canvasRect.x >= window.innerWidth
+         const isStopsWindowLeft = coords.left + this.canvasRect.x <= 0
+         const isStopsWindowTop = coords.top + this.canvasRect.y <= 0
+         const isStopsWindowBottom = coords.top + tooltipRect.height + this.canvasRect.y >= window.innerHeight
 
-         const left = toRight + tooltipRect.width + this.canvasRect.x >= window.innerWidth ? toLeft : toRight
-         const top = toTop + this.canvasRect.y <= 0 ? toBottom : toTop
+         const left = isStopsWindowRight || isStopsWindowLeft ? coords.invertedLeft : coords.left
+         const top = isStopsWindowTop || isStopsWindowBottom ? coords.invertedTop : coords.top
 
          styles(this.tooltipElement, {
             visibility: 'visible',
@@ -488,6 +489,65 @@ export class Chart {
       }
 
       return false
+   }
+
+   private getTooltipCoordinatesByPosition(
+      tooltipPosition: TooltipPositions,
+      tooltipRect: DOMRect,
+      fromRecursy?: boolean
+   ) {
+      const tooltipLeft = this.mouse.value.tooltipLeft || 0
+      const tooltipTop = this.mouse.value.tooltipTop || 0
+      const { width, height } = tooltipRect
+
+      const halfWidth = width / 2
+      const halfHeight = height / 2
+      const offsetX = width / 4
+      const offsetY = height / 4
+
+      const isTop = tooltipPosition === 'top'
+      const isLeft = tooltipPosition === 'left'
+      const isRight = tooltipPosition === 'right'
+      const isBottom = tooltipPosition === 'bottom'
+      const isTopLeft = tooltipPosition === 'top-left'
+      const isTopRight = tooltipPosition === 'top-right'
+      const isBottomLeft = tooltipPosition === 'bottom-left'
+      const isBottomRight = tooltipPosition === 'bottom-right'
+
+      let left = 0
+      let top = 0
+      let invertedLeft = 0
+      let invertedTop = 0
+
+      if (isTop || isBottom) {
+         left = tooltipLeft - halfWidth
+      }
+
+      if (isLeft || isRight) {
+         top = tooltipTop - halfHeight
+      }
+
+      if (isTop || isTopLeft || isTopRight) {
+         top = tooltipTop - height - offsetY
+         if (!fromRecursy) invertedTop = this.getTooltipCoordinatesByPosition('bottom', tooltipRect, true).top
+      }
+
+      if (isLeft || isTopLeft || isBottomLeft) {
+         left = tooltipLeft - width - offsetX
+         if (!fromRecursy) invertedLeft = this.getTooltipCoordinatesByPosition('right', tooltipRect, true).left
+      }
+
+      if (isBottom || isBottomLeft || isBottomRight) {
+         top = tooltipTop + offsetY
+         if (!fromRecursy) invertedTop = this.getTooltipCoordinatesByPosition('top', tooltipRect, true).top
+      }
+
+      if (isRight || isTopRight || isBottomRight) {
+         left = tooltipLeft + offsetX
+         if (!fromRecursy) invertedLeft = this.getTooltipCoordinatesByPosition('left', tooltipRect, true).left
+      }
+
+      return { left, top, invertedLeft, invertedTop }
    }
 
    /**
@@ -723,6 +783,11 @@ export class Chart {
       if (interactivity !== undefined) {
          if (typeof interactivity !== 'object') throw new ChartOptionsError('interactivity should be an object')
 
+         if (interactivity.tooltipPosition !== undefined) {
+            if (typeof interactivity.tooltipPosition !== 'string') throw new ChartOptionsError('interactivity.tooltipPosition should be a string')
+            if (!['top', 'left', 'bottom', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(interactivity.tooltipPosition)) throw new ChartOptionsError('interactivity.tooltipPosition should be one of "top", "left", "bottom", "right", "top-left", "top-right", "bottom-left", "bottom-right"')
+         }
+
          if (interactivity.horisontalGuide !== undefined) {
             if (typeof interactivity.horisontalGuide !== 'boolean') throw new ChartOptionsError('interactivity.horisontalGuide should be a boolean')
          }
@@ -825,6 +890,7 @@ export class Chart {
             months: options.i18n?.months || this.presetOptions.i18n.months
          },
          interactivity: {
+            tooltipPosition: options.interactivity?.tooltipPosition ?? this.presetOptions.interactivity.tooltipPosition,
             horisontalGuide: options.interactivity?.horisontalGuide ?? this.presetOptions.interactivity.horisontalGuide,
             guideDotsRadius: options.interactivity?.guideDotsRadius ?? this.presetOptions.interactivity.guideDotsRadius,
             fpsLimit: options.interactivity?.fpsLimit ?? this.presetOptions.interactivity.fpsLimit,
@@ -865,6 +931,7 @@ export class Chart {
       this.presetOptions.data.timeline.values          = options.data?.timeline?.values         ?? this.presetOptions.data.timeline.values
       this.presetOptions.data.lines                    = options.data?.lines                    ?? this.presetOptions.data.lines
       this.presetOptions.i18n.months                   = options.i18n?.months                   ?? this.presetOptions.i18n.months
+      this.presetOptions.interactivity.tooltipPosition = options.interactivity?.tooltipPosition ?? this.presetOptions.interactivity.tooltipPosition
       this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide ?? this.presetOptions.interactivity.horisontalGuide
       this.presetOptions.interactivity.guideDotsRadius = options.interactivity?.guideDotsRadius ?? this.presetOptions.interactivity.guideDotsRadius
       this.presetOptions.interactivity.fpsLimit        = options.interactivity?.fpsLimit        ?? this.presetOptions.interactivity.fpsLimit
