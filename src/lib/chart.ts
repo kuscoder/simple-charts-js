@@ -113,7 +113,7 @@ export class Chart {
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
       this.LINES_VERTICES_BOUNDARIES = this.getLinesVerticesBoundaries(this.DATA.lines)
       this.X_RATIO = this.VIEW_WIDTH / (linesVerticesLength - 1)
-      this.Y_RATIO = this.VIEW_HEIGHT / (this.LINES_VERTICES_BOUNDARIES[1] - this.LINES_VERTICES_BOUNDARIES[0])
+      this.Y_RATIO = (this.LINES_VERTICES_BOUNDARIES[1] - this.LINES_VERTICES_BOUNDARIES[0]) / this.VIEW_HEIGHT
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
       this.TEXT_STEP = (this.LINES_VERTICES_BOUNDARIES[1] - this.LINES_VERTICES_BOUNDARIES[0]) / this.ROWS_COUNT
       this.TIMELINE_ITEMS_COUNT = 6
@@ -639,7 +639,7 @@ export class Chart {
     * @return {number} The calculated y-coordinate value.
     */
    private getY(value: number): number {
-      return this.DPI_HEIGHT - this.PADDING - value * this.Y_RATIO
+      return this.DPI_HEIGHT - this.PADDING - (value - this.LINES_VERTICES_BOUNDARIES[0]) / this.Y_RATIO
    }
 
    /**
