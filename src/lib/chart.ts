@@ -1,6 +1,6 @@
 import { debounce, throttle } from '@/utils'
 import { ChartOptionsError } from './chart-error'
-import type { IVertices, IChartOptions } from './chart-types'
+import type { ILines, IChartOptions } from './chart-types'
 
 export class Chart {
    // Static options preset
@@ -11,7 +11,7 @@ export class Chart {
       rowsCount: 5,
       data: {
          timeline: null,
-         vertices: []
+         lines: []
       },
       i18n: {
          months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -56,7 +56,7 @@ export class Chart {
    private readonly DPI_HEIGHT: number
    private readonly VIEW_WIDTH: number
    private readonly VIEW_HEIGHT: number
-   private readonly VERTICES_BOUNDARIES: [number, number]
+   private readonly LINES_VERTICES_BOUNDARIES: [number, number]
    private readonly X_RATIO: number
    private readonly Y_RATIO: number
    private readonly ROWS_STEP: number
@@ -86,7 +86,7 @@ export class Chart {
    constructor(containerElement: HTMLElement, options: Partial<IChartOptions> = {}) {
       const formattedOptions = Chart.getOptions(options)
       const timelineLength = formattedOptions.data.timeline?.values.length || 0
-      const verticesLength = this.getVerticesLongestLength(formattedOptions.data.vertices)
+      const linesVerticesLength = this.getLinesVerticesLongestLength(formattedOptions.data.lines)
 
       // Chart container
       this.containerElement = containerElement
@@ -107,11 +107,11 @@ export class Chart {
       this.DPI_HEIGHT = this.HEIGHT * 2
       this.VIEW_WIDTH = this.DPI_WIDTH
       this.VIEW_HEIGHT = this.DPI_HEIGHT - this.PADDING * 2
-      this.VERTICES_BOUNDARIES = this.getVerticesBoundaries(this.DATA.vertices)
-      this.X_RATIO = this.VIEW_WIDTH / (verticesLength - 1)
-      this.Y_RATIO = this.VIEW_HEIGHT / (this.VERTICES_BOUNDARIES[1] - this.VERTICES_BOUNDARIES[0])
+      this.LINES_VERTICES_BOUNDARIES = this.getLinesVerticesBoundaries(this.DATA.lines)
+      this.X_RATIO = this.VIEW_WIDTH / (linesVerticesLength - 1)
+      this.Y_RATIO = this.VIEW_HEIGHT / (this.LINES_VERTICES_BOUNDARIES[1] - this.LINES_VERTICES_BOUNDARIES[0])
       this.ROWS_STEP = this.VIEW_HEIGHT / this.ROWS_COUNT
-      this.TEXT_STEP = (this.VERTICES_BOUNDARIES[1] - this.VERTICES_BOUNDARIES[0]) / this.ROWS_COUNT
+      this.TEXT_STEP = (this.LINES_VERTICES_BOUNDARIES[1] - this.LINES_VERTICES_BOUNDARIES[0]) / this.ROWS_COUNT
       this.TIMELINE_ITEMS_COUNT = 6
       this.TIMELINE_ITEMS_STEP = timelineLength && Math.round(timelineLength / this.TIMELINE_ITEMS_COUNT)
 
@@ -138,26 +138,6 @@ export class Chart {
       if (this.TECHNICAL.immediateInit) {
          this.initialize()
       }
-   }
-
-   /** Create the necessary DOM elements for the chart, but does not insert into the DOM. */
-   private createDOMElements(): void {
-      // Chart wrapper
-      this.wrapperElement = document.createElement('div')
-      this.wrapperElement.className = this.STYLE.classNames.wrapper
-
-      // Canvas
-      this.canvasElement = document.createElement('canvas')
-      this.canvasElement.className = this.STYLE.classNames.canvas
-      this.canvasElement.width = this.DPI_WIDTH
-      this.canvasElement.height = this.DPI_HEIGHT
-      this.canvasElement.style.width = this.WIDTH + 'px'
-      this.canvasElement.style.height = this.HEIGHT + 'px'
-      this.ctx = this.canvasElement.getContext('2d')!
-
-      // Tooltip
-      this.tooltipElement = document.createElement('div')
-      this.tooltipElement.className = this.STYLE.classNames.tooltip
    }
 
    /**
@@ -243,6 +223,26 @@ export class Chart {
       }
 
       return false
+   }
+
+   /** Create the necessary DOM elements for the chart, but does not insert into the DOM. */
+   private createDOMElements(): void {
+      // Chart wrapper
+      this.wrapperElement = document.createElement('div')
+      this.wrapperElement.className = this.STYLE.classNames.wrapper
+
+      // Canvas
+      this.canvasElement = document.createElement('canvas')
+      this.canvasElement.className = this.STYLE.classNames.canvas
+      this.canvasElement.width = this.DPI_WIDTH
+      this.canvasElement.height = this.DPI_HEIGHT
+      this.canvasElement.style.width = this.WIDTH + 'px'
+      this.canvasElement.style.height = this.HEIGHT + 'px'
+      this.ctx = this.canvasElement.getContext('2d')!
+
+      // Tooltip
+      this.tooltipElement = document.createElement('div')
+      this.tooltipElement.className = this.STYLE.classNames.tooltip
    }
 
    /** Main method that draws the chart by clearing the canvas. */
@@ -346,7 +346,7 @@ export class Chart {
       this.ctx.beginPath()
 
       for (let i = 1; i <= this.ROWS_COUNT; i++) {
-         const text = String(Math.round(this.VERTICES_BOUNDARIES[1] - this.TEXT_STEP * i))
+         const text = String(Math.round(this.LINES_VERTICES_BOUNDARIES[1] - this.TEXT_STEP * i))
          const y = i * this.ROWS_STEP + this.PADDING
          this.ctx.fillText(text, 5, y - 10)
          this.ctx.moveTo(0, y)
@@ -362,16 +362,16 @@ export class Chart {
       this.ctx.lineWidth = 4
       this.ctx.fillStyle = this.STYLE.backgroundColor
 
-      for (const verticesItem of this.DATA.vertices) {
+      for (const line of this.DATA.lines) {
          let overX: number | null = null
          let overY: number | null = null
 
-         this.ctx.strokeStyle = verticesItem.color
+         this.ctx.strokeStyle = line.color
          this.ctx.beginPath()
 
-         for (let i = 0; i < verticesItem.values.length; i++) {
+         for (let i = 0; i < line.vertices.length; i++) {
             const x = this.getX(i)
-            const y = this.getY(verticesItem.values[i])
+            const y = this.getY(line.vertices[i])
             this.ctx.lineTo(x, y)
 
             // Write x and y values if the mouse-x is over the vertice
@@ -416,17 +416,17 @@ export class Chart {
    }
 
    /**
-    * Returns an array containing the minimum and maximum y values in the given vertices array.
+    * Returns an array containing the minimum and maximum y vertices values in the given lines array.
     *
-    * @param {IVertices[]} vertices - an array of vertices
+    * @param {ILines[]} lines - an array of lines
     * @return {[number, number]} an array containing the minimum and maximum y values
     */
-   private getVerticesBoundaries(vertices: IVertices[]): [number, number] {
+   private getLinesVerticesBoundaries(lines: ILines[]): [number, number] {
       let yMin: number | null = null
       let yMax: number | null = null
 
-      for (const verticesItem of vertices) {
-         for (const vertice of verticesItem.values) {
+      for (const line of lines) {
+         for (const vertice of line.vertices) {
             if (yMin === null || vertice < yMin) yMin = vertice
             if (yMax === null || vertice > yMax) yMax = vertice
          }
@@ -469,17 +469,17 @@ export class Chart {
    }
 
    /**
-    * Calculate the maximum length of the vertices item.
+    * Calculate the maximum length of the lines vertices values.
     *
-    * @param {?IVertices[]} vertices - optional parameter for the vertices
-    * @return {number} the maximum length of the vertices item.
+    * @param {?ILines[]} lines - optional parameter for the lines
+    * @return {number} the maximum length of the lines vertices values.
     */
-   private getVerticesLongestLength(vertices?: IVertices[]): number {
-      vertices ??= this.DATA.vertices
+   private getLinesVerticesLongestLength(lines?: ILines[]): number {
+      lines ??= this.DATA.lines
       let maxLength = 0
 
-      for (const verticesItem of vertices) {
-         if (verticesItem.values.length > maxLength) maxLength = verticesItem.values.length
+      for (const line of lines) {
+         if (line.vertices.length > maxLength) maxLength = line.vertices.length
       }
 
       return maxLength
@@ -554,6 +554,8 @@ export class Chart {
       if (data) {
          if (data.timeline) {
             if (typeof data.timeline !== 'object') throw new ChartOptionsError('data.timeline should be an object')
+            if (!data.timeline.type) throw new ChartOptionsError('data.timeline.type required')
+            if (!data.timeline.values) throw new ChartOptionsError('data.timeline.values required')
             if (typeof data.timeline.type !== 'string') throw new ChartOptionsError('data.timeline.type should be a string')
             if (!['date'].includes(data.timeline.type)) throw new ChartOptionsError('data.timeline.type should be "date"')
             if (!Array.isArray(data.timeline.values)) throw new ChartOptionsError('data.timeline.values should be an array')
@@ -565,17 +567,23 @@ export class Chart {
             }
          }
 
-         if (data.vertices) {
-            if (!Array.isArray(data.vertices)) throw new ChartOptionsError('data.vertices should be an array')
+         if (data.lines) {
+            if (!Array.isArray(data.lines)) throw new ChartOptionsError('data.vertices should be an array')
 
-            data.vertices.forEach((verticesItem, i) => {
-               if (typeof verticesItem.name !== 'string') throw new ChartOptionsError(`data.vertices[${i}].name should be a string`)
-               if (typeof verticesItem.color !== 'string') throw new ChartOptionsError(`data.vertices[${i}].color should be a string`)
-               if (!Array.isArray(verticesItem.values)) throw new ChartOptionsError(`data.vertices[${i}].values should be an array`)
+            data.lines.forEach((line, i) => {
+               if (!line.key) throw new ChartOptionsError(`data.lines[${i}].key required`)
+               if (!line.name) throw new ChartOptionsError(`data.lines[${i}].name required`)
+               if (!line.color) throw new ChartOptionsError(`data.lines[${i}].color required`)
+               if (!line.vertices) throw new ChartOptionsError(`data.lines[${i}].values required`)
 
-               verticesItem.values.forEach((vertice, j) => {
+               if (typeof line.key !== 'string') throw new ChartOptionsError(`data.lines[${i}].key should be a string`)
+               if (typeof line.name !== 'string') throw new ChartOptionsError(`data.lines[${i}].name should be a string`)
+               if (typeof line.color !== 'string') throw new ChartOptionsError(`data.lines[${i}].color should be a string`)
+               if (!Array.isArray(line.vertices)) throw new ChartOptionsError(`data.lines[${i}].vertices should be an array`)
+
+               line.vertices.forEach((vertice, j) => {
                   if (typeof vertice !== 'number')
-                     throw new ChartOptionsError(`data.vertices[${i}].values[${j}] should be a number`)
+                     throw new ChartOptionsError(`data.lines[${i}].vertices[${j}] should be a number`)
                })
             })
          }
@@ -680,7 +688,7 @@ export class Chart {
          rowsCount: options.rowsCount ?? this.presetOptions.rowsCount,
          data: {
             timeline: options.data?.timeline ?? this.presetOptions.data.timeline,
-            vertices: options.data?.vertices ?? this.presetOptions.data.vertices
+            lines: options.data?.lines ?? this.presetOptions.data.lines
          },
          i18n: {
             months: options.i18n?.months || this.presetOptions.i18n.months
@@ -723,7 +731,7 @@ export class Chart {
       this.presetOptions.padding                       = options.padding                        ?? this.presetOptions.padding
       this.presetOptions.rowsCount                     = options.rowsCount                      ?? this.presetOptions.rowsCount
       this.presetOptions.data.timeline                 = options.data?.timeline                 ?? this.presetOptions.data.timeline
-      this.presetOptions.data.vertices                 = options.data?.vertices                 ?? this.presetOptions.data.vertices
+      this.presetOptions.data.lines                    = options.data?.lines                    ?? this.presetOptions.data.lines
       this.presetOptions.i18n.months                   = options.i18n?.months                   ?? this.presetOptions.i18n.months
       this.presetOptions.interactivity.horisontalGuide = options.interactivity?.horisontalGuide ?? this.presetOptions.interactivity.horisontalGuide
       this.presetOptions.interactivity.guideDotsRadius = options.interactivity?.guideDotsRadius ?? this.presetOptions.interactivity.guideDotsRadius

@@ -3,13 +3,13 @@ export interface ITimeline {
    values: number[]
 }
 
-export interface IVertices {
+export interface ILines {
+   key: string
    name: string
    color: string
-   values: number[]
+   vertices: number[]
 }
 
-// prettier-ignore
 export interface IChartOptions {
    width: number
    height: number
@@ -17,17 +17,17 @@ export interface IChartOptions {
    rowsCount: number
    data: {
       timeline: ITimeline | null
-      vertices: IVertices[]
+      lines: ILines[]
    }
    i18n: {
       months: string[]
    }
    interactivity: {
-      horisontalGuide: boolean,
-      guideDotsRadius: number,
+      horisontalGuide: boolean
+      guideDotsRadius: number
       fpsLimit: number
       disable: boolean
-   },
+   }
    style: {
       textFont: string
       textColor: string
@@ -41,7 +41,12 @@ export interface IChartOptions {
    }
    technical: {
       debug: boolean
-      insertMethod: 'append' | 'prepend' | ((containerElement: HTMLElement, chartWrapperElement: HTMLDivElement) => void)
+      insertMethod: InsertMethod
       immediateInit: boolean
    }
 }
+
+export type InsertMethod =
+   | 'append'
+   | 'prepend'
+   | ((containerElement: HTMLElement, chartWrapperElement: HTMLDivElement) => void)
