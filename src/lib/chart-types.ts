@@ -49,6 +49,21 @@ export type InsertMethod =
    | 'prepend'
    | ((containerElement: HTMLElement, chartWrapperElement: HTMLDivElement) => void)
 
+export interface IMouseProxy {
+   value: {
+      mouseX: number | null
+      mouseY: number | null
+      tooltipLeft: number | null
+      tooltipTop: number | null
+   }
+}
+
+export interface ITooltipItem {
+   name: string
+   color: string
+   value: number
+}
+
 export type DeepPartial<T> = T extends unknown[]
    ? T
    : T extends Function // eslint-disable-line @typescript-eslint/ban-types

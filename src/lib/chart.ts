@@ -1,6 +1,6 @@
-import { debounce, throttle } from '@/utils'
+import { debounce, throttle, styles } from '@/utils'
 import { ChartOptionsError } from './chart-error'
-import type { ILine, IChartOptions, DeepPartial } from './chart-types'
+import type { ILine, IChartOptions, IMouseProxy, ITooltipItem, DeepPartial } from './chart-types'
 
 export class Chart {
    // Static options preset
@@ -68,9 +68,9 @@ export class Chart {
    private readonly TIMELINE_ITEMS_STEP: number
 
    // Interactivity
-   private readonly mouse: { x?: number | null; y?: number | null }
-   private isInitialized: boolean = false
+   private readonly mouse: IMouseProxy
    private rafID: number = 0
+   private isInitialized: boolean = false
 
    // DOM
    private containerElement: HTMLElement
@@ -124,15 +124,24 @@ export class Chart {
       this.mouseLeaveHandler = this.mouseLeaveHandler.bind(this)
       this.drawChart = throttle(this.drawChart.bind(this), 1000 / this.INTERACTIVITY.fpsLimit)
 
-      // prettier-ignore
       // Interactivity
-      this.mouse = new Proxy({}, {
-         set: (...args) => {
-            const result = Reflect.set(...args)
-            this.rafID = window.requestAnimationFrame(this.drawChart)
-            return result
+      this.mouse = new Proxy(
+         {
+            value: {
+               mouseX: null,
+               mouseY: null,
+               tooltipLeft: null,
+               tooltipTop: null
+            }
+         },
+         {
+            set: (...args) => {
+               const result = Reflect.set(...args)
+               this.rafID = window.requestAnimationFrame(this.drawChart)
+               return result
+            }
          }
-      })
+      )
 
       // Create chart DOM elements
       this.createDOMElements()
@@ -239,13 +248,26 @@ export class Chart {
       this.canvasElement.className = this.STYLE.classNames.canvas
       this.canvasElement.width = this.DPI_WIDTH
       this.canvasElement.height = this.DPI_HEIGHT
-      this.canvasElement.style.width = this.WIDTH + 'px'
-      this.canvasElement.style.height = this.HEIGHT + 'px'
+
+      styles(this.canvasElement, {
+         width: this.WIDTH + 'px',
+         height: this.HEIGHT + 'px'
+      })
+
+      // Canvas context
       this.ctx = this.canvasElement.getContext('2d')!
 
       // Tooltip
       this.tooltipElement = document.createElement('div')
       this.tooltipElement.className = this.STYLE.classNames.tooltip
+
+      // Set CSS variables
+      styles(this.wrapperElement, {
+         '--text-font': this.STYLE.textFont,
+         '--text-color': this.STYLE.textColor,
+         '--secondary-color': this.STYLE.secondaryColor,
+         '--background-color': this.STYLE.backgroundColor
+      })
    }
 
    /** Main method that draws the chart by clearing the canvas. */
@@ -280,17 +302,17 @@ export class Chart {
       this.ctx.strokeStyle = this.STYLE.secondaryColor
 
       for (let i = 1; i <= this.DATA.timeline.values.length; i++) {
+         const text = this.getDate(this.DATA.timeline.values[i - 1])
          const x = this.getX(i)
 
          // Draw the timeline
          if ((i - 1) % this.TIMELINE_ITEMS_STEP === 0) {
-            const text = this.getDate(this.DATA.timeline.values[i - 1])
             this.ctx.fillText(text, x, this.DPI_HEIGHT - 10)
          }
 
          // Draw guides
          if (!this.INTERACTIVITY.disable) {
-            this.drawGuideLinesIsOver(x)
+            this.drawGuideLinesIsOver(x, i, text)
          }
       }
    }
@@ -299,21 +321,36 @@ export class Chart {
     * Draws the guide lines if the mouse-x is over the vertice
     *
     * @param {number} x - The x-coordinate to check for mouse position and draw the guide lines.
+    * @param {number} i - The original index of the vertice
+    * @param {string} text - The title to display in the tooltip
     * @return {boolean} true if the guide lines were drawn, false otherwise
     */
-   private drawGuideLinesIsOver(x: number): boolean {
-      if (this.mouse.x && this.mouse.y) {
-         const isOver = this.isMouseVerticeOver(x)
-         const topHeight = this.PADDING / 2
-         const bottomHeight = this.DPI_HEIGHT - this.PADDING
+   private drawGuideLinesIsOver(x: number, i: number, text: string): boolean {
+      const { mouseX, mouseY } = this.mouse.value
 
-         if (isOver && this.mouse.y >= topHeight) {
+      if (mouseX && mouseY) {
+         const isOver = this.isMouseVerticeOver(x)
+
+         if (isOver) {
+            const topHeight = this.PADDING / 2
+            const bottomHeight = this.DPI_HEIGHT - this.PADDING
+
+            // Tooltip
+            this.tooltipShow(
+               text,
+               this.DATA.lines.map((line) => ({
+                  name: line.name,
+                  color: line.color,
+                  value: line.vertices[i]
+               }))
+            )
+
             // Dashed horizontal guide line
-            if (this.INTERACTIVITY.horisontalGuide && this.mouse.y <= bottomHeight) {
+            if (this.INTERACTIVITY.horisontalGuide && mouseY <= bottomHeight) {
                this.ctx.beginPath()
                this.ctx.setLineDash([20, 25])
-               this.ctx.moveTo(0, this.mouse.y)
-               this.ctx.lineTo(this.DPI_WIDTH, this.mouse.y)
+               this.ctx.moveTo(0, mouseY)
+               this.ctx.lineTo(this.DPI_WIDTH, mouseY)
                this.ctx.stroke()
                this.ctx.closePath()
             }
@@ -389,7 +426,7 @@ export class Chart {
 
          // Draw guide dots if the mouse-x is over the vertice
          if (!this.INTERACTIVITY.disable) {
-            if (overX && overY && this.mouse.x && this.mouse.y && this.mouse.y >= this.PADDING / 2) {
+            if (overX && overY) {
                this.ctx.beginPath()
                this.ctx.arc(overX, overY, this.INTERACTIVITY.guideDotsRadius, 0, 2 * Math.PI)
                this.ctx.fill()
@@ -400,17 +437,79 @@ export class Chart {
       }
    }
 
+   /**
+    * Generates the tooltip content and displays it at the specified position.
+    *
+    * @param {string} title - The title of the tooltip.
+    * @param {ITooltipItem[]} items - An array of tooltip items.
+    * @return {boolean} Returns true if the tooltip was successfully displayed, false otherwise.
+    */
+   private tooltipShow(title: string, items: ITooltipItem[]): boolean {
+      const { tooltipLeft, tooltipTop } = this.mouse.value
+
+      if (tooltipLeft && tooltipTop) {
+         const tooltipRect = this.tooltipElement.getBoundingClientRect()
+
+         // prettier-ignore
+         const template = `
+            <h2>${title}</h2>
+            <ul>
+               ${items.map(item => `
+                  <li style="color: ${item.color}">
+                     <h3>${item.value}</h3>
+                     <p>${item.name}</p>
+                  </li>
+               `).join('\n')}
+            </ul>
+         `
+
+         styles(this.tooltipElement, {
+            visibility: 'visible',
+            left: tooltipLeft + tooltipRect.width / 2 + 'px',
+            top: tooltipTop - tooltipRect.height + 'px'
+         })
+
+         this.tooltipElement.innerHTML = ''
+         this.tooltipElement.insertAdjacentHTML('beforeend', template)
+
+         return true
+      }
+
+      return false
+   }
+
+   /**
+    * Hides the tooltip.
+    *
+    * @return {boolean} Returns true if the tooltip was successfully hidden, false otherwise.
+    */
+   private tooltipHide(): boolean {
+      styles(this.tooltipElement, { visibility: 'hidden' })
+      return true
+   }
+
    /** Event handler that updates the mouse position by canvas coordinates. */
    private mouseMoveHandler(e: MouseEvent): void {
       this.canvasRect ??= this.canvasElement.getBoundingClientRect()
-      this.mouse.x = (e.clientX - this.canvasRect.left) * 2
-      this.mouse.y = (e.clientY - this.canvasRect.top) * 2
+
+      this.mouse.value = {
+         mouseX: (e.clientX - this.canvasRect.left) * 2,
+         mouseY: (e.clientY - this.canvasRect.top) * 2,
+         tooltipLeft: e.clientX - this.canvasRect.left,
+         tooltipTop: e.clientY - this.canvasRect.top
+      }
    }
 
    /** Event handler that resets the mouse position when the mouse leaves the canvas. */
    private mouseLeaveHandler(): void {
-      this.mouse.x = null
-      this.mouse.y = null
+      this.tooltipHide()
+
+      this.mouse.value = {
+         mouseX: null,
+         mouseY: null,
+         tooltipLeft: null,
+         tooltipTop: null
+      }
    }
 
    /** Event handler that update the chart interactivity when the window is resized. */
@@ -495,8 +594,9 @@ export class Chart {
     * @return {boolean} true if the mouse-x is hovering over the vertice, false otherwise.
     */
    private isMouseVerticeOver(x: number): boolean {
-      if (!this.mouse.x) return false
-      return Math.abs(x - this.mouse.x) < this.X_RATIO / 2
+      const { mouseX } = this.mouse.value
+      if (!mouseX) return false
+      return Math.abs(x - mouseX) < this.X_RATIO / 2
    }
 
    /**

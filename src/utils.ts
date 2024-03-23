@@ -37,3 +37,15 @@ export function throttle<Args extends unknown[]>(
       }
    }
 }
+
+/**
+ * Applies the specified styles to the given HTML element.
+ *
+ * @param {HTMLElement} element - The HTML element to apply styles to
+ * @param {Record<string, string>} styles - The styles to apply to the element
+ */
+export function styles(element: HTMLElement, styles: Record<string, string>) {
+   for (const [key, value] of Object.entries(styles)) {
+      element.style.setProperty(key, value)
+   }
+}
