@@ -1,7 +1,7 @@
 import '@/assets/chart.scss'
 export * from '@/lib/chart'
 export * from '@/lib/chart-error'
-export type { IChartOptions, ITimeline, ILines, InsertMethod } from '@/lib/chart-types'
+export type { IChartOptions, ILine, InsertMethod } from '@/lib/chart-types'
 // TODO: The ability to add types for timeline other than "date"
 // TODO: Controls and hints in example
 // TODO: tooltip
