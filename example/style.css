@@ -9,18 +9,27 @@
    padding: 0;
 }
 
+html {
+   overflow-x: hidden;
+}
+
 body {
    display: flex;
    align-items: center;
    justify-content: center;
 
-   overflow: hidden;
-   height: 100vh;
-   height: 100dvh;
-
+   padding: 5rem;
    background-color: #252e3d;
 }
 
 canvas {
    display: block;
+}
+
+#charts {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: center;
+   gap: 1rem;
 }
