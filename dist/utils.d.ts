@@ -14,3 +14,10 @@ export declare function debounce<Args extends unknown[]>(func: (...args: Args) =
  * @return {function} - The throttled function.
  */
 export declare function throttle<Args extends unknown[]>(func: (...args: Args) => void, timeout: number): (...args: Args) => void;
+/**
+ * Applies the specified styles to the given HTML element.
+ *
+ * @param {HTMLElement} element - The HTML element to apply styles to
+ * @param {Record<string, string>} styles - The styles to apply to the element
+ */
+export declare function styles(element: HTMLElement, styles: Record<string, string>): void;
