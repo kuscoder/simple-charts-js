@@ -1,6 +1,6 @@
 /* Gets SimpleChartsJS module styles for current environment */
-@import url('https://cdn.jsdelivr.net/npm/simple-charts-js@latest/dist/index.css');
-@import url('https://cdn.jsdelivr.net/gh/kuscoder/simple-charts-js@latest/dist/index.css');
+@import url('https://cdn.jsdelivr.net/npm/simple-charts-js@1.0.0/dist/index.css');
+@import url('https://cdn.jsdelivr.net/gh/kuscoder/simple-charts-js@1.0.0/dist/index.css');
 @import url('../dist/index.css');
 
 * {

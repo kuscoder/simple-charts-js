@@ -67,7 +67,7 @@ async function getSimpleChartsJSModule() {
    if (hostname) {
       // For library GitHub pages
       if (hostname.includes('kuscoder.github.io')) {
-         return import('https://cdn.jsdelivr.net/gh/kuscoder/simple-charts-js@latest/dist/index.js')
+         return import('https://cdn.jsdelivr.net/gh/kuscoder/simple-charts-js@1.0.0/dist/index.js')
       }
 
       // For localhost server
@@ -76,7 +76,7 @@ async function getSimpleChartsJSModule() {
       }
 
       // For any other cases
-      return import('https://cdn.jsdelivr.net/npm/simple-charts-js@latest/dist/index.js')
+      return import('https://cdn.jsdelivr.net/npm/simple-charts-js@1.0.0/dist/index.js')
    }
 
    // For file protocol
