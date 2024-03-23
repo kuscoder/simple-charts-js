@@ -6,7 +6,7 @@
 [![jsdelivr stats](https://data.jsdelivr.com/v1/package/npm/simple-charts-js/badge)](https://www.jsdelivr.com/package/npm/simple-charts-js)
 
 ## Example
-![example.png](./example/example.png)
+![example.png](./assets/example.png)
 Live demo - https://kuscoder.github.io/simple-charts-js/
 
 ## Features
