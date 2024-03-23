@@ -66,7 +66,7 @@ Recommended for learning purposes, you can use the latest version:
 Recommended for production for avoiding unexpected breakage from newer versions:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/simple-charts-js@1.0.0/dist/index.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-charts-js@1.0.1/dist/index.js" defer></script>
 ```
 
 ## 🚀 Usage
